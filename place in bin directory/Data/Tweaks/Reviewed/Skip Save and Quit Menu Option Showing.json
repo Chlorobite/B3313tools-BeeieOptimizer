@@ -1,0 +1,24 @@
+{
+  "Name": "Skip Save and Quit Menu Option Showing",
+  "Scripts": [
+    {
+      "Name": "New Script",
+      "Script": "// Remove Save and Quit\r\n// Change rendering\r\n//   render_save_confirmation\r\n//   Reduce menu options from 3 to 2\r\n//   0x802DD8EC\r\n988EC:\r\n24 07 00 02 // ADDIU A3, R0, 0x0002 // 24 07 00 03 // ADDIU A3, R0, 0x0003\r\n\r\n//   Disable rendering Save And Quit option\r\n//   0x802DD988\r\n98988:\r\n00 00 00 00 // NOP                  // 0C 0B 5D F7 // JAL   0x802D77DC\r\n\r\n//   Replace Y rendering position of Continue Don't Save option\r\n//   0x802DD9A4\r\n989A4:\r\n24 A5 FF EC // ADDIU A1, A1, 0xFFEC // 24 A5 FF D8 // ADDIU A1, A1, 0xFFD8\r\n\r\n// Change option handler\r\n//   handle_save_menu\r\n//   0x8025733C\r\n//   Skip checking Save And Quit option\r\n12380:\r\n10 00 00 12 // B         0x802573CC // 15 E1 00 0D // BNE   T7, At, 0x802573B8\r\n",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "FA199DE3857C31CF9A9BDA2F2CD3EA77",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "yes",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "043779791C6514EBB54C2758FA5D29AB",
+  "Official": false,
+  "Recommended": false
+}

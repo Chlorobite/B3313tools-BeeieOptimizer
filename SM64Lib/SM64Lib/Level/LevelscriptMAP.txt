@@ -1,0 +1,7 @@
+﻿0x19000000 - 0x19005F00: Levelscript, Geolayouts (aligned to end)
+0x19005F00 - 0x19006000: Area Table (Contains inportant infos)
+0x19006000 - 0x19006280: Water Table
+0x19006280 - 0x19006500: Toxic Haze Table
+0x19006500 - 0x19006780: Mist Table
+0x19006780 - 0x19007000: Waterbox data
+0x19007000 - 0x1900a000: Reserved

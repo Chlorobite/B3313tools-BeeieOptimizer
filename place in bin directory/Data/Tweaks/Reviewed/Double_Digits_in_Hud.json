@@ -1,0 +1,24 @@
+{
+  "Name": "Double Digits in Hud",
+  "Scripts": [
+    {
+      "Name": "hud",
+      "Script": "9E780: 24 C6 83 B4 24\r\n9E7E4: 24 C6 83 B4\r\n9E8C0: 24 C6 83 B4",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "F443C419BE739CDFE46157F7919E70F9",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Enables beta double digits in hud, just like B-Roll\r\n tweak version by chrisbrutalagresion",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "9C658C568F42B824A00F400587C8F107",
+  "Official": false,
+  "Recommended": false
+}

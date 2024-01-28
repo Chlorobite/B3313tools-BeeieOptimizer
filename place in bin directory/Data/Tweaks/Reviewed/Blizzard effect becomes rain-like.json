@@ -1,0 +1,24 @@
+{
+  "Name": "Blizzard effect becomes rain-like",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "99B2A: 00 00\r\n99BCA: FF F0",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "8F838B6B5893FF818CED03C78400A61B",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Makes the unused 'Blizzard' environmental effect act more like rain would. Texture location is at DA90BC, use Texture64 or N64Rip to change it. By hamius8000",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "D8E82F9A768FAA3A9F4CC8A8A192295D",
+  "Official": true,
+  "Recommended": false
+}

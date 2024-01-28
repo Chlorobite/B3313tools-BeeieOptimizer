@@ -1,0 +1,24 @@
+{
+  "Name": "1-ups Heal Mario",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "AEC9B: AE 34 0F 08 80 A5 CF 00 AE",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "04D0AE86C49B109C86B7335FFFBAE0D9",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "1-ups will heal Mario completely, by someone2369 (WILL NOT give an extra life)",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "C37D2586EED62FEDC313026A3A26B259",
+  "Official": true,
+  "Recommended": true
+}

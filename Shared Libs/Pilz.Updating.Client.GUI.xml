@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pilz.Updating.Client.GUI</name>
+    </assembly>
+    <members>
+        <member name="T:Pilz.Updating.Client.GUI.My.Resources.Resources">
+            <summary>
+            Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.My.Resources.Resources.ResourceManager">
+            <summary>
+            Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.My.Resources.Resources.Culture">
+            <summary>
+            Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+            Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+            </summary>
+        </member>
+        <member name="T:Pilz.Updating.Client.GUI.MyIcons">
+            <summary>
+              Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.MyIcons.ResourceManager">
+            <summary>
+              Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.MyIcons.Culture">
+            <summary>
+              Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+              Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.MyIcons.icons8_delete_16px">
+            <summary>
+              Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.MyIcons.icons8_software_installer_16px">
+            <summary>
+              Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="T:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes">
+            <summary>
+              Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.ResourceManager">
+            <summary>
+              Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.Culture">
+            <summary>
+              Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+              Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.MsgBox_NoUpdatesFound">
+            <summary>
+              Sucht eine lokalisierte Zeichenfolge, die No updates found! You are using the latest version. ähnelt.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.MsgBox_NoUpdatesFound_Titel">
+            <summary>
+              Sucht eine lokalisierte Zeichenfolge, die No Updates found ähnelt.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.SimpleActions_DownloadingInstaller">
+            <summary>
+              Sucht eine lokalisierte Zeichenfolge, die Downloading Update Installer ... ähnelt.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.SimpleActions_DownloadingPackage">
+            <summary>
+              Sucht eine lokalisierte Zeichenfolge, die Downloading Update Package ... ähnelt.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.SimpleActions_Searching">
+            <summary>
+              Sucht eine lokalisierte Zeichenfolge, die Searching for Updates ... ähnelt.
+            </summary>
+        </member>
+        <member name="P:Pilz.Updating.Client.GUI.UpdatingClientGuiLangRes.SimpleActions_Waiting">
+            <summary>
+              Sucht eine lokalisierte Zeichenfolge, die Waiting ... ähnelt.
+            </summary>
+        </member>
+    </members>
+</doc>

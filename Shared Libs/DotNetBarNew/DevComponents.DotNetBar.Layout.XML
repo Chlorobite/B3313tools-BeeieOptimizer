@@ -1,0 +1,2691 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DevComponents.DotNetBar.Layout</name>
+    </assembly>
+    <members>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.#ctor">
+            <summary>
+            Initializes a new instance of the Background class.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.#ctor(System.Drawing.Color)">
+            <summary>
+            Initializes a new instance of the Background class with single solid backgruond color.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.#ctor(System.Drawing.Color[])">
+            <summary>
+            Initializes a new instance of the Background class.
+            </summary>
+            <param name="colors"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.#ctor(System.Drawing.Color[],System.Single[])">
+            <summary>
+            Initializes a new instance of the Background class.
+            </summary>
+            <param name="colors"></param>
+            <param name="positions"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.#ctor(System.Drawing.Color[],System.Single[],DevComponents.DotNetBar.Layout.eGradientType)">
+            <summary>
+            Initializes a new instance of the Background class.
+            </summary>
+            <param name="colors"></param>
+            <param name="positions"></param>
+            <param name="gradientType"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.#ctor(System.Drawing.Color[],System.Single[],DevComponents.DotNetBar.Layout.eGradientType,System.Int32)">
+            <summary>
+            Initializes a new instance of the Background class.
+            </summary>
+            <param name="colors"></param>
+            <param name="positions"></param>
+            <param name="gradientType"></param>
+            <param name="linearGradientAngle"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Background.IsEmpty">
+            <summary>
+            Gets whether class is empty.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Background.IsBackgroundSet">
+            <summary>
+            Gets whether background is visible, i.e. colors are assigned.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.CreateBrush(System.Drawing.Rectangle)">
+            <summary>
+            Creates the brush which represents the background.
+            </summary>
+            <param name="r">Bounds for the brush.</param>
+            <returns>New instance of the brush or null if brush cannot be created.</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Background.Colors">
+            <summary>
+            Indicates the array of colors that make up background.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Background.Positions">
+            <summary>
+            Indicates the positions for the gradient colors when multiple colors are set to Colors property. When not set
+            the gradient color positions are evenly distributed.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Background.GradientType">
+            <summary>
+            Indicates the gradient type used when multiple Colors are specified.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Background.LinearGradientAngle">
+            <summary>
+            Indicates the linear gradient angle.
+            </summary>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.Background.PropertyChanged">
+            <summary>
+            Occurs when property value has changed.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Raises the PropertyChanged event.
+            </summary>
+            <param name="e">Event arguments</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Background.OnPropertyChangedEx(System.String)">
+            <summary>
+            Raises the PropertyChanged event.
+            </summary>
+            <param name="s">Event arguments</param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.BackgroundConvertor">
+            <summary>
+             BackgroundConvertor
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.BorderColors">
+            <summary>
+            Defines BorderColors structure used to define border colors.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.#ctor(System.Drawing.Color)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="uniformLength">Uniform BorderColors</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.#ctor(System.Drawing.Color,System.Drawing.Color,System.Drawing.Color,System.Drawing.Color)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="left">Left BorderColors</param>
+            <param name="top">Top BorderColors</param>
+            <param name="right">Right BorderColors</param>
+            <param name="bottom">Bottom BorderColors</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.Equals(System.Object)">
+            <summary>
+            Gets whether object equals to this instance.
+            </summary>
+            <param name="obj">object to test.</param>
+            <returns>returns whether objects are Equals</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.Equals(DevComponents.DotNetBar.Layout.BorderColors)">
+            <summary>
+            Gets whether object equals to this instance.
+            </summary>
+            <param name="BorderColors">object to test.</param>
+            <returns>returns whether objects are Equals</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.GetHashCode">
+            <summary>
+            Returns hash code for object.
+            </summary>
+            <returns>Hash code</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.ToString">
+            <summary>
+            Returns string representation of object.
+            </summary>
+            <returns>string representing BorderColors</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderColors.ToString(System.Globalization.CultureInfo)">
+            <summary>
+            Gets string representation of object.
+            </summary>
+            <param name="cultureInfo">Culture info.</param>
+            <returns>string representing BorderColors</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderColors.IsEmpty">
+            <summary>
+            Returns whether all values are empty.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderColors.IsUniform">
+            <summary>
+            Returns whether all values are the same.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderColors.Left">
+            <summary>
+            Gets or sets the left BorderColors.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderColors.Top">
+            <summary>
+            Gets or sets the top BorderColors.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderColors.Right">
+            <summary>
+            Gets or sets the Right BorderColors.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderColors.Bottom">
+            <summary>
+            Gets or sets the Bottom BorderColors.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.BorderColorsConverter">
+            <summary>
+            Provides BorderColors TypeConverter.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.BorderPattern">
+            <summary>
+            Defines Thickness class.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.Empty">
+            <summary>
+            Returns Empty instance of BorderPattern.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.#ctor(DevComponents.DotNetBar.Layout.LinePattern,DevComponents.DotNetBar.Layout.LinePattern,DevComponents.DotNetBar.Layout.LinePattern,DevComponents.DotNetBar.Layout.LinePattern)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="left">Left BorderPatternStyle.</param>
+            <param name="top">Top BorderPatternStyle.</param>
+            <param name="right">Right BorderPatternStyle.</param>
+            <param name="bottom">Bottom BorderPatternStyle.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.#ctor(DevComponents.DotNetBar.Layout.LinePattern)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="all">Specifies uniform Thickness.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.#ctor">
+            <summary>
+             Creates new instance of the object.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.All">
+            <summary>
+            Gets or sets the thickness of all sides.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.Bottom">
+            <summary>
+            Gets or sets the bottom Border Pattern
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.Left">
+            <summary>
+            Gets or sets the left Border Pattern
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.Right">
+            <summary>
+            Gets or sets the Right Border Pattern
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.Top">
+            <summary>
+            Gets or sets the Top Border Pattern
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.IsEmpty">
+            <summary>
+            Gets whether the item is empty
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.IsLeftVisible">
+            <summary>
+            Gets whether left border is visible.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.IsRightVisible">
+            <summary>
+            Gets whether right border is visible.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.IsTopVisible">
+            <summary>
+            Gets whether top border is visible.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BorderPattern.IsBottomVisible">
+            <summary>
+            Gets whether bottom border is visible.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.Equals(System.Object)">
+            <summary>
+            Gets whether two instances are equal.
+            </summary>
+            <param name="obj">Instance to compare to.</param>
+            <returns>true if equal otherwise false.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.Equals(DevComponents.DotNetBar.Layout.BorderPattern)">
+            <summary>
+            Gets whether two instances are equal.
+            </summary>
+            <param name="borderPattern">Instance to compare to</param>
+            <returns>true if equal otherwise false</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.GetHashCode">
+            <summary>
+            Returns hash-code.
+            </summary>
+            <returns>hash-code</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.op_Equality(DevComponents.DotNetBar.Layout.BorderPattern,DevComponents.DotNetBar.Layout.BorderPattern)">
+            <summary>
+            Implements == operator.
+            </summary>
+            <param name="t1">Object 1</param>
+            <param name="t2">Object 2</param>
+            <returns>true if equals</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.op_Inequality(DevComponents.DotNetBar.Layout.BorderPattern,DevComponents.DotNetBar.Layout.BorderPattern)">
+            <summary>
+            Implements != operator
+            </summary>
+            <param name="t1">Object 1</param>
+            <param name="t2">Object 2</param>
+            <returns>true if different</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.ApplyPattern(DevComponents.DotNetBar.Layout.BorderPattern)">
+            <summary>
+            Applies the pattern to instance of this pattern.
+            </summary>
+            <param name="pattern">Pattern to apply.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.Copy">
+            <summary>
+            Creates an exact copy of the BorderPattern.
+            </summary>
+            <returns>Copy of the BorderPattern.</returns>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.BorderPattern.PropertyChanged">
+            <summary>
+            Occurs when property value has changed.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BorderPattern.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Raises the PropertyChanged event.
+            </summary>
+            <param name="e">Event arguments</param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.LinePattern">
+            <summary>
+             LinePattern
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.None">
+            <summary>
+             None
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.NotSet">
+            <summary>
+             NotSet
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.Solid">
+            <summary>
+             Solid
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.Dash">
+            <summary>
+             Dash
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.Dot">
+            <summary>
+             Dot
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.DashDot">
+            <summary>
+             DashDot
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LinePattern.DashDotDot">
+            <summary>
+             DashDotDot
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.BlankExpandableObjectConverter">
+            <summary>
+             BlankExpandableObjectConverter
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BlankExpandableObjectConverter.ConvertTo(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object,System.Type)">
+            <summary>
+             ConvertTo
+            </summary>
+            <param name="context"></param>
+            <param name="culture"></param>
+            <param name="value"></param>
+            <param name="destinationType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.ColorHelpers.GetColor(System.String)">
+            <summary>
+            Converts hex string to Color type.
+            </summary>
+            <param name="rgbHex">Hexadecimal color representation.</param>
+            <returns>Reference to Color object.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.ColorHelpers.GetColor(System.Int32)">
+            <summary>
+            Converts hex string to Color type.
+            </summary>
+            <param name="rgb">Color representation as 32-bit RGB value.</param>
+            <returns>Reference to Color object.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.ColorHelpers.GetColor(System.Int32,System.Int32)">
+            <summary>
+            Converts hex string to Color type.
+            </summary>
+            <param name="rgb">Color representation as 32-bit RGB value.</param>
+            <returns>Reference to Color object.</returns>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.BlockLayoutManager">
+            <summary>
+            Represents block layout manager responsible for sizing the content blocks.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.BlockLayoutManager.Layout(DevComponents.DotNetBar.Layout.TextMarkup.IBlock,System.Drawing.Size)">
+            <summary>
+            Resizes the content block and sets it's Bounds property to reflect new size.
+            </summary>
+            <param name="block">Content block to resize.</param>
+            <param name="availableSize">Content size available for the block in the given line.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.BlockLayoutManager.FinalizeLayout(System.Drawing.Rectangle,System.Drawing.Rectangle,System.Collections.ArrayList)">
+            <summary>
+            Performs layout finalization
+            </summary>
+            <param name="containerBounds"></param>
+            <param name="blocksBounds"></param>
+            <param name="lines"></param>
+            <returns></returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.BlockLayoutManager.Graphics">
+            <summary>
+            Gets or sets the graphics object used by layout manager.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.eContentOrientation">
+            <summary>
+            Specifies orientation of content.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentOrientation.Horizontal">
+            <summary>
+            Indicates Horizontal orientation of the content.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentOrientation.Vertical">
+            <summary>
+            Indicates Vertical orientation of the content.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.eContentAlignment">
+            <summary>
+            Specifies content horizontal alignment.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentAlignment.Left">
+            <summary>
+            Content is left aligned.UI
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentAlignment.Right">
+            <summary>
+            Content is right aligned.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentAlignment.Center">
+            <summary>
+            Content is centered.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.eContentVerticalAlignment">
+            <summary>
+            Specifies content vertical alignment.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentVerticalAlignment.Top">
+            <summary>
+            Content is top aligned.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentVerticalAlignment.Bottom">
+            <summary>
+            Content is bottom aligned.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.eContentVerticalAlignment.Middle">
+            <summary>
+            Content is in the middle.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.IBlock">
+            <summary>
+            Represents a content block interface.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.IBlock.Bounds">
+            <summary>
+            Gets or sets the bounds of the content block.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.IBlock.Visible">
+            <summary>
+            Gets or sets whether content block is visible.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.IBlock.Margin">
+            <summary>
+            Gets or sets the block margins.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.IBlockExtended">
+            <summary>
+            Represents a extended content block interface for advanced layout information.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.IBlockExtended.IsBlockContainer">
+            <summary>
+            Returns whether element is an container so it receives full available size of parent control for layout.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.IContentLayout">
+            <summary>
+            Represents interface for block layout.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.IContentLayout.Layout(System.Drawing.Rectangle,DevComponents.DotNetBar.Layout.TextMarkup.IBlock[],DevComponents.DotNetBar.Layout.TextMarkup.BlockLayoutManager)">
+            <summary>
+            Performs layout of the content block.
+            </summary>
+            <param name="containerBounds">Container bounds to layout content blocks in.</param>
+            <param name="contentBlocks">Content blocks to layout.</param>
+            <param name="blockLayout">Block layout manager that resizes the content blocks.</param>
+            <returns>The bounds of the content blocks within the container bounds.</returns>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager">
+            <summary>
+            Represents the serial content layout manager that arranges content blocks in series next to each other.
+            </summary>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.NextPosition">
+            <summary>
+            Occurs when X, Y position of next block is calcualted.
+            </summary>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.BeforeNewBlockLayout">
+            <summary>
+            Occurs before new block is layed out.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.#ctor">
+            <summary>
+            Creates new instance of the class.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.Layout(System.Drawing.Rectangle,DevComponents.DotNetBar.Layout.TextMarkup.IBlock[],DevComponents.DotNetBar.Layout.TextMarkup.BlockLayoutManager)">
+            <summary>
+            Performs layout of the content block.
+            </summary>
+            <param name="containerBounds">Container bounds to layout content blocks in.</param>
+            <param name="contentBlocks">Content blocks to layout.</param>
+            <param name="blockLayout">Block layout manager that resizes the content blocks.</param>
+            <returns>The bounds of the content blocks within the container bounds.</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.BlockSpacing">
+            <summary>
+            Gets or sets the spacing in pixels between content blocks. Default value is 0.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.FitContainerOversize">
+            <summary>
+            Gets or sets whether content blocks are forced to fit the container bounds if they 
+            occupy more space than it is available by container. Default value is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.FitContainer">
+            <summary>
+            Gets or sets whether content blocks are resized to fit the container bound if they
+            occupy less space than it is available by container. Default value is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.VerticalFitContainerWidth">
+            <summary>
+            Gets or sets whether content blocks are resized (Width) to fit container bounds if they
+            occupy less space than the actual container width. Applies to the Vertical orientation only. Default value is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.HorizontalFitContainerHeight">
+            <summary>
+            Gets or sets whether content blocks are resized (Height) to fit container bounds if they
+            occupy less space than the actual container height. Applies to the Horizontal orientation only. Default value is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.ContentOrientation">
+            <summary>
+            Gets or sets the content orientation. Default value is Horizontal.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.ContentVerticalAlignment">
+            <summary>
+            Gets or sets the content vertical alignment. Default value is Middle.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.BlockLineAlignment">
+            <summary>
+            Gets or sets the block line vertical alignment. Default value is Middle.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.ContentAlignment">
+            <summary>
+            Gets or sets the content horizontal alignment. Default value is Left.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.EvenHeight">
+            <summary>
+            Gets or sets whether all content blocks are resized so they have same height which is height of the tallest content block. Default value is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.OversizeDistribute">
+            <summary>
+            Gets or sets whether oversized blocks are resized based on the percentage reduction instead of based on equal pixel distribution. Default value is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.MultiLine">
+            <summary>
+            Gets or sets whether content is wrapped into new line if it exceeds the width of the container.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SerialContentLayoutManager.RightToLeft">
+            <summary>
+            Gets or sets whether layout is right-to-left.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerPositionEventArgs">
+            <summary>
+            Represents event arguments for SerialContentLayoutManager.NextPosition event.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerPositionEventArgs.Block">
+            <summary>
+            Gets or sets the block that is layed out.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerPositionEventArgs.CurrentPosition">
+            <summary>
+            Gets or sets the current block position.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerPositionEventArgs.NextPosition">
+            <summary>
+            Gets or sets the calculated next block position.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerPositionEventArgs.Cancel">
+            <summary>
+            Cancels default position calculation.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventArgs">
+            <summary>
+            Represents event arguments for the SerialContentLayoutManager layout events.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventArgs.Block">
+            <summary>
+            Gets or sets the reference block object.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventArgs.CurrentPosition">
+            <summary>
+            Gets or sets the position block will assume.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventArgs.CancelLayout">
+            <summary>
+            Cancel the layout of the block, applies only to BeforeXXX layout event.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventArgs.BlockVisibleIndex">
+            <summary>
+            Gets or sets the visibility index of the block.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventArgs.#ctor(DevComponents.DotNetBar.Layout.TextMarkup.IBlock,System.Drawing.Point,System.Int32)">
+            <summary>
+            Creates new instance of the class and initializes it with default values.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerPositionEventHandler">
+            <summary>
+            Delegate for SerialContentLayoutManager.NextPosition event.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.LayoutManagerLayoutEventHandler">
+            <summary>
+            Delegate for the SerialContentLayoutManager layout events.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.ContainerElement.IsBlockElement">
+            <summary>
+            Returns whether markup element is an block element that always consumes a whole line in layout.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.eParagraphAlignment">
+            <summary>
+            Indicates paragraph content alignment
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.eParagraphVerticalAlignment">
+            <summary>
+            Indicates paragraph content alignment
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.EndMarkupElement.StartElement">
+            <summary>
+            Gets reference to markup start element.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.ExpandElement.CanStartNewLine">
+            <summary>
+            Returns whether layout manager can start new line with this element.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.Heading.Level">
+            <summary>
+            Gets or sets heading level. Values from 1 to 6 are valid. Default is 1.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.HyperLink.HitTest(System.Int32,System.Int32)">
+            <summary>
+            Returns whether hyper-link contains specified coordinates.
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+            <returns></returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.IsBlockContainer">
+            <summary>
+            Returns whether markup element is an container so it receives full available size of parent control for layout.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.IsBlockElement">
+            <summary>
+            Returns whether markup element is an block element that always consumes a whole line in layout.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.IsNewLineAfterElement">
+            <summary>
+            Returns whether layout manager switches to new line after processing this element.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.CanStartNewLine">
+            <summary>
+            Returns whether layout manager can start new line with this element.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Elements">
+            <summary>
+            Gets the collection of child elements if any for this markup element.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.IsSizeValid">
+            <summary>
+            Gets or sets whether element size is valid. When size is not valid element Measure method will be called to validate size.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Parent">
+            <summary>
+            Gets element parent or null if parent is not set.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Bounds">
+            <summary>
+            Gets or sets actual rendering bounds.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Visible">
+            <summary>
+            Gets or sets whether markup element is visible.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Margin">
+            <summary>
+            Gets or sets the element margin.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Measure(System.Drawing.Size,DevComponents.DotNetBar.Layout.TextMarkup.MarkupDrawContext)">
+            <summary>
+            Measures the element given available size.
+            </summary>
+            <param name="availableSize">Size available to element</param>
+            <param name="g">Reference to graphics object</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.MeasureEnd(System.Drawing.Size,DevComponents.DotNetBar.Layout.TextMarkup.MarkupDrawContext)">
+            <summary>
+            Measures the end tag of an element. Most implementations do not need to do anything but implementations like the ones
+            that change color should return state back at this time.
+            </summary>
+            <param name="availableSize"></param>
+            <param name="d"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Render(DevComponents.DotNetBar.Layout.TextMarkup.MarkupDrawContext)">
+            <summary>
+            Renders element.
+            </summary>
+            <param name="d">Provides markup drawing context information.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.RenderEnd(DevComponents.DotNetBar.Layout.TextMarkup.MarkupDrawContext)">
+            <summary>
+            Renders element tag end. Most implementations do not need to do anything but mplementations like the ones
+            that change color should return state back at this time.
+            </summary>
+            <param name="d">Provides markup drawing context information.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.ArrangeCore(System.Drawing.Rectangle,DevComponents.DotNetBar.Layout.TextMarkup.MarkupDrawContext)">
+            <summary>
+            Provides final rectangle to element and lets it arrange it's content given new constraint.
+            </summary>
+            <param name="finalRect">Final rectangle.</param>
+            <param name="g"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.Arrange(System.Drawing.Rectangle,DevComponents.DotNetBar.Layout.TextMarkup.MarkupDrawContext)">
+            <summary>
+            Arranges the element given the final size. Layout is two step process with Measure followed by Arrange.
+            </summary>
+            <param name="finalSize"></param>
+            <param name="g"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement.RenderBounds">
+            <summary>
+            Gets or sets actual rendered bounds for a give markup element if applicable.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.#ctor(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement)">
+            <summary>Creates new instance of the class.</summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.Parent">
+            <summary>
+            Gets or sets the collection parent element.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.Add(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement)">
+            <summary>
+            Adds new object to the collection.
+            </summary>
+            <param name="MarkupElement">Object to add.</param>
+            <returns>Index of newly added object.</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.Item(System.Int32)">
+            <summary>
+            Returns reference to the object in collection based on it's index.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.Insert(System.Int32,DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement)">
+            <summary>
+            Inserts new object into the collection.
+            </summary>
+            <param name="index">Position of the object.</param>
+            <param name="value">Object to insert.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.IndexOf(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement)">
+            <summary>
+            Returns index of the object inside of the collection.
+            </summary>
+            <param name="value">Reference to the object.</param>
+            <returns>Index of the object.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.Contains(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement)">
+            <summary>
+            Returns whether collection contains specified object.
+            </summary>
+            <param name="value">Object to look for.</param>
+            <returns>true if object is part of the collection, otherwise false.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.Remove(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement)">
+            <summary>
+            Removes specified object from the collection.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.CopyTo(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement[],System.Int32)">
+            <summary>
+            Copies collection into the specified array.
+            </summary>
+            <param name="array">Array to copy collection to.</param>
+            <param name="index">Starting index.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupElementCollection.CopyTo(DevComponents.DotNetBar.Layout.TextMarkup.MarkupElement[])">
+            <summary>
+            Copies contained items to the MarkupElement array.
+            </summary>
+            <param name="array">Array to copy to.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.MarkupParser.IsMarkup(System.String@)">
+            <summary>
+            Tests whether input text could be markup text.
+            </summary>
+            <param name="text">Text to test.</param>
+            <returns>true if text could be markup, otherwise false</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupSettings.NormalHyperlink">
+            <summary>
+            Gets the style of the hyperlink in its default state.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupSettings.MouseOverHyperlink">
+            <summary>
+            Gets the style of the hyperlink when mouse is over the link.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.MarkupSettings.VisitedHyperlink">
+            <summary>
+            Gets the style of the visited hyperlink.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.MarkupSettings.ResolveImageEventHandler">
+            <summary>
+            Represents the method that will handle the ResolveImage event.
+            </summary>
+        </member>
+        <!-- Ungültiger XML-Kommentar wurde für den Member "E:DevComponents.DotNetBar.Layout.TextMarkup.MarkupSettings.ResolveImage" ignoriert -->
+        <member name="T:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle">
+            <summary>
+            Defines the text-markup hyperlink appearance style.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.#ctor">
+            <summary>
+            Initializes a new instance of the HyperlinkStyle class.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.#ctor(System.Drawing.Color,DevComponents.DotNetBar.Layout.TextMarkup.eHyperlinkUnderlineStyle)">
+            <summary>
+            Initializes a new instance of the HyperlinkStyle class.
+            </summary>
+            <param name="textColor"></param>
+            <param name="underlineStyle"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.#ctor(System.Drawing.Color,System.Drawing.Color,DevComponents.DotNetBar.Layout.TextMarkup.eHyperlinkUnderlineStyle)">
+            <summary>
+            Initializes a new instance of the HyperlinkStyle class.
+            </summary>
+            <param name="textColor"></param>
+            <param name="backColor"></param>
+            <param name="underlineStyle"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.TextColor">
+            <summary>
+            Gets or sets hyperlink text color.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.BackColor">
+            <summary>
+            Gets or sets hyperlink back color.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.UnderlineStyle">
+            <summary>
+            Gets or sets the underline style for the hyperlink.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.HyperlinkStyle.IsChanged">
+            <summary>
+            Gets whether style has been changed from its default state.
+            </summary>
+        </member>
+        <!-- Ungültiger XML-Kommentar wurde für den Member "T:DevComponents.DotNetBar.Layout.TextMarkup.ResolveImageEventArgs" ignoriert -->
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.ResolveImageEventArgs.Handled">
+            <summary>
+            Indicates that event has been handled and that ResolvedImage should be used.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.ResolveImageEventArgs.Key">
+            <summary>
+            Indicates the string key parameters in url-style for the image that needs to be resolved.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.TextMarkup.ResolveImageEventArgs.ResolvedImage">
+            <summary>
+            Indicates the resolved image value.
+            you need to set this value to the resolved image and you need to set Handled property to true.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.TextMarkup.ResolveImageEventArgs.#ctor">
+            <summary>
+            Default constructor.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.NewLine.IsSizeValid">
+            <summary>
+            Gets or sets whether element size is valid. When size is not valid element Measure method will be called to validate size.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.NewLine.IsNewLineAfterElement">
+            <summary>
+            Returns whether layout manager switches to new line after processing this element.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.Span.IsBlockElement">
+            <summary>
+            Returns whether markup element is an block element that always consumes a whole line in layout.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.TextMarkup.SymbolElement.CanStartNewLine">
+            <summary>
+            Returns whether layout manager can start new line with this element.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.DotNetBarLayoutResourcesAttribute">
+            <summary>
+            Summary description for DotNetBarResourcesAttribute.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.LayoutLabelItem">
+            <summary>
+            Represents the label item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Symbols.GetFontAwesome(System.Single)">
+            <summary>
+            Returns FontAwesome at specific size.
+            </summary>
+            <param name="fontSize">Font size in points</param>
+            <returns>Font in desired size.</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Symbols.FontAwesome">
+            <summary>
+            Gets FontAwesome at default size.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Symbols.FontAwesomeFamily">
+            <summary>
+            Returns FontAwesome Family.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Symbols.FontAwesomeDefaultSize">
+            <summary>
+            Gets the default size for the FontAwesome font size in points.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.BarUtilities">
+            <summary>
+            Represents class with static functions that provide commonly used utility functions when working with
+            Bar objects and items hosted by Bar object.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BarUtilities.UseGenericDefaultStringFormat">
+            <summary>
+            Gets or sets whether StringFormat internally used by all DotNetBar controls to render text is GenericDefault. Default value is false
+            which indicates that GenericTypographic is used.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BarUtilities.AntiAliasTextRenderingHint">
+            <summary>
+            Gets or sets the anti-alias text rendering hint that will be used to render text on controls that have AntiAlias property set to true.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BarUtilities.AlwaysGenerateAccessibilityFocusEvent">
+            <summary>
+            Gets or sets whether items always generate the Focus accessibility event when mouse enters the item. Default value is false which indicates
+            that focus event will be raised only when item is on menu bar.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BarUtilities.AutoRemoveMessageFilter">
+            <summary>
+            Gets or sets whether Application Message Filter that is registered by popup controls
+            is automatically unregistered when last control is disposed. Default value is false and
+            in most cases should not be changed.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BarUtilities.TextMarkupCultureSpecificPadding">
+            <summary>
+            Get or sets the text-markup padding for text measurement when running on Japanese version of Windows.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.BarUtilities.DisposeItemImages">
+            <summary>
+            Gets or sets whether Image and Icon resources assigned to items and controls are automatically disposed when
+            control or item is disposed. Default value is false.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BarUtilities.DisposeImage(System.Drawing.Image@)">
+            <summary>
+            Disposes image reference and sets it to null.
+            </summary>
+            <param name="image">Reference to image to dispose.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BarUtilities.DisposeImage(System.Drawing.Icon@)">
+            <summary>
+            Disposes image reference and sets it to null.
+            </summary>
+            <param name="image">Reference to image to dispose.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BarUtilities.InvokeDelayed(System.Windows.Forms.MethodInvoker)">
+            <summary>
+            Invokes the method asynchronously using the WinForms Timer.
+            </summary>
+            <param name="method">Method to invoke.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.BarUtilities.InvokeDelayed(System.Windows.Forms.MethodInvoker,System.Int32)">
+            <summary>
+            Invokes the method asynchronously using the WinForms Timer.
+            </summary>
+            <param name="method">Method to invoke.</param>
+            <param name="delayInterval">Time in milliseconds after which method is invoked.</param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.DisplayHelp">
+            <summary>
+            Summary description for Display.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.DoubleHelpers.AreClose(System.Double,System.Double)">
+            <summary>
+            Gets whether values are close.
+            </summary>
+            <param name="value1">First value.</param>
+            <param name="value2">Second value</param>
+            <returns>true if values are close enough</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.DoubleHelpers.IsZero(System.Double)">
+            <summary>
+            Gets whether value is zero
+            </summary>
+            <param name="value">value to check</param>
+            <returns>true if value is considered zero</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.DoubleHelpers.IsNaN(System.Double)">
+            <summary>
+            Gets whether value is not an number.
+            </summary>
+            <param name="value">value to test</param>
+            <returns>true if value is not an number</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.DrawingHelpers.DrawBorder(System.Drawing.Graphics,System.Drawing.RectangleF,DevComponents.DotNetBar.Layout.Thickness,DevComponents.DotNetBar.Layout.BorderPattern,DevComponents.DotNetBar.Layout.BorderColors)">
+            <summary>
+            Draws the border.
+            </summary>
+            <param name="g">Graphics canvas.</param>
+            <param name="bounds">Bounds for border.</param>
+            <param name="borderThickness">Border thickness.</param>
+            <param name="borderPattern">Border pattern.</param>
+            <param name="borderColor">Border color.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.InsertMarker.#ctor">
+            <summary>
+            Initializes a new instance of the InsertMarker class.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.Items">
+            <summary>
+            Collection of items inside of strip.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.TotalFixedWidth">
+            <summary>
+            Total width of all items with fixed width in the strip.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.IsLeftSpanStrip">
+            <summary>
+            True if this is left most strip in group which spans whole group height.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.IsRightSpanStrip">
+            <summary>
+            True if this is right most strip in group which spans whole group height.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.StripHeightAbsolute">
+            <summary>
+            Strip height determined as maximum height of items in it.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.MinStripHeightAbsolute">
+            <summary>
+            Minimum strip height according to the larges MinSize of contained items.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.StripHeightPercentage">
+            <summary>
+            Maximum percentage strip height for all items in it.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.LayoutItemStrip.LargestTextBaseline">
+            <summary>
+            The largest text-baseline for all items in strip.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutContext.#ctor(DevComponents.DotNetBar.Layout.LayoutControl,System.Drawing.Graphics,System.Drawing.Font)">
+            <summary>
+            Initializes a new instance of the LayoutContext class.
+            </summary>
+            <param name="layoutControl"></param>
+            <param name="graphics"></param>
+            <param name="font"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.#ctor">
+            <summary>
+            Initializes a new instance of the LayoutControl class.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.StyleManagerStyleChanged(DevComponents.DotNetBar.eDotNetBarStyle)">
+            <summary>
+            Called by StyleManager to notify control that style on manager has changed and that control should refresh its appearance if
+            its style is controlled by StyleManager.
+            </summary>
+            <param name="newStyle">New active style.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.ScrollItemIntoView(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Brings specified item that belongs to this LayoutControl into view by scrolling control if necessary.
+            </summary>
+            <param name="item">Item to bring into view.</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.RootGroup">
+            <summary>
+            Gets the LayoutGroup for the control. LayoutGroup should not be changed.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnRootGroupChanged(DevComponents.DotNetBar.Layout.LayoutGroup,DevComponents.DotNetBar.Layout.LayoutGroup)">
+            <summary>
+            Called when RootGroup property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.LabelFont">
+            <summary>
+            Indicates font used for the item labels.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnLabelFontChanged(System.Drawing.Font,System.Drawing.Font)">
+            <summary>
+            Called when LabelFont property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.LabelTextColor">
+            <summary>
+            Gets or sets the color of the label text.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.ShouldSerializeLabelTextColor">
+            <summary>
+            Gets whether property should be serialized.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.ResetLabelTextColor">
+            <summary>
+            Resets property to its default value.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.LabelTextAlignment">
+            <summary>
+            Indicates the label text alignment within the text bounds.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnLabelTextAlignmentChanged(DevComponents.DotNetBar.Layout.eTextAlignment,DevComponents.DotNetBar.Layout.eTextAlignment)">
+            <summary>
+            Called when LabelTextAlignment property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.SetupControlItem(DevComponents.DotNetBar.Layout.LayoutControlItem)">
+            <summary>
+            Sets default property values for LayoutControlItem given the control assigned to it.
+            </summary>
+            <param name="item">Reference to LayoutControlItem</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.MnemonicsEnabled">
+            <summary>
+            Indicates whether accelerator keys assigned to item Text property are processed by items which respond to them.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnMnemonicsEnabledChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when MnemonicsEnabled property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.HotkeyPrefix">
+            <summary>
+            Indicates visibility of the hot-key prefixes, accelerator keys, that are set using ampersand in item Text.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnHotkeyPrefixChanged(System.Drawing.Text.HotkeyPrefix,System.Drawing.Text.HotkeyPrefix)">
+            <summary>
+            Called when HotkeyPrefix property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.Padding">
+            <summary>
+            Padding property is not supported by LayoutControl.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.AutoScaleLayout">
+            <summary>
+            Indicates whether layout control automatically scales the items if the parent Form performs scaling due to AutoScale settings.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.FocusStyle">
+            <summary>
+            Indicates the focus style applied to the item which hosts an Control when that control contains input focus.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnFocusStyleChanged(DevComponents.DotNetBar.Layout.SimpleStyle,DevComponents.DotNetBar.Layout.SimpleStyle)">
+            <summary>
+            Called when FocusStyle property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.VScrollBar">
+            <summary>
+            Gets the vertical scrollbar used by control.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.HScrollBar">
+            <summary>
+            Gets the horizontal scrollbar used by the control.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.FindControlItem(System.Windows.Forms.Control)">
+            <summary>
+            Finds the item which is responsible for the control or returns null if there is no item that represents the control or control is not 
+            contained by the layout control.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.FindOrphanedControlItems">
+            <summary>
+            Finds the layout items which have controls assigned but controls are not parented by the layout control or one of its child controls.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.IsSystemControl(System.Windows.Forms.Control)">
+            <summary>
+            Returns whether control is an system control used internally by LayoutControl.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.DisposeControlsOnRootGroupClear">
+            <summary>
+            Indicates whether controls associated with layout items are automatically disposed when RootGroup.Clear method is called. Default value is true.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.ShowToolTips">
+            <summary>
+            Gets or sets whether tooltips are shown when mouse is over the item when Tooltip property is set.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.HitTest(System.Drawing.Point)">
+            <summary>
+            Gets the layout item at specified location.
+            </summary>
+            <param name="clientLoc">LayoutControl client coordinates to test.</param>
+            <returns>Layout item or null.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.GetHitTestInsertInfo(DevComponents.DotNetBar.Layout.LayoutItemBase,System.Drawing.Point)">
+            <summary>
+            Gets the HitTestInsertInfo structure that provides information on insertion point for an item based on the 
+            specified client coordinates.
+            </summary>
+            <param name="clientLoc">Client coordinates to determine insert location for.</param>
+            <returns>Instance of HitTestInsertInfo or null if item cannot be placed.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.HitTestInsert(DevComponents.DotNetBar.Layout.LayoutGroup,System.Drawing.Point)">
+            <summary>
+            Returns item which contains specified client point or null.
+            </summary>
+            <param name="clientLoc">Client location to test.</param>
+            <returns></returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControl.TouchEnabled">
+            <summary>
+            Indicates whether touch support for scrolling is enabled.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControl.OnTouchEnabledChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when TouchEnabled property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.LayoutControlItem">
+            <summary>
+            Represents layout item which hosts a Windows Forms Control.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControlItem.Control">
+            <summary>
+            Gets or sets the control managed by layout item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControlItem.OnControlChanged(System.Windows.Forms.Control,System.Windows.Forms.Control)">
+            <summary>
+            Called when Control property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControlItem.EnableControlTooltip">
+            <summary>
+            Indicates whether Tooltip for the item is shown when mouse is over the control.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControlItem.OnEnableControlTooltipChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when EnableControlTooltip property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControlItem.TextControlSpacing">
+            <summary>
+            Indicates spacing between text and the control.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControlItem.OnTextControlSpacingChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when TextControlSpacing property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControlItem.ProcessMnemonic(System.Char)">
+            <summary>
+            Processes accelerator key for the item.
+            </summary>
+            <param name="charCode"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControlItem.ControlSize">
+            <summary>
+            Indicates suggested control size which is used only if calculated layout size for the control exceeds the size specified here. Either width or height may be set or both.
+            ControlSize property can be used in conjuction with Dock and Anchor properties on the Control. When available space for the Control
+            exceeds ControlSize the Dock and Anchor properties will indicate the control position inside of the control box.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControlItem.OnControlSizeChanged(System.Drawing.Size,System.Drawing.Size)">
+            <summary>
+            Called when ControlSize property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControlItem.AutoSetTabIndex">
+            <summary>
+            Indicates whether Control TabIndex is automatically set based on the position of the item inside of the layout.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutControlItem.OnAutoSetTabIndexChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when AutoSetTabIndex property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutControlItem.FocusVisualStyleEnabled">
+            <summary>
+            Indicates whether LayoutControl.FocusStyle is used to paint background of item when control has input focus.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.#ctor">
+            <summary>
+            Initializes a new instance of the LayoutGroup class.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.ActualBounds">
+            <summary>
+            Gets actual bounds of elements inside of group. The actual bounds may differ from requested layout bounds due to minium
+            size constraint.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.OnPaintBackground(DevComponents.DotNetBar.Layout.PaintContext)">
+            <summary>
+            Paints the background of the item.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.Layout(DevComponents.DotNetBar.Layout.LayoutContext)">
+            <summary>
+            Performs group layout.
+            </summary>
+            <param name="context">Layout context information.</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.CaptionHeight">
+            <summary>
+            Indicates explicit caption height in pixels.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.OnCaptionHeightChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when CaptionHeight property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.UpdateTextBounds">
+            <summary>
+            Updates the layout of the text inside of item.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.Items">
+            <summary>
+            Gets the collection of layout items objects assigned to the current group. 
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.IsRootGroup">
+            <summary>
+            Indicates whether group is used as a root group in LayoutControl.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.CaptionStyle">
+            <summary>
+            Gets the style for the group caption represented by Text property.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.IsChildItem(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Returns whether item is contained as child item by this item or one of its children.
+            </summary>
+            <param name="value">Item to check.</param>
+            <returns>true if item is contained otherwise false</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.Appearance">
+            <summary>
+            Indicates the built-in appearance of group. When set group is painted using one of the pre-defined styles.
+            When set to None, default value, you can use Style and CaptionStyle properties to change the group appearance.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.OnAppearanceChanged(DevComponents.DotNetBar.Layout.eGroupAppearance,DevComponents.DotNetBar.Layout.eGroupAppearance)">
+            <summary>
+            Called when Appearance property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutGroup.ScaleItem(System.Drawing.SizeF)">
+            <summary>
+            Scales item in response to the scaling of the LayoutControl. Should never be called directly.
+            </summary>
+            <param name="factor"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.IsTextSizeShared">
+            <summary>
+            Gets whether this item text-size is shared with other items inside of its parent group.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutGroup.IsTextBaselineShared">
+            <summary>
+            Gets whether this item's text-baseline is shared with other items inside of its parent group.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.eLayoutType">
+            <summary>
+            Specifies the layout type.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutType.Horizontal">
+            <summary>
+            Horizontal layout type where items are first ordered from left to right then wrapped to next line.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutType.Vertical">
+            <summary>
+            Vertical layout type where items are ordered first from top to bottom then wrapped onto the next column.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.eGroupAppearance">
+            <summary>
+            Specifies built-in appearance for the LayoutGroup.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eGroupAppearance.None">
+            <summary>
+            Group does not use any built-in appearance.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eGroupAppearance.Panel">
+            <summary>
+            Group is rendered like standard DotNetBar Panel control.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eGroupAppearance.GroupPanel">
+            <summary>
+            Group is rendered like GroupPanel control.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.LayoutItemBase">
+            <summary>
+            Represents the base item for layout control.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.#ctor">
+            <summary>
+            Initializes a new instance of the LayoutItemBase class.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.Paint(DevComponents.DotNetBar.Layout.PaintContext)">
+            <summary>
+            Paints the item. Actual code doing painting goes into the OnPaint method which should be overridden.
+            </summary>
+            <param name="context">Provides Paint Context.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnPaintBackground(DevComponents.DotNetBar.Layout.PaintContext)">
+            <summary>
+            Paints the background of the item.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnPaint(DevComponents.DotNetBar.Layout.PaintContext)">
+            <summary>
+            Actual painting implementation.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.UseStripBaseline">
+            <summary>
+            Returns whether strip text base line value is used when calculating position of the rendered text label.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextBaseLineEnabled">
+            <summary>
+            Indicates whether shared text baseline between items is enabled so the text-base aligns.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextBaseLineEnabledChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when TextBaseLineEnabled property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnPaintSelection(DevComponents.DotNetBar.Layout.PaintContext)">
+            <summary>
+            Paints the selection adorner around the item.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.UpdateScrollBounds(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Updates bounds of the item in response to the scrolling of LayoutControl.
+            </summary>
+            <param name="xScroll"></param>
+            <param name="yScroll"></param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Bounds">
+            <summary>
+            Gets the bounds of the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.ProcessMnemonic(System.Char)">
+            <summary>
+            Processes accelerator key for the item.
+            </summary>
+            <param name="charCode"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.SetBounds(System.Drawing.Rectangle)">
+            <summary>
+            Sets new bounds of the item.
+            </summary>
+            <param name="r">New bounds.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.SetBounds(System.Drawing.Rectangle,System.Drawing.Size)">
+            <summary>
+            Sets new bounds of the item and actual text size.
+            </summary>
+            <param name="r"></param>
+            <param name="actualTextSize"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.UpdateLayout">
+            <summary>
+            Updates the item layout. Actual layout is performed in OnUpdateLayout method.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnUpdateLayout">
+            <summary>
+            Actual layout update implementation.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.UpdateTextBounds">
+            <summary>
+            Updates the layout of the text inside of item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.ScaleItem(System.Drawing.SizeF)">
+            <summary>
+            Scales item in response to the scaling of the LayoutControl. Should never be called directly.
+            </summary>
+            <param name="factor"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.MeasureText(DevComponents.DotNetBar.Layout.LayoutContext)">
+            <summary>
+            Measures the size of the item text. Actual measurement is done in OnMeasureText method.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnMeasureText(DevComponents.DotNetBar.Layout.LayoutContext)">
+            <summary>
+            Returns the size of the items text.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.StripTextBaseline">
+            <summary>
+            Gets or sets the text-baseline that is used by whole strip.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextBaseline">
+            <summary>
+            Returns the text base line.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Tag">
+            <summary>
+            Gets or sets an object that contains additional data attached to the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTagChanged(System.Object,System.Object)">
+            <summary>
+            Called when Tag property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Text">
+            <summary>
+            Indicates the item caption.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextChanged(System.String,System.String)">
+            <summary>
+            Called when Text property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextSize">
+            <summary>
+            Gets or sets the explicit size of the text part of item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextSizeChanged(System.Drawing.Size,System.Drawing.Size)">
+            <summary>
+            Called when TextSize property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ActualTextBounds">
+            <summary>
+            Gets actual text bounds.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ActualTextSize">
+            <summary>
+            Gets actual text-size as used by the layout item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnActualTextSizeChanged(System.Drawing.Size,System.Drawing.Size)">
+            <summary>
+            Called when ActualTextSize property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextPadding">
+            <summary>
+            Gets or sets text padding.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextPaddingChanged(System.Windows.Forms.Padding,System.Windows.Forms.Padding)">
+            <summary>
+            Called when TextPadding property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextVisible">
+            <summary>
+            Indicates whether caption/text is visible.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextVisibleChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when TextVisible property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextPosition">
+            <summary>
+            Gets or sets the text position in relation to the other parts of the layout item. Default is same as Left.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextPositionChanged(DevComponents.DotNetBar.Layout.eLayoutPosition,DevComponents.DotNetBar.Layout.eLayoutPosition)">
+            <summary>
+            Called when TextPosition property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Width">
+            <summary>
+            Indicates the total width of the item. The value specified here depends on the WidthType property setting. When using WidthType=Percentage the value specified here indicates the percent of the available client size of group.
+            For example setting of 20 indicates 20% of the available client width.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnWidthChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when Width property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.WidthType">
+            <summary>
+            Indicates width type used by the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnWidthTypeChanged(DevComponents.DotNetBar.Layout.eLayoutSizeType,DevComponents.DotNetBar.Layout.eLayoutSizeType)">
+            <summary>
+            Called when WidthType property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsWidthFixed">
+            <summary>
+            Indicates whether width type is the fixed width type, different than eLayoutSizeType.Percent
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Height">
+            <summary>
+            Indicates the total height of the item. The value specified here depends on the HeightType property setting. When using HeightType=Percentage the value specified here indicates the percent of the available client size of group.
+            For example setting of 10 indicates 10% of the available client height.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnHeightChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when Height property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.HeightType">
+            <summary>
+            Indicates height type used by the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnHeightTypeChanged(DevComponents.DotNetBar.Layout.eLayoutSizeType,DevComponents.DotNetBar.Layout.eLayoutSizeType)">
+            <summary>
+            Called when HeightType property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsHeightFixed">
+            <summary>
+            Indicates whether height type is the fixed height type, different than eLayoutSizeType.Percent
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.MinSize">
+            <summary>
+            Indicates the minimum size of the item. Setting Width or Height to zero indicates unconstrained minimum size for given dimension.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnMinSizeChanged(System.Drawing.Size,System.Drawing.Size)">
+            <summary>
+            Called when MinSize property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.SuggestedGroupId">
+            <summary>
+            When set to value greater than 0 it suggests to layout engine that items with same id that are in collection after each other should be kept on same line if possible.
+            This is only suggestion to layout engine and engine will ignore it if there is insufficient client size available or other size constraints
+            prevent it from keeping items in same line.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnSuggestedGroupIdChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when SuggestedGroupId property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.MnemonicsEnabled">
+            <summary>
+            Indicates whether accelerator keys assigned to item Text property are processed by items which respond to them.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnMnemonicsEnabledChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when MnemonicsEnabled property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Style">
+            <summary>
+            Gets the style for the background of the control.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Padding">
+            <summary>
+            Specifies the amount of padding inside of the item. Padding is the spacing between the edges of item and its content.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnPaddingChanged(System.Windows.Forms.Padding,System.Windows.Forms.Padding)">
+            <summary>
+            Called when Padding property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.AbsoluteIndex">
+            <summary>
+            Indicates the absolute index of the item inside of the LayoutControl.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnAbsoluteIndexChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when AbsoluteIndex property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.GetLayoutControl">
+            <summary>
+            Returns the LayoutControl which hosts the item, if available.
+            </summary>
+            <returns>reference to LayoutControl or null.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.Invalidate">
+            <summary>
+            Invalidates the paint region of the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.InvalidateLayout">
+            <summary>
+            Invalidates layout of the item and causes the LayoutControl to perform layout.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.LayoutControl">
+            <summary>
+            Gets the LayoutControl this group is directly attached too through RootGroup property.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Parent">
+            <summary>
+            Gets the reference to parent item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnParentChanged(DevComponents.DotNetBar.Layout.LayoutItemBase,DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Called when Parent property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.IsChildItem(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Returns whether item is contained as child item by this item or one of its children.
+            </summary>
+            <param name="value">Item to check.</param>
+            <returns>true if item is contained otherwise false</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsKeyboardFocusWithin">
+            <summary>
+            Gets whether keyboard focus is within the control which is assigned to the item.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Image">
+            <summary>
+            Indicates the image that is displayed next to the item text label.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnImageChanged(System.Drawing.Image,System.Drawing.Image)">
+            <summary>
+            Called when Image property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ImageTextSpacing">
+            <summary>
+            Specifies the distance between image and text.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnImageTextSpacingChanged(System.Int32,System.Int32)">
+            <summary>
+            Called when ImageTextSpacing property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ImagePosition">
+            <summary>
+            Indicates the position of the image in relation to the text label of item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnImagePositionChanged(DevComponents.DotNetBar.Layout.eLayoutPosition,DevComponents.DotNetBar.Layout.eLayoutPosition)">
+            <summary>
+            Called when ImagePosition property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ActualImageBounds">
+            <summary>
+            Gets actual image bounds if visible or Rectangle.Empty if image is not visible.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.SymbolColor">
+            <summary>
+            Gets or sets the color of the Symbol.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.ShouldSerializeSymbolColor">
+            <summary>
+            Gets whether property should be serialized.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.ResetSymbolColor">
+            <summary>
+            Resets property to its default value.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Symbol">
+            <summary>
+            Indicates the symbol displayed on face of the item instead of the image. Setting the symbol overrides the image setting.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnSymbolChanged(System.String,System.String)">
+            <summary>
+            Called when Symbol property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.SymbolSize">
+            <summary>
+            Indicates the size of the symbol in points.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnSymbolSizeChanged(System.Single,System.Single)">
+            <summary>
+            Called when SymbolSize property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.SharedTextSizeEnabled">
+            <summary>
+            Indicates whether uniform text-size is used for text label. When shared text-size is used it ensures that all text-labels in LayoutControl use same text-size which is determined as largest text label size.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnSharedTextSizeEnabledChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when SharedTextSizeEnabled property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.BringIntoView">
+            <summary>
+            Brings item into view by scrolling the control if necessary.
+            </summary>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.LayoutItemBase.Disposed">
+            <summary>
+            Occurs when item is disposed.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Name">
+            <summary>
+            Gets or sets the name of the item.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Site">
+            <summary>
+            Gets or sets the Site associated with this component. Used by Windows forms designer.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.DesignMode">
+            <summary>
+            Returns whether item is in design mode.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnIsSelectedChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when IsSelected property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextAlignment">
+            <summary>
+            Indicates the text alignment within the text bounds. Depending on layout item type not all alignments are available.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextAlignmentChanged(DevComponents.DotNetBar.Layout.eTextAlignment,DevComponents.DotNetBar.Layout.eTextAlignment)">
+            <summary>
+            Called when TextAlignment property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextLineAlignment">
+            <summary>
+            Indicates text line alignment. Usually there is no need to change this property value since Default setting will use text-base line so text-box text and captions align.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTextLineAlignmentChanged(DevComponents.DotNetBar.Layout.eTextLineAlignment,DevComponents.DotNetBar.Layout.eTextLineAlignment)">
+            <summary>
+            Called when TextLineAlignment property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsTextSizeShared">
+            <summary>
+            Gets whether this item text-size is shared with other items inside of its parent group.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsTextBaselineShared">
+            <summary>
+            Gets whether this item's text-baseline is shared with other items inside of its parent group.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Visible">
+            <summary>
+            Indicates visibility of the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnVisibleChanged(System.Boolean,System.Boolean)">
+            <summary>
+            Called when Visible property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.LayoutItemBase.MarkupLinkClick">
+            <summary>
+            Occurs when text markup link is clicked. Markup links can be created using "a" tag, for example:
+            <a name="MyLink">Markup link</a>
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextMarkupBody">
+            <summary>
+            Gets reference to parsed markup body element if text was markup otherwise returns null.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.TextMarkupEnabled">
+            <summary>
+            Gets or sets whether item supports and renders text markup. Default value is true.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsMarkupSupported">
+            <summary>
+            Gets whether item supports text markup. Default is false.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.IsMouseOver">
+            <summary>
+            Gets whether mouse is over the item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTooltipChanged">
+            <summary>
+            Occurs after Tooltip text has changed.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.Tooltip">
+            <summary>
+            Gets/Sets informational text (tooltip) for the cell.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ToolTipVisible">
+            <summary>
+            Gets whether tooltip is visible or not.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnTooltip(System.Boolean)">
+            <summary>
+            Called when tooltip is shown and hidden.
+            </summary>
+            <param name="isShown">true if tooltip is being shown otherwise false.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.ShowToolTip">
+            <summary>
+            Shows tooltip for this item.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.HideToolTip">
+            <summary>
+            Destroys tooltip window.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.ResetHover(System.Windows.Forms.Control)">
+            <summary>
+            Resets Hoover timer.
+            </summary>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.LayoutItemBase.ToolTipVisibleChanged">
+            <summary>
+            Occurs when item's tooltip visibility has changed.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemBase.ShowToolTips">
+            <summary>
+            Gets or sets whether tooltips are shown when mouse is over the item when Tooltip property is set.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemBase.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Raises the PropertyChanged event.
+            </summary>
+            <param name="e">Provides event arguments.</param>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.LayoutItemBase.PropertyChanged">
+            <summary>
+            Occurs when property on object has changed.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.eLayoutSizeType">
+            <summary>
+            Specifies how layout items elements should be sized relative to their container.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutSizeType.Absolute">
+            <summary>
+            The item should be sized to an exact number of pixels.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutSizeType.Percent">
+            <summary>
+            The item should be sized as a percentage of the parent container.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.eLayoutPosition">
+            <summary>
+            Contains values that specify how a specific element is positioned relative to another element.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutPosition.Default">
+            <summary>
+            Default location, i.e. left.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutPosition.Left">
+            <summary>
+            Item is located at the left edge of another item.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutPosition.Right">
+            <summary>
+            Item is located at the right edge of another item.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutPosition.Top">
+            <summary>
+            Item is located at the top edge of another item.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.eLayoutPosition.Bottom">
+            <summary>
+            Item is located at the bottom edge of another item.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.eTextAlignment">
+            <summary>
+            Specifies layout text alignment within the text bounds.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.eTextLineAlignment">
+            <summary>
+            Specifies layout text line alignment within the text bounds.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.MarkupLinkClickEventArgs">
+            <summary>
+            Provides more information about MarkupLinkClick event.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.MarkupLinkClickEventArgs.HRef">
+            <summary>
+            Gets the value of href attribute from the markup link that was clicked.
+            </summary>
+        </member>
+        <member name="F:DevComponents.DotNetBar.Layout.MarkupLinkClickEventArgs.Name">
+            <summary>
+            Gets the value of name attribute from the markup link that was clicked.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.MarkupLinkClickEventArgs.#ctor(System.String,System.String)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="name">Value of name attribute.</param>
+            <param name="href">Value of href attribute.</param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.MarkupLinkClickEventHandler">
+            <summary>
+            Defines delegate for MarkupLinkClick event.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.LayoutItemCollection">
+            <summary>
+            Represents collection for LayoutItemBase objects.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemCollection.ParentItem">
+            <summary>
+            Gets or sets the item this collection is associated with.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.SetParentItem(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Sets the item collection belongs to.
+            </summary>
+            <param name="parent">Item that is parent of this collection.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Add(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Adds new object to the collection.
+            </summary>
+            <param name="item">Object to add.</param>
+            <returns>Index of newly added object.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.AddRange(DevComponents.DotNetBar.Layout.LayoutItemBase[])">
+            <summary>
+            Adds an array of objects to the collection. 
+            </summary>
+            <param name="items">Array of item objects.</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.LayoutItemCollection.Item(System.Int32)">
+            <summary>
+            Returns reference to the object in collection based on it's index.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Insert(System.Int32,DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Inserts new object into the collection.
+            </summary>
+            <param name="index">Position of the object.</param>
+            <param name="value">Object to insert.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.IndexOf(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Returns index of the object inside of the collection.
+            </summary>
+            <param name="value">Reference to the object.</param>
+            <returns>Index of the object.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Contains(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Returns whether collection contains specified object.
+            </summary>
+            <param name="value">Object to look for.</param>
+            <returns>true if object is part of the collection, otherwise false.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Remove(DevComponents.DotNetBar.Layout.LayoutItemBase)">
+            <summary>
+            Removes specified object from the collection.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Move(DevComponents.DotNetBar.Layout.LayoutItemBase,System.Int32)">
+            <summary>
+            Moves an item in collection from its current location to new location.
+            </summary>
+            <param name="item"></param>
+            <param name="moveToIndex"></param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.CopyTo(DevComponents.DotNetBar.Layout.LayoutItemBase[],System.Int32)">
+            <summary>
+            Copies collection into the specified array.
+            </summary>
+            <param name="array">Array to copy collection to.</param>
+            <param name="index">Starting index.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.CopyTo(DevComponents.DotNetBar.Layout.LayoutItemBase[])">
+            <summary>
+            Copies contained items to the item array.
+            </summary>
+            <param name="array">Array to copy to.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.CopyTo(System.Collections.Generic.List{DevComponents.DotNetBar.Layout.LayoutItemBase})">
+            <summary>
+            Copies contained items to the item array.
+            </summary>
+            <param name="array">Array to copy to.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Sort">
+            <summary>
+            Sorts the elements in the entire collection using the IComparable implementation of each element.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Sort(System.Collections.IComparer)">
+            <summary>
+            Sorts the elements in the entire collection using the specified comparer.
+            </summary>
+            <param name="comparer">The IComparer implementation to use when comparing elements.-or- null to use the IComparable implementation of each element.</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.LayoutItemCollection.Sort(System.Int32,System.Int32,System.Collections.IComparer)">
+            <summary>
+            Sorts the elements in a range of elements in collection using the specified comparer.
+            </summary>
+            <param name="index"></param>
+            <param name="count"></param>
+            <param name="comparer"></param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.LayoutSpacerItem">
+            <summary>
+            Represents the item used as empty spacer element.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.PaintContext.#ctor(DevComponents.DotNetBar.Layout.LayoutControl,System.Drawing.Graphics,System.Drawing.Text.HotkeyPrefix)">
+            <summary>
+            Initializes a new instance of the PaintContext class.
+            </summary>
+            <param name="control"></param>
+            <param name="graphics"></param>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.#ctor">
+            <summary>
+            Initializes a new instance of the SimpleStyle class.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.IsPainted">
+            <summary>
+            Gets whether any properties on the style have been set that would cause style to be painted.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.Background">
+            <summary>
+            Gets or sets the style background.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.ShouldSerializeBackground">
+            <summary>
+            Gets whether property should be serialized.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.ResetBackground">
+            <summary>
+            Resets property to its default value.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.TextColor">
+            <summary>
+            Gets or sets text color.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.ShouldSerializeTextColor">
+            <summary>
+            Gets whether property should be serialized.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.ResetTextColor">
+            <summary>
+            Resets property to its default value.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.Font">
+            <summary>
+            Indicates the text font.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.OnFontChanged(System.Drawing.Font,System.Drawing.Font)">
+            <summary>
+            Called when Font property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.BorderPattern">
+            <summary>
+            Indicates the border line pattern.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.OnBorderPatternChanged(DevComponents.DotNetBar.Layout.BorderPattern,DevComponents.DotNetBar.Layout.BorderPattern)">
+            <summary>
+            Called when BorderPattern property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.BorderColors">
+            <summary>
+            Gets or sets the border color.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.ShouldSerializeBorderColors">
+            <summary>
+            Gets whether property should be serialized.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.ResetBorderColors">
+            <summary>
+            Resets property to its default value.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.BorderThickness">
+            <summary>
+            Indicates the border thickness.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.OnBorderThicknessChanged(DevComponents.DotNetBar.Layout.Thickness,DevComponents.DotNetBar.Layout.Thickness)">
+            <summary>
+            Called when BorderThickness property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.SimpleStyle.Margin">
+            <summary>
+            Gets or sets spacing between the edge of the item and the border and background. This does not influence the actual layout or size of the item rather applies to rendering of the style only.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.OnMarginChanged(DevComponents.DotNetBar.Padding,DevComponents.DotNetBar.Padding)">
+            <summary>
+            Called when Margin property has changed.
+            </summary>
+            <param name="oldValue">Old property value</param>
+            <param name="newValue">New property value</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.SimpleStyle.OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Raises the PropertyChanged event.
+            </summary>
+            <param name="e">Provides event arguments.</param>
+        </member>
+        <member name="E:DevComponents.DotNetBar.Layout.SimpleStyle.PropertyChanged">
+            <summary>
+            Occurs when property on object has changed.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.Thickness">
+            <summary>
+            Defines Thickness structure used by borders and margins.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.#ctor(System.Double)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="uniformLength">Uniform Thickness</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.#ctor(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Creates new instance of the object.
+            </summary>
+            <param name="left">Left Thickness</param>
+            <param name="top">Top Thickness</param>
+            <param name="right">Right Thickness</param>
+            <param name="bottom">Bottom Thickness</param>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.Equals(System.Object)">
+            <summary>
+            Gets whether object equals to this instance.
+            </summary>
+            <param name="obj">object to test.</param>
+            <returns>returns whether objects are Equals</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.Equals(DevComponents.DotNetBar.Layout.Thickness)">
+            <summary>
+            Gets whether object equals to this instance.
+            </summary>
+            <param name="thickness">object to test.</param>
+            <returns>returns whether objects are Equals</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.GetHashCode">
+            <summary>
+            Returns hash code for object.
+            </summary>
+            <returns>Hash code</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.ToString">
+            <summary>
+            Returns string representation of object.
+            </summary>
+            <returns>string representing Thickness</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.ToString(System.Globalization.CultureInfo)">
+            <summary>
+            Gets string representation of object.
+            </summary>
+            <param name="cultureInfo">Culture info.</param>
+            <returns>string representing Thickness</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.IsZero">
+            <summary>
+            Returns whether all values are zero.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.IsUniform">
+            <summary>
+            Returns whether all values are the same.
+            </summary>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.IsValid(System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Returns whether object holds valid value.
+            </summary>
+            <param name="allowNegative">Specifies whether negative values are allowed.</param>
+            <param name="allowNaN">Specifies whether NaN values are allowed.</param>
+            <param name="allowPositiveInfinity">Specifies whether positive infinity values are allowed</param>
+            <param name="allowNegativeInfinity">Specifies whether negative infinity values are allowed</param>
+            <returns>true if object holds valid value</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.IsClose(DevComponents.DotNetBar.Layout.Thickness)">
+            <summary>
+            Returns true if two objects are close.
+            </summary>
+            <param name="thickness">Thickness to test.</param>
+            <returns>true if values are close.</returns>
+        </member>
+        <member name="M:DevComponents.DotNetBar.Layout.Thickness.AreClose(DevComponents.DotNetBar.Layout.Thickness,DevComponents.DotNetBar.Layout.Thickness)">
+            <summary>
+            Returns true if two objects are close.
+            </summary>
+            <param name="thickness1">Thickness 1</param>
+            <param name="thickness2">Thickness 2</param>
+            <returns>true if values are close.</returns>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.Left">
+            <summary>
+            Gets or sets the left Thickness.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.Top">
+            <summary>
+            Gets or sets the top Thickness.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.Right">
+            <summary>
+            Gets or sets the Right Thickness.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.Bottom">
+            <summary>
+            Gets or sets the Bottom Thickness.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.Horizontal">
+            <summary>
+            Gets the total horizontal thickness i.e. Left+Right.
+            </summary>
+        </member>
+        <member name="P:DevComponents.DotNetBar.Layout.Thickness.Vertical">
+            <summary>
+            Gets the total vertical thickness i.e. Top+Bottom.
+            </summary>
+        </member>
+        <member name="T:DevComponents.DotNetBar.Layout.ThicknessConverter">
+            <summary>
+            Provides Thickness TypeConverter.
+            </summary>
+        </member>
+    </members>
+</doc>

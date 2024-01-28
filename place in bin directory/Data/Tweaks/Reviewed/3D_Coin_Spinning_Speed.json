@@ -1,0 +1,24 @@
+{
+  "Name": "3D Coin Spinning Speed",
+  "Scripts": [
+    {
+      "Name": "Speed",
+      "Script": "//Coin Formation Fix\r\n21A6D8: 08 00 00 00 0F 13 0A 00 0C 00 00 00 80 2A BA 40 09 00 00 00\r\n\r\n\r\n//Collectable Coin\r\n21A732: [8, \"Speed (DEFAULT: 0A)\", hex]\r\n\r\n//Coin Formation\r\n21A6DE: [copy,21A732, 21A733]\r\n\r\n//Red Coin\r\n21DCDE: [copy,21A732, 21A733]\r\n\r\n//Jumping Blue Coin\r\n21CF2E: [copy,21A732, 21A733]\r\n\r\n//Sliding Blue Coin\r\n21CEFE: [copy,21A732, 21A733]\r\n\r\n//Moving Blue Coin\r\n21CECE: [copy,21A732, 21A733]\r\n\r\n//Coin Inside Formation\r\n21CE9E: [copy,21A732, 21A733]\r\n\r\n//Hidden Blue Coin\r\n21C3BA: [copy,21A732, 21A733]\r\n\r\n//Mr.I Blue coin\r\n21A66E: [copy,21A732, 21A733]\r\n\r\n//Boo Coin Inside\r\n21A6CA: [copy,21A732, 21A733]\r\n\r\n\r\n//Temporary Coin\r\n21A756: [copy,21A732, 21A733]\r\n\r\n//Single Coin\r\n21A7DA: [copy,21A732, 21A733]",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "70B2507B4F0596660C8077B4B0567144",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.12.5.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Changes the speed in which the 3D coins spin.\r\n\r\nCreated by Nexan.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "E8D21AFDBF558FD16EA092EE23FF8EBF",
+  "Official": false,
+  "Recommended": false
+}

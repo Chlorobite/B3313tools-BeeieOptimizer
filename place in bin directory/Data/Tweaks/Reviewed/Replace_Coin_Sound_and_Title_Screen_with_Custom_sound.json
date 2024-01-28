@@ -1,0 +1,22 @@
+{
+  "Name": "Replace Coin Sound and Title Screen with Custom sound",
+  "Scripts": [
+    {
+      "Name": "New Script",
+      "Script": "6216: 50 21\r\n\r\n21FA3E: 50 21",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "91C366A51226ABD6415C77F9C32F0E40",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.11.14.1",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Changes the coin and title screen from the default pitched sample to a to ukiki's voiceline (unused in most hacks), import your custom coin sound with n64soundtool in NLST 7 (SFX, misc), sound 7= Ukiki",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "DFBDCF4A01C05641750B1EE453A93D65"
+}

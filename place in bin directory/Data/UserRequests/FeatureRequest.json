@@ -1,0 +1,42 @@
+{
+    "Properties":
+    [
+        {
+            "Name": "Category",
+            "Type": "Text",
+            "Description": "e.g. \"Level Editor\" or \"Music Manager\""
+        },
+        {
+            "Name": "Title",
+            "Description": "How would you name your feature?",
+            "Type": "Text"
+        },
+        {
+            "Name": "Description",
+            "Description": "Please describe your feature detailed.",
+            "Type": "LongText"
+        },
+        {
+            "Name": "Version",
+            "Description": "What version of SM64 ROM Manager are you using right now?\ne.g. \"Version 1.2.0.0 Beta 3\"",
+            "Type": "Text"
+        },
+        {
+            "Name": "Attachments",
+            "Description": "Do you have some screenshots or other helpful ressources?",
+            "Type": "Files"
+        },
+        {
+            "Name": "Contact",
+            "Description": "How can you be contacted If there are more questions open?\nWrite down your Discord#0000 or Skype Name or E-Mail Address.",
+            "Type": "Text",
+            "AllowEmptyState": true
+        }
+    ],
+    "UploadSettings": {
+        "Link": "E/BWdsulKDhuPEQTjb0gpiez9Axs09e+fK+ETuK/yi95nKBnRl3fz99HT1NYFkRhkxiVHU4UEHiyJtVccJEv8zIojxG8GQrBU3pbL/wMhewdMeUkndlL/lTlyeCtKWkY",
+        "Username": "VGlt8rsbDtAsc+CxVCq3q5G3H6MbmA/uSCl2RMkY55I=",
+        "Password": "H0q5ZhVOuchpRw2Ei5QXxuBeg2zIem0w"
+    },
+    "Name": "Feature Request"
+}

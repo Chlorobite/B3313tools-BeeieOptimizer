@@ -1,0 +1,24 @@
+{
+  "Name": "Endcake Screen Brings You Back to the Title Screen",
+  "Scripts": [
+    {
+      "Name": "New Script",
+      "Script": "4AC4D4: 34\r\n4AC4D7: 00 29\r\n4AC4DA: 01\r\n4AC4DC: 33 08 00 4B 00 00 00 00\r\n4AC4E3: 00 03 04 00 78 11 08 00\r\n4AC4EB: 00 80 24 BF A0 03 04 00 F0 1C\r\n4AC4F7: 00 04 04\r\n4AC4FB: 01 02 04 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "14895801DCB69C5589E9133197E8E410",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.12.5.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "By Blakeoramo",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "C7150E764CAA581DC7D02A504E18F073",
+  "Official": false,
+  "Recommended": true
+}

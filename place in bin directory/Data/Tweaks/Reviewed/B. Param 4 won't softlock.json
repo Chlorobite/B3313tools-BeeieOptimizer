@@ -1,0 +1,24 @@
+{
+  "Name": "B. Param 4 won't softlock",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "580C7: 14 3C 0E 13 00 35 CE 2E C0 15 CD 00 05",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "0014981F2902996814B43D6452789E0F",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Behavior Parameter 4 will no longer softlock when changing areas on occasion. A Bowser's Blueprints default tweak by falcobuster.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "CA427AAD10DDF77A8E43FD513AE09B1C",
+  "Official": true,
+  "Recommended": true
+}

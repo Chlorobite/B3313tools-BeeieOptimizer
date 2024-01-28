@@ -1,0 +1,24 @@
+{
+  "Name": "More Jump Types Allow Ceiling Climbing",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "268D4: 34 07 00 02\r\n26F1F: 03\r\n26E57: 03\r\n26D57: 03\r\n26974: 34 07 00 02\r\n2A63F: 03",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "B702648E8624440C643ABECE1FB1DF04",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Allows Mario to grab ceilings with more types of jumps, updated version by falcobuster",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "DA1DE04618D5B83A4B5B9523FD5053DF",
+  "Official": true,
+  "Recommended": true
+}

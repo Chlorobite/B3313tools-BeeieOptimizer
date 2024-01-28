@@ -1,0 +1,33 @@
+{
+  "Name": "RCVI Hack",
+  "Scripts": [
+    {
+      "Name": "Enable RCVI Hack",
+      "Script": "F00C2: 08 34",
+      "Type": "TweakScript",
+      "Description": "Enables the RCVI Hack.",
+      "References": [],
+      "ID": "F4A9E06011E24D57192182F4BE57E2EA",
+      "AllowRevert": false
+    },
+    {
+      "Name": "Revert RCVI Hack",
+      "Script": "F00C2:\n02 0D",
+      "Type": "TweakScript",
+      "Description": "Reverts the RCVI Hack.",
+      "References": [],
+      "ID": "FE957BD44E3017B8F79548B7E6A573A3",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "The RCVI Hack reduces lags on emulators.\r\nBut it also breaks console compatiblity. So be careful!",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "5592B6978DF1E6A196AEB5B67B59C757",
+  "Official": false,
+  "Recommended": true
+}

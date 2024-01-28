@@ -1,0 +1,24 @@
+{
+  "Name": "Camera starts in zoomed-out view",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "42038: 24 08 00 02 00 00 00 00 3C 01 80 34 A4 28 C8 48",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "B8DB5D698E2B7C0F1F0919AD660036EC",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "The camera will start in zoomed-out view.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "5E09C57473B315D3112DF444805A532E",
+  "Official": false,
+  "Recommended": true
+}

@@ -1,0 +1,24 @@
+{
+  "Name": "Vanish Cap Works With Floors",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "FE3DC: 85 0D 00 00 34 01 00 7B 15 A1 00 08 00 00 00 00 3C 0E 80 34 8D CE B1 74 31 CE 00 02 11 C0 00 03 00 00 00 00 10 00 00 3C 00 00 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "AD9AC95C10BE37683101CF9DD55C5D8E",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Allows Vanish Cap mesh collision type to work with floors. By someone2639",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "F0F6D43E722012D722F8B53760D94F69",
+  "Official": true,
+  "Recommended": true
+}

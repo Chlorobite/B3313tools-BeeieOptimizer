@@ -1,0 +1,33 @@
+{
+  "Name": "Red Coins Show > 8 Numbers on Collection",
+  "Scripts": [
+    {
+      "Name": "Part 1",
+      "Script": "6D3E0: 3C 0E 80 36 8D CE 11 60 8D CF 01 44 AD CF 00 F0 3C 01 41 D0 44 81 20 00 03 E0 00 08 E5 C4 00 B0 27 BD FF D0 AF BF 00 24 AF A4 00 30 AF A5 00 34 AF A6 00 38 AF A7 00 3C 3C 0F 80 36 8D EF 11 60 3C 19 13 00 08 0B 97 2B 27 39 15 E4\r\nA0C94: 00 00 00 00\r\nA0CB8: 93 A4 00 33\r\nADD70: AF 08 00 F4 AF 08 01 B0\r\nADDDC: 00 00 08 21\r\nADF70: 25 6C FF FF\r\nADF80: 00 00 08 21\r\nADFAC: 0C 0A C9 00\r\nAE2DC: 00 00 08 25\r\nB1CFC: 8F BF 00 1C 8F B0 00 18 03 E0 00 08 27 BD 00 28 27 BD FF E8 AF BF 00 14 3C 04 13 00 0C 0A 7E 57 34 84 3E 8C AF A2 00 18 3C 04 13 00 0C 0A 7E 57 34 84 3E E4 8F A3 00 18 0C 0B DE 48 00 62 10 25 3C 04 80 36 8C 84 11 60 8C 8F 01 44 AC 8F 00 F0 8F BF 00 14 03 E0 00 08 27 BD 00 18\r\nB2920: 27 BD FF E8 AF BF 00 14 10 40 00 1E 3C 04 80 36 8C 84 11 60 3C 01 41 A0 C4 82 00 A4 44 81 20 00 46 04 11 00 E4 84 00 A4 8C 8F 01 44 8C 49 01 B0 01 2F 78 23 34 0C 00 0A 01 EC 00 1B 00 00 70 12 00 00 68 10 01 2E 58 23 11 C0 00 0E AC 8F 01 44 AC 8D 01 44 AF AB 00 18 34 05 00 DB 3C 06 13 00 0C 0A 7B 73 34 C6 15 E4 8F AE 00 18 AC 4E 01 44 3C 01 42 00 44 81 20 00 C4 42 00 A4 46 04 11 00 E4 44 00 A4 8F BF 00 14 03 E0 00 08 27 BD 00 18\r\n21B3E4: 00 06 00 00 0C 00 00 00 80 2F 6D 0C 0D 0A 00 15 04 00 00 00 13 00 43 54\r\n21DCEC: 04 00 00 00 13 00 44 00\r\n21E148: 00 06 00 00 0C 00 00 00 80 2B 23 E0 11 01 00 01 21 00 00 00 2D 00 00 00 08 00 00 00 0C 00 00 00 80 2F 6D 58 09 00 00 00\r\n21E200: 0C 00 00 00 80 2F 2C 84 08 00 00 00 0C 00 00 00 80 2F 32 8C 09 00 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "9BB2E022AE912ABCCC86161B6E48F6A0",
+      "AllowRevert": true
+    },
+    {
+      "Name": "Part 2",
+      "Script": "// fix red coins play sound 0x802F2F8C\r\n0xADF8C:\r\n11 E0 00 09 // BEQZ T7, 0x802F2FB4 // 11 E1 00 09 // BEQ T7, AT, 0x802F2FB4\r\n\r\n// fix red coin star spawn condition 0x802F2DE4\r\n0xAE2E4:\r\n15 00 00 05 // BNEZ T0, 0x802F2DFC // 15 01 00 05 // BNE T0, AT, 0x802F2DFC\r\n\r\n// fix sound effects\r\n// count down from 8th red sfx instead of 1st red 0x802F2FBC\r\n0xADFBC:\r\n3C 01 78 2F // LUI AT, 0x782F // 3C 01 78 28 // LUI AT, 0x7828\r\n// do not subtract an extra 1 from calculation\r\n0xADFD4:\r\n00 00 00 00 // NOP            // 24 84 FF FF // ADDIU A0, A0, 0xFFFF\r\n// subtract current red coin count from 8th red sfx instead of adding\r\n0xADFE4:\r\n00 24 20 23 // SUBU A0, AT, A0 // 00 81 20 21 // ADDU A0, A0, AT\r\n",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "565806449C2035D9F792E2680DB54B1E",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Original ASM Code by jesusyoshi\r\nTweak Version by Blakeoramo.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "BF11ED521EEEE1D3A08550833CB26DA6",
+  "Official": true,
+  "Recommended": false
+}

@@ -1,0 +1,24 @@
+{
+  "Name": "File screen text allows lowercase letters",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "2246FE: 02\r\n224702: 1C C8\r\n224756: 5D F7\r\n22475B: A1\r\n22476A: 5D F7\r\n22476F: A1\r\n22477E: 5D F7\r\n224783: 78\r\n224792: 5D F7\r\n224797: 78\r\n2247C2: 02\r\n2247C6: 1D 50\r\n224AD2: 02\r\n224AD6: 1C C8\r\n224B2A: 5D F7\r\n224B2F: A3\r\n224B3E: 5D F7\r\n224B43: A3\r\n224B52: 5D F7\r\n224B57: 78\r\n224B66: 5D F7\r\n224B6B: 78\r\n224B96: 02\r\n224B9A: 1D 50\r\n225082: 02\r\n225086: 1C C8\r\n2250DA: 5D F7\r\n2250DF: A3\r\n2250EE: 5D F7\r\n2250F3: A3\r\n225102: 5D F7\r\n225107: 78\r\n225116: 5D F7\r\n22511B: 78\r\n225146: 02\r\n22514A: 1D 50\r\n225C7A: 02\r\n225C7E: 1C C8\r\n225CD2: 5D F7\r\n225CD7: A3\r\n225CE6: 5D F7\r\n225CEB: A3\r\n225CFA: 5D F7\r\n225CFF: 78\r\n225D0E: 5D F7\r\n225D13: 78\r\n225D3E: 02\r\n225D42: 1D 50",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "-1",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.1.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Makes the file select screen text become the font that allows lowercase letters, only for Main, Copy, and Erase menus. Made by anonymous_moose",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "-1",
+  "Official": true,
+  "Recommended": false
+}

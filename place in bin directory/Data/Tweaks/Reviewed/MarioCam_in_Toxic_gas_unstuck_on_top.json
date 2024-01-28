@@ -1,0 +1,21 @@
+{
+  "Name": "Mario Camera in Toxic gas doesn't get stuck on top",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "3F8A4:08 0A 12 43 00 00 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": null
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Avoids the Mario cam getting stuck on top of a toxic gas box. Code by ZenonX/Drahnokks i guess",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": null
+}

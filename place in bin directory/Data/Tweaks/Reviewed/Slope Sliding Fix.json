@@ -1,0 +1,24 @@
+{
+  "Name": "Slope Sliding Fix",
+  "Scripts": [
+    {
+      "Name": "Slope Sliding Fix",
+      "Script": "; Allow A hold\r\n;.orga 0x22fd8\r\n;   ANDI T0, T9, 0x82\r\n\r\n; Allow holding A but expect a release anywhere, on 5th frame jump\r\n.orga 0x22fbc\r\n    LW A0, 0x18(SP) ; m\r\n    LHU T7, 0x1a(A0) ; m->actionTimer\r\n    \r\n    LHU T9, 0x2(A0) ; m->input\r\n\r\n    BEQ T7, R0, overinit ; m->actionTimer != 0\r\n    LI T8, 0x80 ;  INPUT_A_HOLD\r\n    LBU T8, 0x1c(A0) ; m->extra &= m->input, T8 == 0 iff there was a frame where INPUT_A_HOLD was not appearing\r\noverinit:\r\n    AND T8, T8, T9 \r\n    SB T8, 0x1c(A0)\r\n\r\n    LI T0, 5 ; check actionTimer\r\n    BNE T0, T7, tooearly\r\n    \r\n    ANDI T1, T9, 0x02 ; A pressed\r\n    BNE T1, R0, dojump\r\n    NOP\r\n    LI T6, 0x0C008220\r\n    BEQ T6, A1, nojump\r\n    ANDI T2, T9, 0x80 ; A hold\r\n    BEQ T2, R0, nojump ; end -- not holding\r\n    NOP\r\n    BNE T8, R0, nojump ; end -- always held does not count\r\n    NOP\r\n\r\ndojump:\r\n    LW A1, 0x20(SP)\r\n    JAL 0x2530a0\r\n    LI A2, 0\r\n    B end ; end of function\r\n    \r\n    ; if (m->actionTimer == 5)\r\ntooearly:\r\n    ADDIU T7, T7, 1\r\n    SH T7, 0x1a(A0)\r\nnojump:\r\n\r\n    JAL 0x80264740\r\n    LUI A1, 0x4080\r\n    \r\n    LW A0, 0x18(SP) ; m\r\n    LW A1, 0x1C(SP) ; stopAction\r\n    BNEZ V0, setMarioAction\r\n    LW A3, 0x28(SP) ; animation\r\n\r\ncommonSlideAction:\r\n    JAL 0x80267ce4\r\n    LW A2, 0x24(SP)\r\n    B end\r\n    LI V0, 0\r\n    \r\nsetMarioAction:\r\n    JAL 0x80252cf4\r\n    LI A2, 0\r\n    \r\nend:\r\n    LW RA, 0x14(SP)\r\n    JR RA\r\n    ADDIU SP, SP, 0x18",
+      "Type": "Armips",
+      "Description": "",
+      "References": [],
+      "ID": "C3E8FF1ADFDE5CAE0C7B8053CF5A2F84",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.12.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Allows Mario to jump out of sliding off of his butt on the first few frames.\r\n\r\nASM Script made by aglab2.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "ABAEB1CB60EA791634A2944EF088B2B2",
+  "Official": true,
+  "Recommended": false
+}

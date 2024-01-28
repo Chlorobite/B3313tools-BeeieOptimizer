@@ -1,0 +1,12 @@
+﻿Located Bank 0x19.
+Start: 0x19005F00
+End: 0x19006000
+
+One line = one Area
+xx xx xx xx yy yy yy yy 00 00 00 00 00 00 00 ff
+xx = Fast3D Start (ROM Pos)
+zz = Fast3D Length (in Bytes)
+ff = 2D-Camera (0xff = on | 0x0 = off)
+
+How to get to the table entry for the current area:
+Table-Start + AreaID * 0x10

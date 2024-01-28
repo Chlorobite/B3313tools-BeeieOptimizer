@@ -1,0 +1,24 @@
+{
+  "Name": "Culling uses screen width dynamically",
+  "Scripts": [
+    {
+      "Name": "New Script",
+      "Script": "38528: 3C 08 3F D6\r\n3858C: 44 88 00 00\r\n385C8: 46 00 94 82\r\n385D4: E7 B2 00 04",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "B26845A67598913BB252479603FA3694",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Falcobuster tweak that fixes bug in vanilla that caused culling to use horizontal FOV, tweak fixes it to use horizontal FOV, which works if you force widescreen on your emulator too.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "720E8450DE2B26AC404D2CB3730F1E93",
+  "Official": true,
+  "Recommended": true
+}

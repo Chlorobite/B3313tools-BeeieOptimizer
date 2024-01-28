@@ -1,0 +1,24 @@
+{
+  "Name": "Accurate GFX plugins will have less input lag",
+  "Scripts": [
+    {
+      "Name": "New Script",
+      "Script": ".headersize 0x80246000 - 0x00001000\r\n.org 0x8024815c\r\n    nop\r\n    lui     v0,0xa410\r\n    lw      v0,16(v0)\r\n    beqz    v0, after_incs\r\n    lui     t1,0x8033\r\n    lhu     t2,-10792(t1)\r\n    addiu   t2,t2,1\r\n    sh      t2,-10792(t1)\r\n    li      at,3\r\n    andi    t3,t2,0xffff\r\n    bne     t3,at,after_sCurrFBNumInc\r\n    nop\r\n    sh      zero,-10792(t1)\r\nafter_sCurrFBNumInc:\r\n    lui     t4,0x8033\r\n    lhu     t5,-10788(t4)\r\n    addiu   t5,t5,1\r\n    sh      t5,-10788(t4)\r\n    li      at,3\r\n    andi    t6,t5,0xffff\r\n    bne     t6,at,after_frameBufferIndexInc\r\n    nop\r\n    sh      zero,-10788(t4)\r\nafter_frameBufferIndexInc:\r\nafter_incs:\r\n\r\n.org 0x80247f9c\r\n    lui     v0,0xa410\r\n    lw      v0,16(v0)\r\n    beqz    v0, after_fb_increment\r\n    lui     t2,0x8033\r\n    lhu     t3,-10788(t2)\r\n    addiu   t3,t3,1\r\n    sh      t3,-10788(t2)\r\nafter_fb_increment:\r\n    lw      t4,-10796(t2)\r\n    addiu   t4,t4,1\r\n    sw      t4,-10796(t2)",
+      "Type": "Armips",
+      "Description": "",
+      "References": [],
+      "ID": "68F7ABDFF5861E4E04B7E82719656845",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Plugins that emulate the framebuffer will have that aspect ignored, leading to less input lag. By Wiseguy, works everywhere.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "6AA8D4D7013D2D5E415AA01F6056A187",
+  "Official": true,
+  "Recommended": true
+}

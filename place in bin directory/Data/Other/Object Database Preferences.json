@@ -1,0 +1,19 @@
+{
+    "CategoryPaths":{
+        "Reviewed":"Reviewed"/*,
+        "Experimental":"Experimental",
+        "Uploads":"Uploads"*/
+    },
+    "Logins":{
+        "ReadOnlyAll":{
+            "Link":"E/BWdsulKDhuPEQTjb0gpiez9Axs09e+fK+ETuK/yi95nKBnRl3fz99HT1NYFkRhkxiVHU4UEHiyJtVccJEv8zIojxG8GQrBU3pbL/wMhewdMeUkndlL/lTlyeCtKWkY",
+            "Username":"WZhP+baXzG2nYT+yfnNxH1IwwTHrXj9mu1rFsE2Fmnc=",
+            "Password":"FWqy811nuGmmDdVzDGKMMyzpQ/yAl9Gj"
+        }/*,
+        "UserUploads":{
+            "Link":"E/BWdsulKDhuPEQTjb0gpiez9Axs09e+fK+ETuK/yi95nKBnRl3fz99HT1NYFkRhkxiVHU4UEHiyJtVccJEv8zIojxG8GQrBU3pbL/wMhewdMeUkndlL/lTlyeCtKWkY",
+            "Username":"",
+            "Password":""
+        }*/
+    }
+}

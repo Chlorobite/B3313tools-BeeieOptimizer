@@ -1,0 +1,21 @@
+{
+  "Name": "Red-Coin Counter Replaces Lives Counter",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "9E744: 08 10 10 FB 00 00 00 00\n12043EC: 27 BD FF E8 AF BF 00 14 24 04 00 1E 0C 0B 6D 26 24 05 00 D1 3C 06 80 34 24 C6 83 84 24 04 00 26 0C 0B 59 55 24 05 00 D1 3C 06 80 34 3C 07 80 36 80 E7 13 Fe 24 C6 83 88 24 04 00 36 08 0B 8D E2 00 00 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": null
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Replaces life counter with Red-Coin counter. Might possibly have conflicts with code to remove Lives HUD",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": null
+}

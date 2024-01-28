@@ -1,0 +1,24 @@
+{
+  "Name": "No Cap Music",
+  "Scripts": [
+    {
+      "Name": "Script",
+      "Script": "// Overwrite the start of the cap music function with \"jr ra; nop;\"\r\n4398: 03 E0 00 08 00 00 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "D4B4A87547F7EECAFD5860D8216D9FF1",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.13.3.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Disables cap music.\r\nThe level music continues playing when you grab a cap.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "033856854AFC14C65D463A537DF17770",
+  "Official": false,
+  "Recommended": false
+}

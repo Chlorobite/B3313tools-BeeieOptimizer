@@ -1,0 +1,33 @@
+{
+  "Name": "Star (Empty)",
+  "Description": "",
+  "Presets": [
+    {
+      "Name": "",
+      "Description": "",
+      "ScriptAfter": {
+        "Name": "Extend Bank 03 for Importing",
+        "Script": "2ABCAC: 17 0C 00 03 00 AB 24 50 00 AE D7 58",
+        "Type": "TweakScript",
+        "Description": " Extend Bank 03.\r\n",
+        "References": [],
+        "ID": null,
+        "AllowRevert": false
+      },
+      "ScriptBefore": null,
+      "RomAddress": 11442008,
+      "RamAddress": 50557704,
+      "MaxLength": 16384,
+      "CollisionPointers": [],
+      "GeometryPointers": [
+        2202920
+      ]
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  }
+}

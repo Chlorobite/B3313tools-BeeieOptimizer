@@ -1,0 +1,24 @@
+{
+  "Name": "Toad won't fade in or out",
+  "Scripts": [
+    {
+      "Name": "",
+      "Script": "1E4FF4: 1A",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "72FE60F93F5497E9FF0BCC2D7126351B",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Makes it so Toad won't fade in or out depending on distance. Code by JesusYoshi",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "6FEFB7E6A43EA47418E1FCBD9168597B",
+  "Official": true,
+  "Recommended": true
+}

@@ -1,0 +1,24 @@
+{
+  "Name": "Camera Left and Right Buttons Don't Make Noise",
+  "Scripts": [
+    {
+      "Name": "New Script",
+      "Script": ".orga 0x468B8\r\nJR RA\r\nNOP",
+      "Type": "Armips",
+      "Description": "",
+      "References": [],
+      "ID": "CE3C96395301135769C14656DA9CCB08",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "C-Left and C-Right won't make any noise when moving the camera",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "9BA0D798D65310274C429C11A17C992D",
+  "Official": true,
+  "Recommended": true
+}

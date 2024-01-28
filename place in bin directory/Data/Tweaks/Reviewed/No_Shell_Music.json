@@ -1,0 +1,24 @@
+{
+  "Name": "No Shell Music",
+  "Scripts": [
+    {
+      "Name": "Script",
+      "Script": "// Overwrite the start of the shell music function with \"jr ra; nop;\"\r\n4310: 03 E0 00 08 00 00 00 00",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "ACEA4959644A0F26679B420F94DC0882",
+      "AllowRevert": true
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.13.3.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Disables Shell Music.\r\nThe level music continues playing when you grab a shell.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "4DDDEFE5B9398169AE52BE13FCCF0062",
+  "Official": false,
+  "Recommended": false
+}

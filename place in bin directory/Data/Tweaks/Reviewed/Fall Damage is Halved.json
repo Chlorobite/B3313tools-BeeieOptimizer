@@ -1,0 +1,33 @@
+{
+  "Name": "Fall Damage is Halved",
+  "Scripts": [
+    {
+      "Name": "Halve Fall Damage",
+      "Script": "25303: 08 \r\n25307: 0C \r\n2539B: 04 \r\n2539F: 06",
+      "Type": "TweakScript",
+      "Description": "",
+      "References": [],
+      "ID": "7B14EBFB66FE0E46043A81323B751208",
+      "AllowRevert": false
+    },
+    {
+      "Name": "Revert Fall Damage",
+      "Script": "25303:\n10 \n25307: 18 \n2539B: 08 \n2539F: 0C",
+      "Type": "TweakScript",
+      "Description": "Reverts the RCVI Hack.",
+      "References": [],
+      "ID": "62460EFD13D093A011F8A87529E7738A",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.0.0.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Small falls will take 1HP away instead of 2HP, big falls will take 2HP instead of 4HP. Tweak by Pyro Jay, code help by Katx.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "EA4F23EB5D1883B347CFC9FF9B937195",
+  "Official": true,
+  "Recommended": true
+}

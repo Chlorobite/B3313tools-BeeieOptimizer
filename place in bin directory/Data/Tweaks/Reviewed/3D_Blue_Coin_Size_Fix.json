@@ -1,0 +1,24 @@
+{
+  "Name": "3D Blue Coin Size Fix",
+  "Scripts": [
+    {
+      "Name": "Default Size",
+      "Script": "//Hidden Blue Coin\r\n21C394: 32 00 00 90\r\n\r\n//Mr.I Blue Coin\r\n21A658: 32 00 00 90\r\n\r\n//Moving Blue Coin\r\n21CEAC: 32 00 00 90\r\n\r\n//Sliding Blue Coin\r\n21CEDC: 32 00 00 90\r\n\r\n//Jumping Blue coin\r\n21CF0C: 32 00 00 90\r\n\r\n//Boo Coin\r\n21A6B0: 32 00 00 90",
+      "Type": "TweakScript",
+      "Description": "Changes the size back to normal.",
+      "References": [],
+      "ID": "45F97F59B09064401B06654827332822",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.12.5.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Makes the 3D blue coins bigger, like in the original game.\r\n\r\nCAUTION:\r\nApply this tweak AFTER applying the 3D Coins tweak.\r\n\r\nMade by Nexan.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "BECFE5C665AF599A00D0DE84818C9A8D",
+  "Official": false,
+  "Recommended": false
+}

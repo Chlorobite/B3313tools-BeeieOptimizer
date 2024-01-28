@@ -1,0 +1,42 @@
+{
+    "Properties":
+    [
+        {
+            "Name": "Category",
+            "Type": "Text",
+            "Description": "e.g. \"Level Editor\" or \"Music Manager\""
+        },
+        {
+            "Name": "Title",
+            "Description": "Please explain quickly what the problem is.",
+            "Type": "Text"
+        },
+        {
+            "Name": "Description",
+            "Description": "Please explain it very detailed, so I can easily reproduce this bug.",
+            "Type": "LongText"
+        },
+        {
+            "Name": "Version",
+            "Description": "e.g. \"Version 1.2.0.0 Beta 3\"",
+            "Type": "Text"
+        },
+        {
+            "Name": "Attachments",
+            "Description": "What I would need (if possible):\n- Your ROM File where this error/bug happend to (if it is deticted to your ROM)\n- Screenshots or other pictures if they are helpful",
+            "Type": "Files"
+        },
+        {
+            "Name": "Contact",
+            "Description": "It would be good to know how you can be contacted.\nWrite down your Discord#0000 or Skype Name or E-Mail Address.",
+            "Type": "Text",
+            "AllowEmptyState": true
+        }
+    ],
+    "UploadSettings": {
+        "Link": "E/BWdsulKDhuPEQTjb0gpiez9Axs09e+fK+ETuK/yi95nKBnRl3fz99HT1NYFkRhkxiVHU4UEHiyJtVccJEv8zIojxG8GQrBU3pbL/wMhewdMeUkndlL/lTlyeCtKWkY",
+        "Username": "ZRu65bPlQy+gUGOERZSfjWoChbwbL0uCLSgNG9u67kg=",
+        "Password": "mkZVj0dlAcEPCcu1sRbRLrGj5YiDfk42"
+    },
+    "Name": "Bug Report"
+}

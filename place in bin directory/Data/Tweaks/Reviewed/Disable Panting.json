@@ -1,0 +1,22 @@
+{
+  "Name": "Disable Panting",
+  "Scripts": [
+    {
+      "Name": "Disable Panting",
+      "Script": "1BD4A: 00 00",
+      "Type": "TweakScript",
+      "Description": "Disables mario from panting on low health by settings the health check to trigger at 0 health, which should always be overwritten by death action.",
+      "References": [],
+      "ID": "65B775BB63FFDCEADB134BCA26D86DD1",
+      "AllowRevert": false
+    }
+  ],
+  "Version": "1.0.0.0",
+  "MinVersion": "1.11.15.0",
+  "MaxVersion": "0.0.0.0",
+  "Description": "Disables mario from panting when low on health.",
+  "EmbeddedFiles": {
+    "CompressedFiles": {}
+  },
+  "ID": "E4ECEB912C070DC24B2F1B49F2D539DC"
+}
