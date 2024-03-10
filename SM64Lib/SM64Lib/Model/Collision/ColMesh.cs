@@ -4,8 +4,8 @@ namespace SM64Lib.Model.Collision
 {
     public class ColMesh
     {
-        public VertexList Vertices { get; set; } = new VertexList();
-        public TriangleList Triangles { get; set; } = new TriangleList();
+        public VertexList Vertices { get; set; } = [];
+        public TriangleList Triangles { get; set; } = [];
 
         public ColMesh[] SplitMesh()
         {
