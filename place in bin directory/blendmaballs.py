@@ -69,10 +69,18 @@ def main():
                 weld.merge_threshold = 2.5
                 bpy.ops.object.modifier_apply(modifier="Weld")
                 
+                edgesplit = mesh_object.modifiers.new("EdgeSplit", 'EDGE_SPLIT')
+                edgesplit.split_angle = 2/180*3.14159
+                bpy.ops.object.modifier_apply(modifier="EdgeSplit")
+                
                 decimate = mesh_object.modifiers.new("Decimate", 'DECIMATE')
                 decimate.decimate_type = "DISSOLVE"
                 decimate.angle_limit = 2/180*3.14159
                 bpy.ops.object.modifier_apply(modifier="Decimate")
+                
+                weld = mesh_object.modifiers.new("Weld", 'WELD')
+                weld.merge_threshold = 2.5
+                bpy.ops.object.modifier_apply(modifier="Weld")
                 
                 triangulate = mesh_object.modifiers.new("Triangulate", 'TRIANGULATE')
                 bpy.ops.object.modifier_apply(modifier="Triangulate")

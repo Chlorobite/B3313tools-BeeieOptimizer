@@ -67,6 +67,7 @@ void OptimizeCollision(RomManager manger) {
     StreamWriter collisionData = new("collisionData.txt");
     foreach (Level level in manger.Levels) {
         foreach (LevelArea area in level.Areas) {
+            //if (level.LevelID != 0x22 || area.AreaID != 4) continue;
             collisionData.WriteLine($"AREA {level.LevelID} {area.AreaID}");
             
             /*if (level.LevelID == 0x6 && area.AreaID == 11) {
@@ -480,6 +481,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                 }
 
                 bool currentListContainsCmd(byte cmd) {
+                    if (currentList == null) return false;
                     for (int i = 0; i < currentList.Count; i += 8) {
                         if (currentList[i] == cmd) return true;
                     }
@@ -559,10 +561,10 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                                 throw new Exception($"gsDPSetTextureImage with unmapped texID {textureID:X2}??");
                             }
 
-                            if (!newTextureCmds.ContainsKey(val))
-                                newTextureCmds.Add(val, []);
-                            Console.WriteLine($"Entering texture {val:X8}");
-                            currentList = newTextureCmds[val];
+                            //if (!newTextureCmds.ContainsKey(val))
+                            //    newTextureCmds.Add(val, []);
+                            //Console.WriteLine($"Entering texture {val:X8}");
+                            //currentList = newTextureCmds[val];
                             texType = newTexTypeMap[val];
 
                             WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
@@ -586,8 +588,8 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                         case 0xF2: // gsDPSetTileSize
                             break;
                         default:
-                            Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
-                            flushTextureCmds();
+                        //    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
+                        //    flushTextureCmds();
                             break;
                     }
 
@@ -644,6 +646,13 @@ void OptimizeObjects(RomManager manger) {
                         Console.WriteLine("Removing object (acts = 0)");
                         area.Objects.RemoveAt(i);
                     }
+
+/*
+                    uint bhv = ReadU32(data, 0x14);
+                    if (bhv == 0x1F002C00) {
+                        Console.WriteLine("Mirror object!");
+                    }
+*/
                 }
             }
             Console.WriteLine($"new object count: {area.Objects.Count}");
@@ -743,8 +752,8 @@ SaveAndPrintRomSize(manger, "post collision optimization");
 OptimizeFast3D(manger, painting64Path, painting64Cfg);
 SaveAndPrintRomSize(manger, "post Fast3D optimization");
 
-//OptimizeObjects(manger);
-//SaveAndPrintRomSize(manger, "post object purge");
+OptimizeObjects(manger);
+SaveAndPrintRomSize(manger, "post object purge");
 
 if (File.Exists("paintingcfg.txt")) {
     Console.WriteLine($"Applying new Painting64 cfg to rom...");
