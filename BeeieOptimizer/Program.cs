@@ -8,6 +8,7 @@ using SM64Lib;
 using SM64Lib.Geolayout;
 using SM64Lib.Levels;
 using SM64Lib.Levels.Script;
+using SM64Lib.Levels.ScrolTex;
 using SM64Lib.Model.Collision;
 using SM64Lib.Model.Fast3D;
 using Z.Core.Extensions;
@@ -225,7 +226,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
             foreach (Geopointer ptr in buffer.DLPointers) {
                 uint dataptr = (uint)(ptr.SegPointer & 0xFFFFFF);
                 buffer.Seek(dataptr, SeekOrigin.Begin);
-                Console.WriteLine($"Load DL {dataptr:X2}");
+                //Console.WriteLine($"Load DL {dataptr:X2}");
                 byte[] cmdBuffer = new byte[8];
                 uint textureImage = 0;
                 uint textureID = 0;
@@ -237,12 +238,12 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                     // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
 
                     switch (cmdBuffer[0]) {
-                        case 0x06: // gsSPDisplayList
+                        case (byte)RSPCmd.DisplayList:
                             throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case 0xB8: // gsSPEndDisplayList
+                        case (byte)RSPCmd.EndDisplayList:
 				            goto dlEnd;
-                        case 0xF3: // gsDPLoadBlock (texture size)
-                            Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
+                        case (byte)RDPCmd.LoadBlock: // (contains texture size)
+                            //Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
                             STAT_totalLoads++;
                             if (!oldToNewTexMap.ContainsKey(textureID)) {
                                 STAT_uniqueLoads++;
@@ -329,8 +330,8 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                                 }
                             }
                             break;
-                        case 0xFD: // gsDPSetTextureImage
-                            Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
+                        case (byte)RDPCmd.SetTextureImage:
+                            //Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
                             texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
                             textureImage = ReadU32(cmdBuffer, 4);
                             if ((textureImage & 0xFF000000) != 0x0E000000) {
@@ -338,8 +339,8 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             }
                             textureImage &= 0xFFFFFF;
                             textureID = GetTextureID(textureImage, texType);
-                            Console.WriteLine($"textureImage: {textureImage:X8}");
-                            Console.WriteLine($"textureID: {textureID:X8}");
+                            //Console.WriteLine($"textureImage: {textureImage:X8}");
+                            //Console.WriteLine($"textureID: {textureID:X8}");
                             break;
                     }
                 }
@@ -366,8 +367,8 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                     // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
 
                     switch (cmdBuffer[0]) {
-                        case 0x04: // gsSPVertex
-                            Console.WriteLine($"gsSPVertex {ReadU16(cmdBuffer, 2)} {ReadU32(cmdBuffer, 4):X8}");
+                        case (byte)RSPCmd.Vertex:
+                            //Console.WriteLine($"gsSPVertex {ReadU16(cmdBuffer, 2)} {ReadU32(cmdBuffer, 4):X8}");
                             int length = ReadU16(cmdBuffer, 2);
                             uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
 
@@ -391,13 +392,16 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                                     newBuffer.AddRange(vertData);
 
                                     newVertices.Add(newVertexPtr, vertData);
-                                    oldToNewVertMap.Add(vertexPtr, newVertexPtr);
+                                    //Console.WriteLine($"Vertex data: {vertexPtr} -> {newVertexPtr}; length {length}");
+                                    for (uint i = 0; i < length; i++) {
+                                        oldToNewVertMap.Add(vertexPtr + i, newVertexPtr + i);
+                                    }
                                 }
                             }
                             break;
-                        case 0x06: // gsSPDisplayList
+                        case (byte)RSPCmd.DisplayList:
                             throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case 0xB8: // gsSPEndDisplayList
+                        case (byte)RSPCmd.EndDisplayList:
 				            goto dlEnd;
                     }
                 }
@@ -422,7 +426,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
 
                     switch (cmdBuffer[0]) {
                         case 0x03: // G_MOVEMEM
-                            Console.WriteLine($"G_MOVEMEM {ReadU16(cmdBuffer, 2)} {ReadU32(cmdBuffer, 4):X8}");
+                            //Console.WriteLine($"G_MOVEMEM {ReadU16(cmdBuffer, 2)} {ReadU32(cmdBuffer, 4):X8}");
                             int length = ReadU16(cmdBuffer, 2);
                             uint memPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
 
@@ -450,9 +454,9 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                                 }
                             }
                             break;
-                        case 0x06: // gsSPDisplayList
+                        case (byte)RSPCmd.DisplayList:
                             throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case 0xB8: // gsSPEndDisplayList
+                        case (byte)RSPCmd.EndDisplayList:
 				            goto dlEnd;
                     }
                 }
@@ -526,7 +530,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             WriteU32(newCmdBuffer, 4, val | 0x0E000000);
                         }
                             break;
-                        case 0x04: { // gsSPVertex
+                        case (byte)RSPCmd.Vertex: {
                             uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
 
                             if (!oldToNewVertMap.TryGetValue(vertexPtr, out uint val)) {
@@ -536,23 +540,23 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             WriteU32(newCmdBuffer, 4, val | 0x0E000000);
                         }
                             break;
-                        case 0x06: // gsSPDisplayList
+                        case (byte)RSPCmd.DisplayList:
                             throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case 0xB8: // gsSPEndDisplayList
+                        case (byte)RSPCmd.EndDisplayList:
                             flushTextureCmds();
                             printAndAddDL(cmdBuffer);
 				            goto dlEnd;
-                        case 0xF3: // gsDPLoadBlock (texture size)
+                        case (byte)RDPCmd.LoadBlock: // (contains texture size)
                             skipCmd = currentListContainsCmd(0xF3);
                             break;
-                        case 0xF5: // gsDPSetTile
+                        case (byte)RDPCmd.SetTile:
                             /* TODO: CI4 conversion
                             WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
                             if (texType == ((2 << 2) | 0)) {
                                 WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
                             }*/
                             break;
-                        case 0xFD: { // gsDPSetTextureImage
+                        case (byte)RDPCmd.SetTextureImage: {
                             texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
                             uint textureImage = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
                             uint textureID = GetTextureID(textureImage, texType);
@@ -603,6 +607,19 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
 
                 dlEnd:
                 continue;
+            }
+
+            // Check these moving texture objects
+            for (int i = 0; i < area.ScrollingTextures.Count; i++) {
+                ManagedScrollingTexture scrollingTexture = area.ScrollingTextures[i];
+
+                Console.WriteLine($"Texture scroll object - points to {scrollingTexture.VertexPointer:X8}");
+
+                if (!oldToNewVertMap.TryGetValue((uint)scrollingTexture.VertexPointer & 0xFFFFFF, out uint val)) {
+                    throw new Exception($"Texture scroll object with unmapped ptr {scrollingTexture.VertexPointer:X8}??");
+                }
+
+                scrollingTexture.VertexPointer = (int)(val | 0x0E000000);
             }
 
             buffer.SetLength(newBuffer.Count);
@@ -749,11 +766,11 @@ PrintRomSize(manger, "pre compression");
 OptimizeCollision(manger);
 SaveAndPrintRomSize(manger, "post collision optimization");
 
-OptimizeFast3D(manger, painting64Path, painting64Cfg);
-SaveAndPrintRomSize(manger, "post Fast3D optimization");
+//OptimizeFast3D(manger, painting64Path, painting64Cfg);
+//SaveAndPrintRomSize(manger, "post Fast3D optimization");
 
-OptimizeObjects(manger);
-SaveAndPrintRomSize(manger, "post object purge");
+//OptimizeObjects(manger);
+//SaveAndPrintRomSize(manger, "post object purge");
 
 if (File.Exists("paintingcfg.txt")) {
     Console.WriteLine($"Applying new Painting64 cfg to rom...");

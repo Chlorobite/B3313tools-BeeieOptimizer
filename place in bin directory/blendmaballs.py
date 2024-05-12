@@ -65,25 +65,20 @@ def main():
                 mesh_object = create_mesh(objects[key])
                 bpy.context.view_layer.objects.active = mesh_object
                 
-                weld = mesh_object.modifiers.new("Weld", 'WELD')
-                weld.merge_threshold = 2.5
-                bpy.ops.object.modifier_apply(modifier="Weld")
-                
-                edgesplit = mesh_object.modifiers.new("EdgeSplit", 'EDGE_SPLIT')
-                edgesplit.split_angle = 2/180*3.14159
-                bpy.ops.object.modifier_apply(modifier="EdgeSplit")
-                
-                decimate = mesh_object.modifiers.new("Decimate", 'DECIMATE')
-                decimate.decimate_type = "DISSOLVE"
-                decimate.angle_limit = 2/180*3.14159
-                bpy.ops.object.modifier_apply(modifier="Decimate")
-                
-                weld = mesh_object.modifiers.new("Weld", 'WELD')
-                weld.merge_threshold = 2.5
-                bpy.ops.object.modifier_apply(modifier="Weld")
-                
-                triangulate = mesh_object.modifiers.new("Triangulate", 'TRIANGULATE')
-                bpy.ops.object.modifier_apply(modifier="Triangulate")
+                if len(mesh_object.data.vertices) > 0:
+                    bpy.ops.object.mode_set(mode='EDIT')
+                    bpy.ops.mesh.select_all(action='SELECT')
+                    bpy.ops.mesh.remove_doubles(threshold=2.5, use_unselected=False, use_sharp_edge_from_normals=False)
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                    
+                    decimate = mesh_object.modifiers.new("Decimate", 'DECIMATE')
+                    decimate.decimate_type = "DISSOLVE"
+                    decimate.angle_limit = 1/180*3.14159
+                    decimate.delimit = {"SHARP"}
+                    bpy.ops.object.modifier_apply(modifier="Decimate")
+                    
+                    triangulate = mesh_object.modifiers.new("Triangulate", 'TRIANGULATE')
+                    bpy.ops.object.modifier_apply(modifier="Triangulate")
                 
                 triangle_data = mesh_to_triangle_data(mesh_object)
                 for line in triangle_data:
