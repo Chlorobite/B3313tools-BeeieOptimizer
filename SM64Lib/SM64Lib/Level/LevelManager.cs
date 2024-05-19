@@ -13,6 +13,7 @@ using global::SM64Lib.Levels.Script.Commands;
 using global::SM64Lib.Levels.ScrolTex;
 using global::SM64Lib.Model;
 using global::SM64Lib.SegmentedBanking;
+using SM64Lib.Model.Fast3D;
 
 namespace SM64Lib.Levels
 {
@@ -356,6 +357,23 @@ namespace SM64Lib.Levels
                 }
 
                 a.CollisionPointer = res.CollisionPointer;
+
+                // We need to adjust the collision pointer for mio0 model areas
+                {
+                    Fast3DBuffer buffer = a.AreaModel.Fast3DBuffer;
+
+                    byte[] data = new byte[4];
+                    buffer.Seek(0, SeekOrigin.Begin);
+                    buffer.Read(data, 0, (int)data.Length);
+                    
+                    if (data.SequenceEqual(new byte[] { 0x4D, 0x49, 0x4F, 0x30 })) {
+                        System.Console.WriteLine($"meow0 adjustment {a.CollisionPointer:X8} -> {(a.CollisionPointer + 0x806A0000 - 0x80420000):X8}");
+                        // mio0.
+                        // the data will likely be overwritten where we currently are so go to where the game will load the data to
+                        a.CollisionPointer += (int)(0x806A0000 - 0x80420000);
+                    }
+                }
+
                 a.Geolayout.Geopointers.Clear();
                 a.Geolayout.Geopointers.AddRange(res.GeoPointers.ToArray());
                 curOff += (uint)(res.Length + 0x20);
