@@ -979,6 +979,22 @@ void MIO0_Fast3D(RomManager manger) {
 }
 
 
+/*RomManager manger = new("b3313 silved.z64");
+manger.LoadRom();
+Console.WriteLine(manger.GameName);
+
+
+Console.WriteLine($"there are {manger.Levels.Length} levels");
+
+foreach (var level in manger.Levels)
+{
+    Console.WriteLine($"level {level.LevelID} has areas:");
+    foreach (var area in level.Areas)
+    {
+        Console.WriteLine($"area {area.AreaID} has warps: ");
+        Console.WriteLine(area.Warps);
+    }
+}*/
 RomManager manger;
 Console.WriteLine("hmm");
 if (args[1] == "MIO0_STAGE") {
