@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -703,6 +703,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                 byte[] cmdBuffer = new byte[8];
                 byte[] newCmdBuffer = new byte[8];
                 byte texType = 0;
+                bool thefunnytol = false;
 
                 void printAndAddDL(byte[] data) {
                     /*Console.WriteLine("Writing DL");
@@ -760,15 +761,20 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                         }
                             break;
                         case (byte)RSPCmd.Vertex: {
-                            uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                            vertexPtr += (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
+                            thefunnytol = Random.Shared.NextDouble() < 0.8;
+                            skipCmd = thefunnytol;
 
-                            if (!tryMapPtr(vertexPtr, out uint val)) {
-                                throw new Exception($"gsSPVertex with unmapped ptr {vertexPtr:X2}??");
+                            if (!skipCmd) {
+                                uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
+                                vertexPtr += (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
+
+                                if (!tryMapPtr(vertexPtr, out uint val)) {
+                                    throw new Exception($"gsSPVertex with unmapped ptr {vertexPtr:X2}??");
+                                }
+
+                                val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
+                                WriteU32(newCmdBuffer, 4, val | 0x0E000000);
                             }
-
-                            val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
-                            WriteU32(newCmdBuffer, 4, val | 0x0E000000);
                         }
                             break;
                         case (byte)RSPCmd.DisplayList:
@@ -812,9 +818,11 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             skipCmd = currentListContainsCmd(0xFD);
                         }
                             break;
+                        case 0xBF: // gsSP1Triangle
+                            skipCmd = thefunnytol;
+                            break;
                         // Commands known to not alter state or require any pointer processing
                         case 0xBA: // G_SETOTHERMODE_H
-                        case 0xBF: // gsSP1Triangle
                         case 0xE6: // gsDPLoadSync
                         case 0xE7: // gsDPPipeSync
                         case 0xE8: // gsDPTileSync
