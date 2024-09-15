@@ -761,7 +761,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                         }
                             break;
                         case (byte)RSPCmd.Vertex: {
-                            thefunnytol = Random.Shared.NextDouble() < 0.8;
+                            //thefunnytol = Random.Shared.NextDouble() < 0.8;
                             skipCmd = thefunnytol;
 
                             if (!skipCmd) {
@@ -798,6 +798,12 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             uint textureImage = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
                             //uint textureID = GetTextureID(textureImage, texType);
 
+                            thefunnytol = false;
+                            if (areaPainting64Cfg != null) {
+                                thefunnytol = textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF) ||
+                                    areaPainting64Cfg.textureSegmentedAddresses.Any(addr => textureImage == (addr & 0xFFFFFF));
+                            }
+
                             if (!tryMapPtr(textureImage, out uint val)) {
                                 throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
                             }
@@ -815,7 +821,7 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                                 Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
                                 Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
                             }*/
-                            skipCmd = currentListContainsCmd(0xFD);
+                            skipCmd = thefunnytol || currentListContainsCmd(0xFD);
                         }
                             break;
                         case 0xBF: // gsSP1Triangle
