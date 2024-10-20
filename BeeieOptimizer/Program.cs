@@ -166,6 +166,13 @@ void OptimizeCollision(RomManager manger) {
                         int areaID = int.Parse(ln[2]);
                         currentArea = manger.Levels.Where(l => l.LevelID == levelID).First()
                                             .Areas.Where(a => a.AreaID == areaID).First();
+
+                        if (levelID == 0x0E && areaID == 0x08) {
+                            Console.WriteLine("the special box data before we troll is:");
+                            foreach (BoxData bd in currentArea.AreaModel.Collision.SpecialBoxes) {
+                                Console.WriteLine($"\t{bd.Index}  {bd.X1}-{bd.X2} {bd.Z1}-{bd.Z2} {bd.Y}");
+                            }
+                        }
                     }
                         break;
                     case "COLLISIONTYPE":
