@@ -301,9 +301,9 @@ namespace SM64Lib.Levels
             var lid = rommgr.LevelInfoData.GetByLevelID(lvl.LevelID);
 
             // Write Area Model & Update Scrolling Texture Vertex Pointers & Write Custom Object Bank
-            var CollisionBoxTableIndex = new[] { 0, 0x32, 0x33 };
             foreach (LevelArea a in lvl.Areas)
             {
+                var CollisionBoxTableIndex = new[] { 0, 0x32, 0x33 };
                 a.SpecialBoxes.SortByHeight();
                 a.Bank0x0EOffset = curOff;
 
