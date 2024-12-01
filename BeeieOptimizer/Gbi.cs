@@ -1,5 +1,6 @@
 using System.CodeDom;
 using System.IO;
+using System.Security;
 using SM64Lib.Model.Fast3D;
 using static ReadWrite;
 
@@ -92,8 +93,7 @@ public static class Gbi {
         WriteU32(pkt, 4, __gsSP1Triangle_w1f(v0, v1, v2, flag));
     }
 
-    public static void gDPNoParam(byte[] pkt, RDPCmd cmd)
-    {
+    public static void gDPNoParam(byte[] pkt, RDPCmd cmd) {
         WriteU32(pkt, 0, _SHIFTL((byte)cmd, 24, 8));
         WriteU32(pkt, 4, 0);
     }
@@ -104,5 +104,19 @@ public static class Gbi {
 
     public static void gSPNoOp(byte[] pkt) {
         gDma0p(pkt, RSPCmd.NOOP, 0, 0);
+    }
+
+    public static void gSPDisplayList(byte[] pkt, uint dl) {
+        gDma1p(pkt, RSPCmd.DisplayList, dl, 0, 0x00);
+    }
+
+    public static void gSPEndDisplayList(byte[] pkt) {
+        gDma0p(pkt, RSPCmd.EndDisplayList, 0, 0);
+    }
+
+    public static void gSPCullDisplayList(byte[] pkt, uint vstart, uint vend) {
+        WriteU32(pkt, 0, _SHIFTL((byte)RSPCmd.CullDisplayList, 24, 8) |
+                        ((0x0f & (vstart))*40));
+        WriteU32(pkt, 4, (0x0f & (vend+1))*40);
     }
 }

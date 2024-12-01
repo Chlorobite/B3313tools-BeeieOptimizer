@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading.Tasks;
 using SM64Lib;
@@ -1150,17 +1152,19 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             vMaxNew = (short)(vMaxNew - dist - UV_HALF_PIXEL + V_OFFSET);
                         }
 
-                        short wideEnd = (short)(UV_SNAP * (wide ? 2 : 1) - UV_HALF_PIXEL * 2);
-                        short tallEnd = (short)(UV_SNAP * (tall ? 2 : 1) - UV_HALF_PIXEL * 2);
-                        if ((uMaxNew - uMinNew) == wideEnd) {
+                        short uRange = (short)(UV_SNAP * (wide ? 2 : 1) - UV_HALF_PIXEL * 2);
+                        short uEnd = (short)(uRange + UV_HALF_PIXEL + U_OFFSET);
+                        short vRange = (short)(UV_SNAP * (tall ? 2 : 1) - UV_HALF_PIXEL * 2);
+                        short vEnd = (short)(vRange + UV_HALF_PIXEL + V_OFFSET);
+                        if ((uMaxNew - uMinNew) == uRange) {
                             // how convenient...
                             uMinNew = UV_HALF_PIXEL + U_OFFSET;
-                            uMaxNew = wideEnd;
+                            uMaxNew = uEnd;
                         }
-                        if ((vMaxNew - vMinNew) == tallEnd) {
+                        if ((vMaxNew - vMinNew) == vRange) {
                             // how convenient...
-                            vMinNew = UV_HALF_PIXEL + U_OFFSET;
-                            vMaxNew = tallEnd;
+                            vMinNew = UV_HALF_PIXEL + V_OFFSET;
+                            vMaxNew = vEnd;
                         }
 
                         for (int i = 0; i < vertices.Length; i++) {
@@ -1173,16 +1177,16 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                         }
 
                         (bool u, bool v) clampma = (false, false);
-                        if (uMinNew == UV_HALF_PIXEL + U_OFFSET && uMaxNew == wideEnd) {
+                        if (uMinNew == UV_HALF_PIXEL + U_OFFSET && uMaxNew == uEnd) {
                             clampma.u = true;
                         }
-                        if (vMinNew == UV_HALF_PIXEL + U_OFFSET && vMaxNew == tallEnd) {
+                        if (vMinNew == UV_HALF_PIXEL + V_OFFSET && vMaxNew == vEnd) {
                             clampma.v = true;
                         }
-                        if (clamp.ContainsKey(texPtr))
-                            clamp[texPtr] = (false, false);
-                        else
-                            clamp.Add(texPtr, clampma);
+
+                        if (!clamp.ContainsKey(texPtr))
+                            clamp.Add(texPtr, (true, true));
+                        clamp[texPtr] = (clamp[texPtr].u && clampma.u, clamp[texPtr].v && clampma.v);
                     }
 
                     for (int i = 0; i < vertices.Length; i++) {
@@ -1533,49 +1537,10 @@ typedef struct {
                     }
                 }
 
-                dataptr = startptr;
-                buffer.Seek(dataptr, SeekOrigin.Begin);
-                Dictionary<uint, List<byte>> newTextureCmds = [];
-                List<byte> currentList = null;
+                List<(List<byte> dl, uint sourceStart, uint sourceEnd, uint destStart)> materials = [];
+                (List<byte> dl, uint sourceStart, uint sourceEnd, uint destStart)? currentMat = null;
                 byte texType = 0;
                 bool thefunnytol = false;
-
-                void printAndAddDL(byte[] data) {
-                    printCmd(data, -1);
-                    /*Console.WriteLine("Writing DL");
-                    for (int i = 0; i < data.Length; i += 8) {
-                        Console.WriteLine($"{ReadU32(data, i):X8} {ReadU32(data, i + 4):X8}");
-                    }*/
-
-                    newBuffer.AddRange(data);
-                }
-
-                bool currentListContainsCmd(byte cmd) {
-                    if (currentList == null) return false;
-                    for (int i = 0; i < currentList.Count; i += 8) {
-                        if (currentList[i] == cmd) return true;
-                    }
-                    return false;
-                }
-
-                void flushTextureCmds() {
-                    foreach (KeyValuePair<uint, List<byte>> texture in newTextureCmds) {
-                        /*if (areaPainting64Cfg != null) {
-                            uint baseTexID = GetTextureID(areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF, 2);
-                            if (oldToNewTexMap.TryGetValue(baseTexID, out uint val)) {
-                                if (val == texture.Key) {
-                                    // Do not render the out of bounds placeholder texture
-                                    Console.WriteLine("Skipping FUCK");
-                                    continue;
-                                }
-                            }
-                        }*/
-                        printAndAddDL(texture.Value.ToArray());
-                    }
-
-                    newTextureCmds.Clear();
-                    currentList = null;
-                }
 
                 Dictionary<string, ulong> rcpState = [];
                 Dictionary<string, ulong> rcpStateKnownBits = [];
@@ -1603,76 +1568,22 @@ typedef struct {
                     return true;
                 }
 
-                bool WillBeOverwrittenBeforeGeometry(ulong mask) {
-                    bool returnValue = false;
-                    uint seekBack = dataptr;
-                    byte command = cmdBuffer[0];
-
-                    byte[] _cmdBuffer = new byte[8];
-                    while (dataptr < buffer.Length) {
-                        buffer.Read(_cmdBuffer, 0, _cmdBuffer.Length);
-                        dataptr += 8;
-
-                        switch (cmdBuffer[0]) {
-                            case (byte)RSPCmd.Tri1:
-                            case (byte)RSPCmd.EndDisplayList:
-                                returnValue = false;
-                                goto ret;
-                        }
-                        if (cmdBuffer[0] == command) {
-                            ulong newMask = 0;
-                            switch (command) {
-                                case (byte)RSPCmd.SetGeometryMode:
-                                case (byte)RSPCmd.ClearGeometryMode:
-                                    newMask = ReadU32(cmdBuffer, 4);
-                                    break;
-                                case (byte)RSPCmd.SetOtherModeH:
-                                    newMask = (uint)((1 << cmdBuffer[2]) - 1) << cmdBuffer[3];
-                                    break;
-
-                                case (byte)RDPCmd.SetTileSize:
-                                    newMask = 0x00FFFFFFFFFFFFFF;
-                                    break;
-                                case (byte)RDPCmd.SetTile:
-                                    newMask = 0x00FFFFFFFFFFFFFF;
-                                    break;
-
-                                default:
-                                //    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
-                                //    flushTextureCmds();
-                                    break;
-                            }
-
-                            mask &= ~newMask;
-                            if (mask == 0) {
-                                returnValue = true;
-                                goto ret;
-                            }
-                        }
-                    }
-
-                    ret:
-                    dataptr = seekBack;
-                    buffer.Seek(dataptr, SeekOrigin.Begin);
-                    return returnValue;
-                }
-
-
-                ptr.SegPointer = 0x0E000000 | newBuffer.Count;
-                if (verboseDebug) {
-                    Console.Write("IN".PadRight(40, ' '));
-                    Console.WriteLine("OUT");
-                }
+                // first, we identify the materials and extract them.
+                dataptr = startptr;
+                buffer.Seek(dataptr, SeekOrigin.Begin);
                 uint currentTex = 0;
+                bool drawingGeometry = false;
                 while (dataptr < buffer.Length) {
                     buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                    printCmd(cmdBuffer, 50);
+                    byte[] tro = new byte[cmdBuffer.Length];
+                    Array.Copy(cmdBuffer, tro, cmdBuffer.Length);
                     if (geometryBalls.TryGetValue(dataptr, out byte[] overrideCmd)) {
                         Array.Copy(overrideCmd, cmdBuffer, cmdBuffer.Length);
                     }
                     Array.Copy(cmdBuffer, newCmdBuffer, cmdBuffer.Length);
                     dataptr += 8;
                     bool skipCmd = false;
+                    bool _drawingGeometry = false;
                     // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
 
                     switch (cmdBuffer[0]) {
@@ -1681,6 +1592,10 @@ typedef struct {
                             skipCmd = true; // should be obvious why
                             break;
                         case 0x03: { // G_MOVEMEM
+                            // usually used at the end of the prologue of a DL, to set up the lights
+                            // this isn't drawing geometry, but let's signal that the end of this is the start of the first material
+                            _drawingGeometry = true;
+
                             uint lightPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
 
                             if (!tryMapPtr(lightPtr, out uint val)) {
@@ -1693,6 +1608,7 @@ typedef struct {
                         case (byte)RSPCmd.Vertex: {
                             //thefunnytol = Random.Shared.NextDouble() < 0.8;
                             skipCmd = thefunnytol;
+                            _drawingGeometry = true;
 
                             if (!skipCmd) {
                                 uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
@@ -1712,9 +1628,7 @@ typedef struct {
                         case (byte)RSPCmd.DisplayList:
                             throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
                         case (byte)RSPCmd.EndDisplayList:
-                            flushTextureCmds();
-                            printAndAddDL(cmdBuffer);
-				            goto dlEnd;
+				            goto dlEnd1;
                         case (byte)RDPCmd.SetEnvColor:
                             envColorA = ReadU8(cmdBuffer, 7);
                             currentTex = 0;
@@ -1729,7 +1643,8 @@ typedef struct {
                             thefunnytol = envColorA <= 1;
                             if (areaPainting64Cfg != null) {
                                 thefunnytol = textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF) ||
-                                    areaPainting64Cfg.textureSegmentedAddresses.Any(addr => textureImage == (addr & 0xFFFFFF));
+                                    (areaPainting64Cfg.textureSegmentedAddresses.Any(addr => textureImage == (addr & 0xFFFFFF)) &&
+                                    !areaPainting64Cfg.textureSegmentedAddresses_NoPurge.Any(addr => textureImage == (addr & 0xFFFFFF)));
                             }
 
                             if (!tryMapPtr(textureImage, out uint val)) {
@@ -1749,10 +1664,11 @@ typedef struct {
                                 Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
                                 Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
                             }*/
-                            skipCmd = thefunnytol || currentListContainsCmd(0xFD);
+                            skipCmd = thefunnytol;
                         }
                             break;
                         case (byte)RSPCmd.Tri1:
+                            _drawingGeometry = true;
                             skipCmd = thefunnytol;
                             break;
 
@@ -1805,17 +1721,380 @@ typedef struct {
                     }
 
                     if (!skipCmd) {
-                        if (currentList == null)
-                            printAndAddDL(newCmdBuffer);
-                        else
-                            currentList.AddRange(newCmdBuffer);
+                        if (drawingGeometry != _drawingGeometry) {
+                            if (drawingGeometry) {
+                                // end of material, commit
+                                if (currentMat.HasValue) {
+                                    currentMat = (currentMat.Value.dl, currentMat.Value.sourceStart, dataptr - 8, currentMat.Value.destStart);
+                                    if (verboseDebug)
+                                        Console.WriteLine($"END MATERIAL {materials.Count + 1}");
+                                    materials.Add(currentMat.Value);
+                                }
+                                // geometry starts here :D
+                                currentMat = (new List<byte>(), dataptr - 8, 0, 0);
+                                if (verboseDebug)
+                                    Console.WriteLine($"MATERIAL {materials.Count + 1}");
+                            }
+                            else {
+                                // clear rcp state so a new material can be identified after we're done with tris and verts
+                                rcpState.Clear();
+                                rcpStateKnownBits.Clear();
+                            }
+
+                            drawingGeometry = _drawingGeometry;
+                        }
+                    }
+
+                    if (currentMat != null)
+                        printCmd(tro, 50);
+
+                    if (!skipCmd) {
+                        if (currentMat.HasValue) {
+                            printCmd(newCmdBuffer, -1);
+                            currentMat.Value.dl.AddRange(newCmdBuffer);
+                        }
+                    }
+                    else if (verboseDebug && currentMat != null) {
+                        Console.WriteLine();
+                    }
+                }
+
+                dlEnd1:
+                // the amount of bound volume that it has to be reduced to compared to the last check before printing again
+                const double VTX_BOUNDS_PERCENTAGE = 0.5;
+                // minimum vertex load calls in the geometry between bounds checks
+                const int VTX_BOUNDS_MIN_VTX = 20;
+                // write every material's code to newBuffer
+                for (int i = 0; i < materials.Count; i++) {
+                    byte[] dl = materials[i].dl.ToArray();
+                    byte[] _newBufferArr = newBuffer.ToArray();
+                    List<Vtx_tn> allVtx = [];
+                    Dictionary<int, (byte[] data, ulong volume, uint vtxDataPtr)> bounds = [];
+
+                    byte[] cmdScratch = new byte[8];
+                    byte[] vtxScratch = new byte[0x10];
+
+                    short[] aabbXRange = [short.MaxValue, short.MinValue];
+                    short[] aabbYRange = [short.MaxValue, short.MinValue];
+                    short[] aabbZRange = [short.MaxValue, short.MinValue];
+                    int skip = 0;
+
+                    for (int j = dl.Length - 8; j >= 0; j -= 8) {
+                        Array.Copy(dl, j, cmdScratch, 0, 8);
+
+                        switch (cmdScratch[0]) {
+                            case (byte)RSPCmd.Vertex:
+                                ushort loadLength = ReadU16(cmdScratch, 2);
+                                uint vertPtr = ReadU32(cmdScratch, 4) & 0xFFFFFF;
+
+                                for (int k = 0; k <= loadLength - 0x10; k += 0x10) {
+                                    Array.Copy(_newBufferArr, vertPtr + k, vtxScratch, 0, 0x10);
+                                    Vtx_tn vtx = Vtx_tn.Read(vtxScratch, 0);
+                                    allVtx.Add(vtx);
+
+                                    if (vtx.x < aabbXRange[0])
+                                        aabbXRange[0] = vtx.x;
+                                    if (vtx.x > aabbXRange[1])
+                                        aabbXRange[1] = vtx.x;
+
+                                    if (vtx.y < aabbYRange[0])
+                                        aabbYRange[0] = vtx.y;
+                                    if (vtx.y > aabbYRange[1])
+                                        aabbYRange[1] = vtx.y;
+
+                                    if (vtx.z < aabbZRange[0])
+                                        aabbZRange[0] = vtx.z;
+                                    if (vtx.z > aabbZRange[1])
+                                        aabbZRange[1] = vtx.z;
+                                }
+
+                                if (skip > 0)
+                                    skip--;
+                                else {
+                                    byte[] boundVtxData = new byte[0x10 * 8];
+
+                                    Vtx_tn[] boundVtx = new Vtx_tn[8];
+                                    for (int x = 0; x <= 1; x++) {
+                                        for (int y = 0; y <= 1; y++) {
+                                            for (int z = 0; z <= 1; z++) {
+                                                boundVtx[x * 4 + y * 2 + z] = new(aabbXRange[x], aabbYRange[y], aabbZRange[z], 0, 0, 0, 0, 0, 0, 0);
+                                            }
+                                        }
+                                    }
+
+                                    for (int k = 0; k < boundVtx.Length; k++) {
+                                        Array.Copy(boundVtx[k].ToBytes(), 0, boundVtxData, k * 0x10, 0x10);
+                                    }
+                                    ulong volume = (ulong)(aabbXRange[1] - aabbXRange[0]) * (ulong)(aabbYRange[1] - aabbYRange[0]) * (ulong)(aabbZRange[1] - aabbZRange[0]);
+                                    bounds.Add(j, (boundVtxData, volume, 0));
+                                }
+                                break;
+                        }
+                    }
+
+                    var keys = bounds.Keys.Order();
+                    ulong previousVolume = ulong.MaxValue;
+                    skip = 0;
+                    foreach (int vtxCmdPtr in keys) {
+                        bool accept = false;
+                        if (skip > 0) {
+                            skip--;
+                        }
+                        else {
+                            ulong volume = bounds[vtxCmdPtr].volume;
+                            if (volume < previousVolume * VTX_BOUNDS_PERCENTAGE) {
+                                accept = true;
+                            }
+                        }
+
+                        if (accept) {
+                            skip = VTX_BOUNDS_MIN_VTX - 1;
+                        }
+                        else {
+                            bounds.Remove(vtxCmdPtr);
+                        }
+                    }
+
+                    keys = bounds.Keys.Order();
+                    foreach (int vtxCmdPtr in keys) {
+                        // add bounds vtx
+                        byte[] pad = new byte[0x10 - (newBuffer.Count & 0xF)];
+                        if (pad.Length < 0x10) {
+                            newBuffer.AddRange(pad);
+                        }
+                        uint boundsVtxPtr = (uint)(0x0E000000 | newBuffer.Count);
+                        newBuffer.AddRange(bounds[vtxCmdPtr].data);
+
+                        bounds[vtxCmdPtr] = (bounds[vtxCmdPtr].data, bounds[vtxCmdPtr].volume, boundsVtxPtr);
+                    }
+
+                    materials[i] = (materials[i].dl, materials[i].sourceStart, materials[i].sourceEnd, (uint)(0x0E000000 | newBuffer.Count));
+                    if (verboseDebug)
+                        Console.WriteLine($"material possession {i+1}: 0x{materials[i].sourceStart:X8}-0x{materials[i].sourceEnd:X8}");
+
+                    skip = 1;
+                    for (int j = 0; j <= dl.Length - 8; j += 8) {
+                        Array.Copy(dl, j, cmdScratch, 0, 8);
+
+                        switch (cmdScratch[0]) {
+                            /*case (byte)RDPCmd.SetTextureImage: 
+                                if (bounds.Count > 0 && skip > 0) {
+                                    skip--;
+
+                                    keys = bounds.Keys.Order();
+                                    int kek = keys.First();
+                                    (byte[] data, ulong volume, uint vtxDataPtr) boundmaballs = bounds[kek];
+
+                                    // the trol.
+                                    gSPVertex(cmdScratch, boundmaballs.vtxDataPtr, (uint)(boundmaballs.data.Length / 0x10), 0);
+                                    newBuffer.AddRange(cmdScratch);
+                                    gSPCullDisplayList(cmdScratch, 0, (uint)(boundmaballs.data.Length / 0x10 - 1));
+                                    newBuffer.AddRange(cmdScratch);
+                                    Array.Copy(dl, j, cmdScratch, 0, 8);
+
+                                    bounds.Remove(kek);
+                                }
+                                break;*/
+                            case (byte)RSPCmd.Vertex: {
+                                if (bounds.TryGetValue(j, out (byte[] data, ulong volume, uint vtxDataPtr) boundmaballs)) {
+                                    // the trol.
+                                    gSPVertex(cmdScratch, boundmaballs.vtxDataPtr, (uint)(boundmaballs.data.Length / 0x10), 0);
+                                    newBuffer.AddRange(cmdScratch);
+                                    gSPCullDisplayList(cmdScratch, 0, (uint)(boundmaballs.data.Length / 0x10 - 1));
+                                    newBuffer.AddRange(cmdScratch);
+                                    Array.Copy(dl, j, cmdScratch, 0, 8);
+                                    bounds.Remove(j);
+                                }
+                            }
+                                break;
+                        }
+                        newBuffer.AddRange(cmdScratch);
+                    }
+
+                    // fin
+                    gSPEndDisplayList(cmdScratch);
+                    newBuffer.AddRange(cmdScratch);
+                }
+
+                // then we write the DL
+                void printAndAddDL(byte[] data) {
+                    printCmd(data, -1);
+                    /*Console.WriteLine("Writing DL");
+                    for (int i = 0; i < data.Length; i += 8) {
+                        Console.WriteLine($"{ReadU32(data, i):X8} {ReadU32(data, i + 4):X8}");
+                    }*/
+
+                    newBuffer.AddRange(data);
+                }
+
+                rcpState.Clear();
+                rcpStateKnownBits.Clear();
+                dataptr = startptr;
+                buffer.Seek(dataptr, SeekOrigin.Begin);
+                ptr.SegPointer = 0x0E000000 | newBuffer.Count;
+                if (verboseDebug) {
+                    Console.Write("IN".PadRight(40, ' '));
+                    Console.WriteLine("OUT");
+                }
+                while (dataptr < buffer.Length) {
+                    buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
+                    printCmd(cmdBuffer, 50);
+                    if (geometryBalls.TryGetValue(dataptr, out byte[] overrideCmd)) {
+                        Array.Copy(overrideCmd, cmdBuffer, cmdBuffer.Length);
+                    }
+                    Array.Copy(cmdBuffer, newCmdBuffer, cmdBuffer.Length);
+                    (List<byte> dl, uint sourceStart, uint sourceEnd, uint destStart) mat = materials.FirstOrDefault(m => m.sourceStart == dataptr);
+                    dataptr += 8;
+                    bool skipCmd = false;
+                    // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
+
+                    if (mat.dl != null) {
+                        gSPDisplayList(newCmdBuffer, mat.destStart);
+                        //skipCmd = true;
+
+                        dataptr = mat.sourceEnd;
+                        buffer.Seek(dataptr, SeekOrigin.Begin);
+                    }
+                    else {
+                        switch (cmdBuffer[0]) {
+                            case (byte)RSPCmd.NOOP:
+                            case (byte)RDPCmd.NOOP:
+                                skipCmd = true; // should be obvious why
+                                break;
+                            case 0x03: { // G_MOVEMEM
+                                uint lightPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
+
+                                if (!tryMapPtr(lightPtr, out uint val)) {
+                                    throw new Exception($"G_MOVEMEM with unmapped ptr {lightPtr:X2}??");
+                                }
+
+                                WriteU32(newCmdBuffer, 4, val | 0x0E000000);
+                            }
+                                break;
+                            case (byte)RSPCmd.Vertex: {
+                                //thefunnytol = Random.Shared.NextDouble() < 0.8;
+                                skipCmd = thefunnytol;
+
+                                if (!skipCmd) {
+                                    uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
+                                    vertexPtr += (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
+
+                                    if (!tryMapPtr(vertexPtr, out uint val)) {
+                                        throw new Exception($"gsSPVertex with unmapped ptr {vertexPtr:X2}??");
+                                    }
+
+                                    val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
+                                    //if (verboseDebug)
+                                    //    Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
+                                    WriteU32(newCmdBuffer, 4, val | 0x0E000000);
+                                }
+                            }
+                                break;
+                            case (byte)RSPCmd.DisplayList:
+                                throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
+                            case (byte)RSPCmd.EndDisplayList:
+                                printAndAddDL(cmdBuffer);
+                                goto dlEnd2;
+                            case (byte)RDPCmd.SetEnvColor:
+                                envColorA = ReadU8(cmdBuffer, 7);
+                                currentTex = 0;
+                                thefunnytol = envColorA <= 1;
+                                break;
+                            case (byte)RDPCmd.SetTextureImage: {
+                                texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
+                                uint textureImage = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
+                                currentTex = textureImage;
+                                //uint textureID = GetTextureID(textureImage, texType);
+
+                                thefunnytol = envColorA <= 1;
+                                if (areaPainting64Cfg != null) {
+                                    thefunnytol = textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF) ||
+                                        (areaPainting64Cfg.textureSegmentedAddresses.Any(addr => textureImage == (addr & 0xFFFFFF)) &&
+                                        !areaPainting64Cfg.textureSegmentedAddresses_NoPurge.Any(addr => textureImage == (addr & 0xFFFFFF)));
+                                }
+
+                                if (!tryMapPtr(textureImage, out uint val)) {
+                                    throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
+                                }
+
+                                //if (!newTextureCmds.ContainsKey(val))
+                                //    newTextureCmds.Add(val, []);
+                                //Console.WriteLine($"Entering texture {val:X8}");
+                                //currentList = newTextureCmds[val];
+
+                                //WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
+                                WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
+                                /* TODO: CI4 conversion
+                                if (texType == ((2 << 2) | 0)) {
+                                    Console.WriteLine("Conversion to CI4 in effect!");
+                                    Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
+                                    Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
+                                }*/
+                                skipCmd = thefunnytol;
+                            }
+                                break;
+                            case (byte)RSPCmd.Tri1:
+                                skipCmd = thefunnytol;
+                                break;
+
+                            case (byte)RSPCmd.SetGeometryMode:
+                                skipCmd = !RcpSetState("SPGeometryMode", 0xFFFFFFFF, ReadU32(cmdBuffer, 4));
+                                break;
+                            case (byte)RSPCmd.ClearGeometryMode:
+                                skipCmd = !RcpSetState("SPGeometryMode", 0x00000000, ReadU32(cmdBuffer, 4));
+                                break;
+                            case (byte)RSPCmd.SetOtherModeH:
+                                skipCmd = !RcpSetState("SPOtherModeH", ReadU32(cmdBuffer, 4), (uint)((1 << cmdBuffer[2]) - 1) << cmdBuffer[3]);
+                                break;
+
+                            case (byte)RDPCmd.FullSync:
+                            case (byte)RDPCmd.LoadSync:
+                            case (byte)RDPCmd.PipeSync:
+                            case (byte)RDPCmd.TileSync:
+                            case (byte)RDPCmd.LoadBlock: // (contains texture size)
+                                //skipCmd = currentListContainsCmd((byte)RDPCmd.LoadBlock);
+                                skipCmd = thefunnytol;
+                                break;
+
+                            case (byte)RDPCmd.SetTileSize:
+                                skipCmd = !RcpSetState("DPTileSize", ((ulong)(ReadU32(cmdBuffer, 0) & 0xFFFFFF) << 32) | ReadU32(cmdBuffer, 4), 0x00FFFFFFFFFFFFFF);
+                                break;
+                            case (byte)RDPCmd.SetTile:
+                                /* TODO: CI4 conversion
+                                WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
+                                if (texType == ((2 << 2) | 0)) {
+                                    WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
+                                }*/
+                                if (clamp.TryGetValue(currentTex, out (bool u, bool v) clampma)) {
+                                    if (clampma.u) {
+                                        cmdBuffer[6] |= 0x2;
+                                        newCmdBuffer[6] |= 0x2;
+                                    }
+                                    if (clampma.v) {
+                                        cmdBuffer[5] |= 0x2 << 2;
+                                        newCmdBuffer[5] |= 0x2 << 2;
+                                    }
+                                }
+
+                                skipCmd = !RcpSetState("DPTile", ((ulong)(ReadU32(cmdBuffer, 0) & 0xFFFFFF) << 32) | ReadU32(cmdBuffer, 4), 0x00FFFFFFFFFFFFFF);
+                                break;
+
+                            default:
+                            //    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
+                            //    flushTextureCmds();
+                                break;
+                        }
+                    }
+
+                    if (!skipCmd) {
+                        printAndAddDL(newCmdBuffer);
                     }
                     else if (verboseDebug) {
                         Console.WriteLine();
                     }
                 }
 
-                dlEnd:
+                dlEnd2:
                 Console.ResetColor();
                 continue;
             }
@@ -1835,11 +2114,9 @@ typedef struct {
 
             buffer.SetLength(newBuffer.Count);
             buffer.Position = 0;
-            foreach (byte b in newBuffer)
-                buffer.WriteByte(b);
+            buffer.Write(newBuffer.ToArray(), 0, newBuffer.Count);
             
             if (areaPainting64Cfg != null) {
-                Console.WriteLine($"pains are canon");
                 List<uint> trol = [ .. areaPainting64Cfg.textureSegmentedAddresses, areaPainting64Cfg.baseSegmentedAddress ];
                 // Update Painting64 config.
                 foreach (uint oldPtr in trol) {
@@ -1851,7 +2128,6 @@ typedef struct {
                         throw new Exception($"areaPainting64Cfg contains unmapped ptr {oldPtr:X8}?? mappings:\n{string.Join("\n", oldToNewPtrMap.Select(mapping => $"{mapping.Key:X8} -> {mapping.Value:X8} len: {(newData.TryGetValue(mapping.Value, out byte[] data) ? data.Length : 0):X8}"))}");
                     }
                     string newStr = $"0x00E{newPtr & 0xFFFFFF:X6}";
-                    Console.WriteLine($"mapma {oldStr[0]} -> {newStr}");
                     foreach (string _oldStr in oldStr)
                         areaPainting64Cfg.config = areaPainting64Cfg.config.ToLowerInvariant().Replace(_oldStr, newStr);
                 }
@@ -1999,7 +2275,10 @@ StreamReader sr = new(args[2]);
 byte levelID = 0;
 int linen = 0;
 try {
-    bool addedTexHalf2 = false;
+    uint half1 = 0;
+    uint half2 = 0;
+    bool optimizeIgnore = false;
+
     while (!sr.EndOfStream) {
         string ln = sr.ReadLine();
         linen++;
@@ -2007,10 +2286,17 @@ try {
         string key = ln.Split('=')[0].ToLowerInvariant();
         if (key == "new_painting") {
             current.paintingCount++;
-            if (current != null && current.textureSegmentedAddresses.Count > 0 && !addedTexHalf2) {
-                current.textureSegmentedAddresses.Add(current.textureSegmentedAddresses[^1] + 0x1000);
+            if (current != null && half1 != 0) {
+                current.textureSegmentedAddresses.Add(half1);
+                current.textureSegmentedAddresses.Add(half2);
+                if (optimizeIgnore) {
+                    current.textureSegmentedAddresses_NoPurge.Add(half1);
+                    current.textureSegmentedAddresses_NoPurge.Add(half2);
+                }
             }
-            addedTexHalf2 = false;
+            half1 = 0;
+            half2 = 0;
+            optimizeIgnore = false;
         }
         else if (ln.Length > key.Length + 1) {
             string strValue = ln.Substring(key.Length + 1);
@@ -2026,10 +2312,34 @@ try {
 
             switch (key) {
                 case "level_id":
+                    if (current != null && half1 != 0) {
+                        current.textureSegmentedAddresses.Add(half1);
+                        current.textureSegmentedAddresses.Add(half2);
+                        if (optimizeIgnore) {
+                            current.textureSegmentedAddresses_NoPurge.Add(half1);
+                            current.textureSegmentedAddresses_NoPurge.Add(half2);
+                        }
+                    }
+                    half1 = 0;
+                    half2 = 0;
+                    optimizeIgnore = false;
+
                     current = null;
                     levelID = byte.Parse(value);
                 break;
                 case "area_id":
+                    if (current != null && half1 != 0) {
+                        current.textureSegmentedAddresses.Add(half1);
+                        current.textureSegmentedAddresses.Add(half2);
+                        if (optimizeIgnore) {
+                            current.textureSegmentedAddresses_NoPurge.Add(half1);
+                            current.textureSegmentedAddresses_NoPurge.Add(half2);
+                        }
+                    }
+                    half1 = 0;
+                    half2 = 0;
+                    optimizeIgnore = false;
+
                     byte areaID = byte.Parse(value);
                     if (!painting64Cfg.ContainsKey((levelID, areaID))) {
                         painting64Cfg.Add((levelID, areaID), new AreaPaintingCfg());
@@ -2046,11 +2356,14 @@ try {
                 case "segmented_address":
                     throw new Exception("painting segmented_address in Painting64 config not supported!");
                 case "texture_segmented_address":
-                    current.textureSegmentedAddresses.Add(uint.Parse(value));
+                    half1 = uint.Parse(value);
+                    half2 = half1 + 0x1000;
                     break;
                 case "texture_segmented_address_half2":
-                    addedTexHalf2 = true;
-                    current.textureSegmentedAddresses.Add(uint.Parse(value));
+                    half2 = uint.Parse(value);
+                    break;
+                case "optimize_ignore":
+                    optimizeIgnore = true;
                     break;
             }
         }
@@ -2077,8 +2390,8 @@ Console.WriteLine("a manger?");
 manger.LoadRom();
 PrintRomSize(manger, "pre compression");
 
-//OptimizeCollision(manger);
-//SaveAndPrintRomSize(manger, "post collision optimization");
+OptimizeCollision(manger);
+SaveAndPrintRomSize(manger, "post collision optimization");
 //EvaporateCollision(manger);
 //SaveAndPrintRomSize(manger, "post collision evaporation");
 
@@ -2087,8 +2400,8 @@ SaveAndPrintRomSize(manger, "post Fast3D optimization");
 //EvaporateFast3D(manger, painting64Path, painting64Cfg);
 //SaveAndPrintRomSize(manger, "post Fast3D evaporation");
 
-//OptimizeObjects(manger);
-//EvaporateObjects(manger);
+OptimizeObjects(manger);
+EvaporateObjects(manger);
 //SaveAndPrintRomSize(manger, "post object purge");
 
 if (File.Exists("paintingcfg.txt")) {
