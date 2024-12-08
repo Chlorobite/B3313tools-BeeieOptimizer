@@ -13,9 +13,11 @@ using SM64Lib;
 using SM64Lib.Geolayout;
 using SM64Lib.Levels;
 using SM64Lib.Levels.Script;
+using SM64Lib.Levels.Script.Commands;
 using SM64Lib.Levels.ScrolTex;
 using SM64Lib.Model.Collision;
 using SM64Lib.Model.Fast3D;
+using Z.Collections.Extensions;
 using Z.Core.Extensions;
 
 using static Gbi;
@@ -1768,7 +1770,6 @@ typedef struct {
                 for (int i = 0; i < materials.Count; i++) {
                     byte[] dl = materials[i].dl.ToArray();
                     byte[] _newBufferArr = newBuffer.ToArray();
-                    List<Vtx_tn> allVtx = [];
                     Dictionary<int, (byte[] data, ulong volume, uint vtxDataPtr)> bounds = [];
 
                     byte[] cmdScratch = new byte[8];
@@ -1790,7 +1791,6 @@ typedef struct {
                                 for (int k = 0; k <= loadLength - 0x10; k += 0x10) {
                                     Array.Copy(_newBufferArr, vertPtr + k, vtxScratch, 0, 0x10);
                                     Vtx_tn vtx = Vtx_tn.Read(vtxScratch, 0);
-                                    allVtx.Add(vtx);
 
                                     if (vtx.x < aabbXRange[0])
                                         aabbXRange[0] = vtx.x;
@@ -2207,6 +2207,110 @@ void EvaporateObjects(RomManager manger) {
     }
 }
 
+Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> ExtractWarps(RomManager manger) {
+    Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> result = [];
+
+    foreach (Level level in manger.Levels) {
+        foreach (LevelArea area in level.Areas) {
+            Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)> extractedWarps = [];
+            var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
+
+            foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
+                foreach (LevelscriptCommand warp in list) {
+                    byte warpId = clWarp.GetWarpID(warp);
+                    byte destAreaID = clWarp.GetDestinationAreaID(warp);
+                    byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
+                    byte destWarpID = clWarp.GetDestinationWarpID(warp);
+
+                    if (!(warpId == 0xF0 || warpId == 0xF1)) continue;
+                    if (extractedWarps.ContainsKey(warpId)) {
+                        byte newAreaID = extractedWarps[warpId].destAreaID;
+                        byte newLevelID = extractedWarps[warpId].destLevelID;
+                        byte newWarpID = extractedWarps[warpId].destWarpID;
+                        bool changes = destAreaID != newAreaID || destLevelID != newLevelID || destWarpID != newWarpID;
+
+                        if (changes) throw new("ok zro");
+                    }
+                    else {
+                        extractedWarps.Add(warpId, (destAreaID, destLevelID, destWarpID));
+                    }
+                }
+            }
+
+            if (extractedWarps.Count > 0) {
+                int resultKey = (level.LevelID << 16) | area.AreaID;
+                if (!result.ContainsKey(resultKey)) {
+                    result.Add(resultKey, []);
+                }
+
+                foreach (var kvp in extractedWarps)
+                    result[resultKey].Add(kvp.Key, kvp.Value);
+            }
+        }
+    }
+
+    return result;
+}
+
+string GetLevelName(RomManager manger, Level level) {
+    string name = ((RMLevel)level).Config.LevelName;
+
+    if (string.IsNullOrWhiteSpace(name)) {
+        name = manger.LevelInfoData.First(_level => _level.ID == level.LevelID).Name;
+    }
+    
+    return name;
+}
+
+string GetAreaName(RomManager manger, Level level, byte areaID) {
+    string name = ((RMLevel)level).Config.GetLevelAreaConfig(areaID).AreaName;
+
+    return name;
+}
+
+void PatchWarps(RomManager manger, Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> warps) {
+    foreach (Level level in manger.Levels) {
+        foreach (LevelArea area in level.Areas) {
+            bool anyChanges = false;
+            string log = $"Level 0x{level.LevelID:X2} '{GetLevelName(manger, level)}' area {area.AreaID} '{GetAreaName(manger, level, area.AreaID)}':";
+
+            var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
+            int key = (level.LevelID << 16) | area.AreaID;
+            if (!warps.ContainsKey(key)) continue;
+            Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)> localWarps = warps[key];
+
+            foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
+                foreach (LevelscriptCommand warp in list) {
+                    byte warpId = clWarp.GetWarpID(warp);
+                    byte destAreaID = clWarp.GetDestinationAreaID(warp);
+                    byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
+                    byte destWarpID = clWarp.GetDestinationWarpID(warp);
+
+                    if (!localWarps.ContainsKey(warpId)) continue;
+                    byte newAreaID = localWarps[warpId].destAreaID;
+                    byte newLevelID = localWarps[warpId].destLevelID;
+                    byte newWarpID = localWarps[warpId].destWarpID;
+                    bool changes = destAreaID != newAreaID || destLevelID != newLevelID || destWarpID != newWarpID;
+
+                    if (changes) {
+                        anyChanges = true;
+                        Level mangleDest = manger.Levels.First(lvl => lvl.LevelID == destLevelID);
+                        Level mangleNew = manger.Levels.First(lvl => lvl.LevelID == newLevelID);
+                        log += $"\n\tRerouting warp 0x{warpId:X2} from level 0x{destLevelID:X2} '{GetLevelName(manger, mangleDest)}' area {destAreaID} '{GetAreaName(manger, mangleDest, destAreaID)}' warp {destWarpID}\n" +
+                        $"\t\tto level 0x{newLevelID:X2} '{GetLevelName(manger, mangleNew)}' area {newAreaID} '{GetAreaName(manger, mangleNew, newAreaID)}' warp {newWarpID}";
+                        clWarp.SetDestinationAreaID(warp, newAreaID);
+                        clWarp.SetDestinationLevelID(warp, (Levels)newLevelID);
+                        clWarp.SetDestinationWarpID(warp, newWarpID);
+                    }
+                }
+            }
+            
+            if (anyChanges)
+                Console.WriteLine(log);
+        }
+    }
+}
+
 
 void MIO0_Fast3D(RomManager manger) {
     int maxMio0Size = 0;
@@ -2266,6 +2370,18 @@ if (args[1] == "MIO0_STAGE") {
     manger.LoadRom();
     MIO0_Fast3D(manger);
     SaveAndPrintRomSize(manger, "post Fast3D mio0 compression");
+    return;
+}
+if (args[1] == "PATCH_WARPS") {
+    manger = new("b3313 a3.z64");
+    manger.LoadRom();
+
+    var warps = ExtractWarps(manger);
+    manger = null;
+    RomManager manger2 = new("b3313 a2.z64");
+    manger2.LoadRom();
+    PatchWarps(manger2, warps);
+    SaveAndPrintRomSize(manger2, "patchma?");
     return;
 }
 
