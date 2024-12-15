@@ -142,8 +142,9 @@ void OptimizeCollision(RomManager manger) {
         }
     }
     collisionData.Close();
-
-    Process p = Process.Start("blender", "-b --python blendmaballs.py");
+    
+    string blendball = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "blendmaballs.py");
+    Process p = Process.Start("blender", $"-b --python \"{blendball}\"");
     p.WaitForExit();
 
     File.Delete("collisionData.txt");
@@ -631,6 +632,9 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                             loadLength = length;
                             loadType = 1; // texture
                             break;
+                        case (byte)RDPCmd.SetEnvColor:
+                            texturerImager++; // idfk but this will create a unique number which is what matters
+                            break;
                         case (byte)RDPCmd.SetTextureImage:
                             //Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
                             if (inGeometry) {
@@ -1110,6 +1114,9 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                     bool tall = (type & 0x02000000) != 0;
 
                     const short UV_SNAP = 1024;
+                    // geometries spanning a lot of surfaces will have a lot of uv wraparound which causes artifacts when scaled,
+                    // a max size is necessary to prevent these artifacts
+                    const short UV_SNAP_MAX_SIZE = 4096;
                     const short UV_SNAP_MARGIN = 128;
                     const short UV_HALF_PIXEL = 16;
                     const short U_OFFSET = -16;
@@ -1126,32 +1133,36 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                         short vMinNew = vMin;
                         short vMaxNew = vMax;
 
-                        short dist = (short)uvmod(uMinNew, UV_SNAP);
-                        if (dist > UV_SNAP / 2)
-                            dist -= UV_SNAP;
-                        if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                            uMinNew = (short)(uMinNew - dist + UV_HALF_PIXEL + U_OFFSET);
+                        if ((uMax - uMin) < UV_SNAP_MAX_SIZE) {
+                            short dist = (short)uvmod(uMinNew, UV_SNAP);
+                            if (dist > UV_SNAP / 2)
+                                dist -= UV_SNAP;
+                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
+                                uMinNew = (short)(uMinNew - dist + UV_HALF_PIXEL + U_OFFSET);
+                            }
+
+                            dist = (short)uvmod(uMaxNew, UV_SNAP);
+                            if (dist > UV_SNAP / 2)
+                                dist -= UV_SNAP;
+                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
+                                uMaxNew = (short)(uMaxNew - dist - UV_HALF_PIXEL + U_OFFSET);
+                            }
                         }
 
-                        dist = (short)uvmod(uMaxNew, UV_SNAP);
-                        if (dist > UV_SNAP / 2)
-                            dist -= UV_SNAP;
-                        if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                            uMaxNew = (short)(uMaxNew - dist - UV_HALF_PIXEL + U_OFFSET);
-                        }
+                        if ((vMax - vMin) < UV_SNAP_MAX_SIZE) {
+                            short dist = (short)uvmod(vMinNew, UV_SNAP);
+                            if (dist > UV_SNAP / 2)
+                                dist -= UV_SNAP;
+                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
+                                vMinNew = (short)(vMinNew - dist + UV_HALF_PIXEL + V_OFFSET);
+                            }
 
-                        dist = (short)uvmod(vMinNew, UV_SNAP);
-                        if (dist > UV_SNAP / 2)
-                            dist -= UV_SNAP;
-                        if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                            vMinNew = (short)(vMinNew - dist + UV_HALF_PIXEL + V_OFFSET);
-                        }
-
-                        dist = (short)uvmod(vMaxNew, UV_SNAP);
-                        if (dist > UV_SNAP / 2)
-                            dist -= UV_SNAP;
-                        if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                            vMaxNew = (short)(vMaxNew - dist - UV_HALF_PIXEL + V_OFFSET);
+                            dist = (short)uvmod(vMaxNew, UV_SNAP);
+                            if (dist > UV_SNAP / 2)
+                                dist -= UV_SNAP;
+                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
+                                vMaxNew = (short)(vMaxNew - dist - UV_HALF_PIXEL + V_OFFSET);
+                            }
                         }
 
                         short uRange = (short)(UV_SNAP * (wide ? 2 : 1) - UV_HALF_PIXEL * 2);
