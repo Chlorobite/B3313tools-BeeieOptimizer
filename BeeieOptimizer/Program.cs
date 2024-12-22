@@ -24,6 +24,9 @@ using static Gbi;
 using static ReadWrite;
 
 
+HashSet<string> noCollidema = ["Haunted Mansion"];
+
+
 void RunProcess(string process) {
     string name = process.Split(' ')[0];
     string args = process[(name.Length + 1)..];
@@ -103,6 +106,12 @@ void OptimizeCollision(RomManager manger) {
     StreamWriter collisionData = new("collisionData.txt");
     foreach (Level level in manger.Levels) {
         foreach (LevelArea area in level.Areas) {
+            if (area.AreaModel.Collision.Mesh.Triangles.Count == 0) continue;
+            if (noCollidema.Contains(GetAreaName(manger, level, area.AreaID))) {
+                Console.WriteLine("les fucing go");
+                Console.ReadKey(true);
+                continue;
+            }
             //if (level.LevelID != 0x22 || area.AreaID != 4) continue;
             collisionData.WriteLine($"AREA {level.LevelID} {area.AreaID}");
             
@@ -559,9 +568,17 @@ void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, 
                 areaPainting64Cfg = value;
             }
 
-            bool verboseDebug = level.LevelID == 0x10 && area.AreaID == 5;
+            bool verboseDebug = level.LevelID == 0x9 && area.AreaID == 9;
 
             Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
+            if (buffer.DLPointers.Length == 0) {
+                // nothing to do here. in fact this breaks sunken ghost ship
+                continue;
+            }
+
+            if (verboseDebug) {
+                Console.WriteLine($"verbosely debugging level {level.LevelID:X2} area {area.AreaID} which has {area.AreaModel.Fast3DBuffer.DLPointers.Length}x fast3d the buffer is {area.AreaModel.Fast3DBuffer.Length} in size");
+            }
             //Console.WriteLine($"OptimizeFast3D: area {level.LevelID:X2}:{area.AreaID} original size {buffer.Length:X2}");
 
             List<byte> newBuffer = [];
@@ -1660,8 +1677,15 @@ typedef struct {
                                     !areaPainting64Cfg.textureSegmentedAddresses_NoPurge.Any(addr => textureImage == (addr & 0xFFFFFF)));
                             }
 
-                            if (!tryMapPtr(textureImage, out uint val)) {
-                                throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
+                            if (!thefunnytol) {
+                                if (!tryMapPtr(textureImage, out uint val)) {
+                                    throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
+                                }
+                                WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
+                                skipCmd = false;
+                            }
+                            else {
+                                skipCmd = true;
                             }
 
                             //if (!newTextureCmds.ContainsKey(val))
@@ -1670,14 +1694,12 @@ typedef struct {
                             //currentList = newTextureCmds[val];
 
                             //WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-                            WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
                             /* TODO: CI4 conversion
                             if (texType == ((2 << 2) | 0)) {
                                 Console.WriteLine("Conversion to CI4 in effect!");
                                 Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
                                 Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
                             }*/
-                            skipCmd = thefunnytol;
                         }
                             break;
                         case (byte)RSPCmd.Tri1:
@@ -2024,8 +2046,15 @@ typedef struct {
                                         !areaPainting64Cfg.textureSegmentedAddresses_NoPurge.Any(addr => textureImage == (addr & 0xFFFFFF)));
                                 }
 
-                                if (!tryMapPtr(textureImage, out uint val)) {
-                                    throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
+                                if (!thefunnytol) {
+                                    if (!tryMapPtr(textureImage, out uint val)) {
+                                        throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
+                                    }
+                                    WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
+                                    skipCmd = false;
+                                }
+                                else {
+                                    skipCmd = true;
                                 }
 
                                 //if (!newTextureCmds.ContainsKey(val))
@@ -2034,14 +2063,12 @@ typedef struct {
                                 //currentList = newTextureCmds[val];
 
                                 //WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-                                WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
                                 /* TODO: CI4 conversion
                                 if (texType == ((2 << 2) | 0)) {
                                     Console.WriteLine("Conversion to CI4 in effect!");
                                     Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
                                     Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
                                 }*/
-                                skipCmd = thefunnytol;
                             }
                                 break;
                             case (byte)RSPCmd.Tri1:
@@ -2136,7 +2163,7 @@ typedef struct {
                         $"0xE{oldPtr & 0xFFFFFF:X6}".ToLowerInvariant(),
                     ];
                     if (!tryMapPtr(oldPtr & 0xFFFFFF, out uint newPtr)) {
-                        throw new Exception($"areaPainting64Cfg contains unmapped ptr {oldPtr:X8}?? mappings:\n{string.Join("\n", oldToNewPtrMap.Select(mapping => $"{mapping.Key:X8} -> {mapping.Value:X8} len: {(newData.TryGetValue(mapping.Value, out byte[] data) ? data.Length : 0):X8}"))}");
+                        throw new Exception($"Level 0x{level.LevelID:X2} area {area.AreaID}: areaPainting64Cfg contains unmapped ptr {oldPtr:X8}?? mappings:\n{string.Join("\n", oldToNewPtrMap.Select(mapping => $"{mapping.Key:X8} -> {mapping.Value:X8} len: {(newData.TryGetValue(mapping.Value, out byte[] data) ? data.Length : 0):X8}"))}");
                     }
                     string newStr = $"0x00E{newPtr & 0xFFFFFF:X6}";
                     foreach (string _oldStr in oldStr)
@@ -2323,6 +2350,27 @@ void PatchWarps(RomManager manger, Dictionary<int, Dictionary<byte, (byte destAr
 }
 
 
+Dictionary<int, (CameraPresets preset, bool hasCameraObject)> ExtractCameras(RomManager manger) {
+    Dictionary<int, (CameraPresets preset, bool hasCameraObject)> result = [];
+
+    foreach (Level level in manger.Levels) {
+        foreach (LevelArea area in level.Areas) {
+            CameraPresets preset = area.Geolayout.CameraPreset;
+            bool hasCameraObject = area.Objects.Any(cmd => clNormal3DObject.GetSegBehaviorAddr(cmd) == 0x1F000500);
+
+            int dictKey = (level.LevelID << 16) | area.AreaID;
+            if (!result.ContainsKey(dictKey)) {
+                result.Add(dictKey, (CameraPresets.OpenCamera, false));
+            }
+            result[dictKey] = (preset, hasCameraObject);
+        }
+    }
+
+    return result;
+}
+
+
+
 void MIO0_Fast3D(RomManager manger) {
     int maxMio0Size = 0;
 
@@ -2395,24 +2443,79 @@ if (args[1] == "PATCH_WARPS") {
     SaveAndPrintRomSize(manger2, "patchma?");
     return;
 }
+if (args[1] == "VERIFY_CAMERABALLS") {
+    RomManager manger2 = new("b3313 ref.z64");
+    manger2.LoadRom();
+    var camerasRef = ExtractCameras(manger2);
+    manger2 = null;
+
+    manger = new("b3313 silved.z64");
+    manger.LoadRom();
+    var cameras = ExtractCameras(manger);
+    
+    HashSet<int> keys = new(cameras.Keys);
+    keys.IntersectWith(camerasRef.Keys);
+    
+    Console.WriteLine("mangled to 0x01 (Open Camera):");
+    foreach (int i in keys) {
+        CameraPresets prev = camerasRef[i].preset;
+        CameraPresets next = cameras[i].preset;
+        ushort levelID = (ushort)((i >> 16) & 0xFFFF);
+        byte areaID = (byte)((i >> 0) & 0xFF);
+
+        if (prev != next) {
+            if (next == CameraPresets.OpenCamera) {
+                Level level = manger.Levels.First(l => l.LevelID == levelID);
+
+                Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
+            }
+        }
+    }
+
+    Console.WriteLine("honorable mention:");
+    foreach (int i in keys) {
+        CameraPresets prev = camerasRef[i].preset;
+        CameraPresets next = cameras[i].preset;
+        ushort levelID = (ushort)((i >> 16) & 0xFFFF);
+        byte areaID = (byte)((i >> 0) & 0xFF);
+
+        if (prev != next) {
+            if (next != CameraPresets.OpenCamera) {
+                Level level = manger.Levels.First(l => l.LevelID == levelID);
+
+                Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
+                Console.WriteLine($"\tchanged from preset 0x{(byte)prev:X2} {prev} to 0x{(byte)next:X2} {next}");
+            }
+        }
+    }
+
+    Console.WriteLine("missing area center objects:");
+    foreach (int i in keys) {
+        ushort levelID = (ushort)((i >> 16) & 0xFFFF);
+        byte areaID = (byte)((i >> 0) & 0xFF);
+
+        if (cameras[i].preset == CameraPresets.OpenCamera && !cameras[i].hasCameraObject) {
+            Level level = manger.Levels.First(l => l.LevelID == levelID);
+
+            Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
+        }
+    }
+
+    return;
+}
 
 Dictionary<(byte, byte), AreaPaintingCfg> painting64Cfg = [];
-AreaPaintingCfg current = null;
-StreamReader sr = new(args[2]);
-byte levelID = 0;
-int linen = 0;
-try {
-    uint half1 = 0;
-    uint half2 = 0;
-    bool optimizeIgnore = false;
+{
+    AreaPaintingCfg current = null;
+    StreamReader sr = new(args[2]);
+    byte levelID = 0;
+    int linen = 0;
+    try {
+        uint half1 = 0;
+        uint half2 = 0;
+        bool optimizeIgnore = false;
 
-    while (!sr.EndOfStream) {
-        string ln = sr.ReadLine();
-        linen++;
-
-        string key = ln.Split('=')[0].ToLowerInvariant();
-        if (key == "new_painting") {
-            current.paintingCount++;
+        void CommitPaintingIfAny() {
             if (current != null && half1 != 0) {
                 current.textureSegmentedAddresses.Add(half1);
                 current.textureSegmentedAddresses.Add(half2);
@@ -2425,89 +2528,86 @@ try {
             half2 = 0;
             optimizeIgnore = false;
         }
-        else if (ln.Length > key.Length + 1) {
-            string strValue = ln.Substring(key.Length + 1);
-            string value = strValue;
 
-            if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
-                try {
-                    ulong u = Convert.ToUInt64(value.Substring(2), 16);
-                    value = u.ToString();
-                }
-                catch { }
-            }
-
-            switch (key) {
-                case "level_id":
-                    if (current != null && half1 != 0) {
-                        current.textureSegmentedAddresses.Add(half1);
-                        current.textureSegmentedAddresses.Add(half2);
-                        if (optimizeIgnore) {
-                            current.textureSegmentedAddresses_NoPurge.Add(half1);
-                            current.textureSegmentedAddresses_NoPurge.Add(half2);
-                        }
-                    }
-                    half1 = 0;
-                    half2 = 0;
-                    optimizeIgnore = false;
-
-                    current = null;
-                    levelID = byte.Parse(value);
+        while (true) {
+            if (sr.EndOfStream) {
+                CommitPaintingIfAny();
                 break;
-                case "area_id":
-                    if (current != null && half1 != 0) {
-                        current.textureSegmentedAddresses.Add(half1);
-                        current.textureSegmentedAddresses.Add(half2);
-                        if (optimizeIgnore) {
-                            current.textureSegmentedAddresses_NoPurge.Add(half1);
-                            current.textureSegmentedAddresses_NoPurge.Add(half2);
-                        }
-                    }
-                    half1 = 0;
-                    half2 = 0;
-                    optimizeIgnore = false;
+            }
 
-                    byte areaID = byte.Parse(value);
-                    if (!painting64Cfg.ContainsKey((levelID, areaID))) {
-                        painting64Cfg.Add((levelID, areaID), new AreaPaintingCfg());
+            string ln = sr.ReadLine();
+            linen++;
+
+            string key = ln.Split('=')[0].ToLowerInvariant();
+            if (key == "new_painting") {
+                if (current != null)
+                    current.paintingCount++;
+                CommitPaintingIfAny();
+            }
+            else if (ln.Length > key.Length + 1) {
+                string strValue = ln.Substring(key.Length + 1);
+                string value = strValue;
+
+                if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
+                    try {
+                        ulong u = Convert.ToUInt64(value.Substring(2), 16);
+                        value = u.ToString();
                     }
-                    current = painting64Cfg[(levelID, areaID)];
+                    catch { }
+                }
+
+                switch (key) {
+                    case "level_id":
+                        CommitPaintingIfAny();
+
+                        current = null;
+                        levelID = byte.Parse(value);
                     break;
-                case "base_rom_address":
-                    throw new Exception("base_rom_address in Painting64 config not supported!");
-                case "base_segmented_address":
-                    current.baseSegmentedAddress = uint.Parse(value);
-                    break;
-                case "rom_address":
-                    throw new Exception("painting rom_address in Painting64 config not supported!");
-                case "segmented_address":
-                    throw new Exception("painting segmented_address in Painting64 config not supported!");
-                case "texture_segmented_address":
-                    half1 = uint.Parse(value);
-                    half2 = half1 + 0x1000;
-                    break;
-                case "texture_segmented_address_half2":
-                    half2 = uint.Parse(value);
-                    break;
-                case "optimize_ignore":
-                    optimizeIgnore = true;
-                    break;
+                    case "area_id":
+                        CommitPaintingIfAny();
+
+                        byte areaID = byte.Parse(value);
+                        if (!painting64Cfg.ContainsKey((levelID, areaID))) {
+                            painting64Cfg.Add((levelID, areaID), new AreaPaintingCfg());
+                        }
+                        current = painting64Cfg[(levelID, areaID)];
+                        break;
+                    case "base_rom_address":
+                        throw new Exception("base_rom_address in Painting64 config not supported!");
+                    case "base_segmented_address":
+                        current.baseSegmentedAddress = uint.Parse(value);
+                        break;
+                    case "rom_address":
+                        throw new Exception("painting rom_address in Painting64 config not supported!");
+                    case "segmented_address":
+                        throw new Exception("painting segmented_address in Painting64 config not supported!");
+                    case "texture_segmented_address":
+                        half1 = uint.Parse(value);
+                        half2 = half1 + 0x1000;
+                        break;
+                    case "texture_segmented_address_half2":
+                        half2 = uint.Parse(value);
+                        break;
+                    case "optimize_ignore":
+                        optimizeIgnore = true;
+                        break;
+                }
+            }
+
+            if (current != null) {
+                current.config += ln + "\n";
             }
         }
 
-        if (current != null) {
-            current.config += ln + "\n";
-        }
+        sr.Close();
     }
-
-    sr.Close();
-}
-catch (Exception e) {
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine($"Exception at line {linen} in paintingcfg.txt:\n\n{e}");
-    sr.Close();
-    Console.ReadKey(true);
-    return;
+    catch (Exception e) {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"Exception at line {linen} in paintingcfg.txt:\n\n{e}");
+        sr.Close();
+        Console.ReadKey(true);
+        return;
+    }
 }
 Console.WriteLine("Loaded Painting64 config!");
 
