@@ -86,6 +86,7 @@ namespace SM64Lib
         public ILevelManager LevelManager { get; private set; }
         public RomConfig RomConfig { get; private set; }
         public bool IsNewROM { get; private set; } = false;
+		public bool BoxSystemA3Mode { get; set; } = false;
         public CustomObjectCollection CustomObjects { get => RomConfig.GlobalObjectBank; }
         public Text.TextGroup[] TextGroups { get => myTextGroups.ToArray(); }
 
@@ -369,6 +370,19 @@ namespace SM64Lib
             }
         }
 
+        // this solution may be more optimized for repeated accesses
+        // also yes i am corrupting the holy c# land with tabs trol
+        public long romSize = 0;
+
+		public long GetRomSize() {
+			if (romSize == 0) {
+				var fs = new BinaryRom(this, FileAccess.Read);
+				romSize = fs.Length;
+				fs.Close();
+			}
+			return romSize;
+		}
+
         /// <summary>
         /// Gets a new instance of BinaryRom, a BinaryData object.
         /// </summary>
@@ -382,9 +396,7 @@ namespace SM64Lib
         public RomSpaceInfo GetRomSpaceInfo()
         {
             var info = new RomSpaceInfo();
-            var fs = new BinaryRom(this, FileAccess.Read);
-            info.MaxAvailableSpace = fs.Length - 0x1210000;
-            fs.Close();
+            info.MaxAvailableSpace = GetRomSize() - 0x1210000;
             info.UsedLevelsSpace = Levels.Length;
             info.UsedMusicSpace = MusicList.Length;
             info.UsedGlobalBehaviorSpace = GlobalBehaviorBank.Length;

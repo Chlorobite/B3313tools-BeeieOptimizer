@@ -1,94 +1,20 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Threading.Tasks;
+using System.Text.Json;
 using SM64Lib;
 using SM64Lib.Geolayout;
 using SM64Lib.Levels;
 using SM64Lib.Levels.Script;
 using SM64Lib.Levels.Script.Commands;
-using SM64Lib.Levels.ScrolTex;
-using SM64Lib.Model.Collision;
 using SM64Lib.Model.Fast3D;
-using Z.Collections.Extensions;
-using Z.Core.Extensions;
 
-using static Gbi;
-using static ReadWrite;
+using static Simplicity;
 
 
-HashSet<string> noCollidema = ["Haunted Mansion"];
-
-
-void RunProcess(string process) {
-    string name = process.Split(' ')[0];
-    string args = process[(name.Length + 1)..];
-
-    Process? p = Process.Start(new ProcessStartInfo(name, args) {
-        CreateNoWindow = true,
-        UseShellExecute = false,
-    });
-
-    if (p == null) {
-        Console.WriteLine($"Failed to run {process}");
-        return;
-    }
-    p.WaitForExit();
-    p.Close();
-}
-
-bool IsTriDegenerate(Vtx_tn v1, Vtx_tn v2, Vtx_tn v3) {
-    long ax = v2.x - v1.x, ay = v2.y - v1.y, az = v2.z - v1.z;
-    long bx = v3.x - v1.x, by = v3.y - v1.y, bz = v3.z - v1.z;
-
-    // Cross product
-    long cx = ay * bz - az * by;
-    long cy = az * bx - ax * bz;
-    long cz = ax * by - ay * bx;
-
-    // Degenerate if the cross product is zero
-    return cx == 0 && cy == 0 && cz == 0;
-}
-
-double TriArea(Vtx_tn v1, Vtx_tn v2, Vtx_tn v3) {
-    // Edge vectors
-    long ax = v2.x - v1.x, ay = v2.y - v1.y, az = v2.z - v1.z;
-    long bx = v3.x - v1.x, by = v3.y - v1.y, bz = v3.z - v1.z;
-
-    // Cross product
-    long cx = ay * bz - az * by;
-    long cy = az * bx - ax * bz;
-    long cz = ax * by - ay * bx;
-
-    // Magnitude of the cross product
-    double crossMagnitude = Math.Sqrt(cx * cx + cy * cy + cz * cz);
-
-    // Area of the triangle
-    return crossMagnitude / 2.0;
-}
-
-double Lerp(double a, double b, double t) {
-    return a * (1.0 - t) + b * t;
-}
-double InverseLerp(double a, double b, double value) {
-    return (value - a) / (b - a);
-}
-
-double Remap(double value, double oldMin, double oldMax, double newMin, double newMax) {
-    double t = InverseLerp(oldMin, oldMax, value);
-    return Lerp(newMin, newMax, t);
-}
-
-double uvmod(double a, double b) {
-    return (a + 65536) % b;
-}
+//HashSet<string> noCollidema = ["Haunted Mansion"];
+Config configma = new("BeeieOptimizer.json");
 
 
 
@@ -102,2148 +28,9 @@ void SaveAndPrintRomSize(RomManager manger, string context) {
     PrintRomSize(manger, context);
 }
 
-void OptimizeCollision(RomManager manger) {
-    StreamWriter collisionData = new("collisionData.txt");
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            if (area.AreaModel.Collision.Mesh.Triangles.Count == 0) continue;
-            if (noCollidema.Contains(GetAreaName(manger, level, area.AreaID))) {
-                Console.WriteLine("les fucing go");
-                Console.ReadKey(true);
-                continue;
-            }
-            //if (level.LevelID != 0x22 || area.AreaID != 4) continue;
-            collisionData.WriteLine($"AREA {level.LevelID} {area.AreaID}");
-            
-            /*if (level.LevelID == 0x6 && area.AreaID == 11) {
-                Console.WriteLine(string.Join(";", (IEnumerable<Geopointer>)area.AreaModel.Fast3DBuffer.DLPointers));
-                var bin = new SM64Lib.Data.BinaryFile("dump.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite) { Position = 0 };
-                area.AreaModel.ToBinaryData(bin, 0, 0, 0xE000000, manger.RomConfig.CollisionBaseConfig);
-                bin.Close();
-            }*/
-            
-            Dictionary<byte, List<Triangle>> triangles = [];
-            foreach (Triangle tri in area.AreaModel.Collision.Mesh.Triangles) {
-                byte funny = tri.CollisionType;
-                if (!triangles.ContainsKey(funny))
-                    triangles.Add(funny, []);
-                
-                triangles[funny].Add(tri);
-            }
 
-            foreach ((byte collisionType, List<Triangle> tris) in triangles) {
-                bool hasParams = manger.RomConfig.CollisionBaseConfig.CollisionTypesWithParams.Contains(collisionType);
-                collisionData.WriteLine($"\tCOLLISIONTYPE {collisionType}");
 
-                foreach (Triangle tri in tris) {
-                    string ln = "\t\tTRI ";
-                    foreach (Vertex v in tri.Vertices) {
-                        ln += $"{v.X};{v.Y};{v.Z} ";
-                    }
-                    if (hasParams) {
-                        foreach (byte param in tri.ColParams) {
-                            ln += $"{param} ";
-                        }
-                    }
-                    collisionData.WriteLine(ln);
-                }
-            }
-        }
-    }
-    collisionData.Close();
-    
-    string blendball = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "blendmaballs.py");
-    Process p = Process.Start("blender", $"-b --python \"{blendball}\"");
-    p.WaitForExit();
 
-    File.Delete("collisionData.txt");
-    File.Move("collisionData.txt.new", "collisionData.txt");
-
-    {
-        StreamReader collisionDataSr = new("collisionData.txt");
-        Dictionary<string, Vertex> posToVert = [];
-        VertexList verts = [];
-        TriangleList tris = [];
-        LevelArea currentArea = null;
-        byte currentCollisionType = 0;
-        bool colTypeHasParams = false;
-
-        void CommitToArea() {
-            if (currentArea != null) {
-                currentArea.AreaModel.Collision.Mesh.Vertices = verts;
-                currentArea.AreaModel.Collision.Mesh.Triangles = tris;
-
-                posToVert = [];
-                verts = [];
-                tris = [];
-                currentArea = null;
-            }
-        }
-
-        int lineNumber = 0;
-        while (!collisionDataSr.EndOfStream) {
-            lineNumber++;
-            string[] ln = collisionDataSr.ReadLine().Trim().Split(" ");
-
-            try {
-                switch (ln[0]) {
-                    case "AREA": {
-                        CommitToArea();
-                        
-                        int levelID = int.Parse(ln[1]);
-                        int areaID = int.Parse(ln[2]);
-                        currentArea = manger.Levels.Where(l => l.LevelID == levelID).First()
-                                            .Areas.Where(a => a.AreaID == areaID).First();
-                    }
-                        break;
-                    case "COLLISIONTYPE":
-                        currentCollisionType = byte.Parse(ln[1]);
-                        colTypeHasParams = manger.RomConfig.CollisionBaseConfig.CollisionTypesWithParams.Contains(currentCollisionType);
-                        break;
-                    case "TRI": {
-                        Vertex[] _verts = new Vertex[3];
-                        for (int i = 1; i <= 3; i++) {
-                            string v = ln[i];
-
-                            if (!posToVert.TryGetValue(v, out Vertex vertex)) {
-                                string[] components = v.Split(";");
-                                vertex = new Vertex {
-                                    X = short.Parse(components[0]),
-                                    Y = short.Parse(components[1]),
-                                    Z = short.Parse(components[2]),
-                                };
-                                posToVert.Add(v, vertex);
-                                verts.Add(vertex);
-                            }
-
-                            _verts[i - 1] = vertex;
-                        }
-
-                        Triangle tri = new() {
-                            CollisionType = currentCollisionType,
-                            Vertices = _verts
-                        };
-                        if (colTypeHasParams) {
-                            tri.ColParams[0] = byte.Parse(ln[4]);
-                            tri.ColParams[1] = byte.Parse(ln[5]);
-                        }
-                        tris.Add(tri);
-                    }
-                        break;
-                }
-            }
-            catch (Exception e) {
-                Console.WriteLine("Skill issue located on line " + lineNumber + ":");
-                Console.WriteLine(e);
-                return;
-            }
-        }
-        CommitToArea();
-        collisionDataSr.Close();
-    }
-}
-
-void OptimizeFast3D(RomManager manger, string painting64Path, Dictionary<(byte, byte), AreaPaintingCfg> painting64Cfg) {
-    uint GetTextureID(uint ptr, byte texType) {
-        return (ptr & 0xFFFFFF) | ((uint)texType << 24);
-    }
-
-    const int GLOBAL_TEXTURE_BANK_LIMIT = 256*1024;
-    const int LOCAL_TEXTURE_BANK_LIMIT = 256*1024;
-
-    int totalSaves = 0;
-    Console.WriteLine($"Purely hypothetically speaking, by merging all duplicate textures...");
-    List<(byte[] data, int frequency)> globalTextureBank = [];
-    foreach (Level level in manger.Levels) {
-        List<byte[]> uniqueTextures = [];
-
-        foreach (LevelArea area in level.Areas) {
-            AreaPaintingCfg areaPainting64Cfg = null;
-            if (painting64Cfg.TryGetValue(((byte)level.LevelID, (byte)area.AreaID), out AreaPaintingCfg value)) {
-                areaPainting64Cfg = value;
-            }
-
-            Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
-
-            List<(uint pointer, int length)> loads = [];
-            
-            foreach (Geopointer ptr in buffer.DLPointers) {
-                uint dataptr = (uint)(ptr.SegPointer & 0xFFFFFF);
-                buffer.Seek(dataptr, SeekOrigin.Begin);
-                //Console.WriteLine($"Load DL {dataptr:X2}");
-                byte[] cmdBuffer = new byte[8];
-                uint textureImage = 0;
-                byte texType = 0;
-
-                while (dataptr < buffer.Length) {
-                    buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                    dataptr += 8;
-
-                    uint loadPtr = 0;
-                    int loadLength = 0;
-                    // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-
-                    switch (cmdBuffer[0]) {
-                        case (byte)RSPCmd.DisplayList:
-                            throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case (byte)RSPCmd.EndDisplayList:
-				            goto dlEnd;
-                        case (byte)RDPCmd.LoadBlock: // (contains texture size)
-                            //Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
-                            loadPtr = textureImage;
-                            
-                            int length = (ReadU16(cmdBuffer, 5) >> 4) + 1;
-                            switch (texType & 3) {
-                                case 2: // 16 bit
-                                    length *= 2;
-                                    break;
-                                case 3: // 32 bit
-                                    length *= 4;
-                                    break;
-                            }
-                            
-                            if (areaPainting64Cfg != null) {
-                                if (textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF)) {
-                                    length = 0; // do not load the fuck texture, let painting64 handle it
-                                }
-                            }
-
-                            loadLength = length;
-                            break;
-                        case (byte)RDPCmd.SetTextureImage:
-                            //Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
-                            texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-                            textureImage = ReadU32(cmdBuffer, 4);
-                            if ((textureImage & 0xFF000000) != 0x0E000000) {
-                                throw new Exception($"{textureImage:X8} is NOT segment 0E!");
-                            }
-                            textureImage &= 0xFFFFFF;
-                            //Console.WriteLine($"textureImage: {textureImage:X8}");
-                            break;
-                    }
-
-                    if (loadLength > 0) {
-                        if (!loads.Contains((loadPtr, loadLength))) {
-                            loads.Add((loadPtr, loadLength));
-                        }
-                    }
-                }
-
-                dlEnd:
-                continue;
-            }
-
-            // Merge intersecting data loads for optimization and to prevent issues.
-            loads = loads.OrderBy((load) => load.pointer).ToList();
-            for (int i = 0; i < loads.Count - 1; i++) {
-                var load1 = loads[i];
-                var load2 = loads[i + 1];
-
-                if (load1.pointer + load1.length > load2.pointer) {
-                    loads[i] = (load1.pointer, (int)Math.Max(load1.length, load2.pointer + load2.length));
-                    loads.RemoveAt(i + 1);
-                    i--;
-                }
-            }
-
-            // Now, fetch all the data we need.
-            foreach ((uint pointer, int _length) in loads) {
-                int length = (_length + 0xF) & ~0xF;
-                byte[] data = new byte[length];
-                buffer.Seek(pointer, SeekOrigin.Begin);
-                buffer.Read(data, 0, length);
-                bool exists = false;
-
-                foreach (byte[] texData in uniqueTextures) {
-                    if (data.SequenceEqual(texData)) {
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if (!exists) {
-                    uniqueTextures.Add(data);
-                }
-            }
-        }
-
-        // Once gathered, add the textures to the global bank.
-        foreach (byte[] texData in uniqueTextures) {
-            bool exists = false;
-
-            for (int i = 0; i < globalTextureBank.Count; i++) {
-                if (globalTextureBank[i].data.SequenceEqual(texData)) {
-                    globalTextureBank[i] = (globalTextureBank[i].data, globalTextureBank[i].frequency + 1);
-
-                    exists = true;
-                    break;
-                }
-            }
-
-            if (!exists) {
-                globalTextureBank.Add((texData, 1));
-            }
-        }
-    }
-
-    {
-        globalTextureBank = globalTextureBank.Where(x=>x.frequency > 1).OrderBy(x => 0-(x.data.Length * (x.frequency - 1))).ToList();
-        int saveable = 0;
-        int ramPressure = 0;
-        int ii = 0;
-        for (; ii < globalTextureBank.Count; ii++) {
-            int n = globalTextureBank[ii].data.Length * (globalTextureBank[ii].frequency - 1);
-
-            if (ramPressure + globalTextureBank[ii].data.Length > GLOBAL_TEXTURE_BANK_LIMIT)
-                break;
-            
-            saveable += n;
-            if (n > 0) {
-                ramPressure += globalTextureBank[ii].data.Length;
-            }
-        }
-        while (globalTextureBank.Count > ii)
-            globalTextureBank.RemoveAt(ii);
-        Console.WriteLine($"Global texture bank: {ramPressure/1024} KiB (save {saveable/1024} KiB)");
-        totalSaves += saveable;
-    }
-
-    foreach (Level level in manger.Levels) {
-        List<(byte[] data, int frequency)> localTextureBank = [];
-
-        foreach (LevelArea area in level.Areas) {
-            AreaPaintingCfg areaPainting64Cfg = null;
-            if (painting64Cfg.TryGetValue(((byte)level.LevelID, (byte)area.AreaID), out AreaPaintingCfg value)) {
-                areaPainting64Cfg = value;
-            }
-
-            Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
-
-            List<(uint pointer, int length)> loads = [];
-            List<byte[]> uniqueTextures = [];
-            
-            foreach (Geopointer ptr in buffer.DLPointers) {
-                uint dataptr = (uint)(ptr.SegPointer & 0xFFFFFF);
-                buffer.Seek(dataptr, SeekOrigin.Begin);
-                //Console.WriteLine($"Load DL {dataptr:X2}");
-                byte[] cmdBuffer = new byte[8];
-                uint textureImage = 0;
-                byte texType = 0;
-
-                while (dataptr < buffer.Length) {
-                    buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                    dataptr += 8;
-
-                    uint loadPtr = 0;
-                    int loadLength = 0;
-                    // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-
-                    switch (cmdBuffer[0]) {
-                        case (byte)RSPCmd.DisplayList:
-                            throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case (byte)RSPCmd.EndDisplayList:
-				            goto dlEnd;
-                        case (byte)RDPCmd.LoadBlock: // (contains texture size)
-                            //Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
-                            loadPtr = textureImage;
-                            
-                            int length = (ReadU16(cmdBuffer, 5) >> 4) + 1;
-                            switch (texType & 3) {
-                                case 2: // 16 bit
-                                    length *= 2;
-                                    break;
-                                case 3: // 32 bit
-                                    length *= 4;
-                                    break;
-                            }
-                            
-                            if (areaPainting64Cfg != null) {
-                                if (textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF)) {
-                                    length = 0; // do not load the fuck texture, let painting64 handle it
-                                }
-                            }
-
-                            loadLength = length;
-                            break;
-                        case (byte)RDPCmd.SetTextureImage:
-                            //Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
-                            texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-                            textureImage = ReadU32(cmdBuffer, 4);
-                            if ((textureImage & 0xFF000000) != 0x0E000000) {
-                                throw new Exception($"{textureImage:X8} is NOT segment 0E!");
-                            }
-                            textureImage &= 0xFFFFFF;
-                            //Console.WriteLine($"textureImage: {textureImage:X8}");
-                            break;
-                    }
-
-                    if (loadLength > 0) {
-                        if (!loads.Contains((loadPtr, loadLength))) {
-                            loads.Add((loadPtr, loadLength));
-                        }
-                    }
-                }
-
-                dlEnd:
-                continue;
-            }
-
-            // Merge intersecting data loads for optimization and to prevent issues.
-            loads = loads.OrderBy((load) => load.pointer).ToList();
-            for (int i = 0; i < loads.Count - 1; i++) {
-                var load1 = loads[i];
-                var load2 = loads[i + 1];
-
-                if (load1.pointer + load1.length > load2.pointer) {
-                    loads[i] = (load1.pointer, (int)Math.Max(load1.length, load2.pointer + load2.length));
-                    loads.RemoveAt(i + 1);
-                    i--;
-                }
-            }
-
-            // Now, fetch all the data we need.
-            foreach ((uint pointer, int _length) in loads) {
-                int length = (_length + 0xF) & ~0xF;
-                byte[] data = new byte[length];
-                buffer.Seek(pointer, SeekOrigin.Begin);
-                buffer.Read(data, 0, length);
-                bool exists = false;
-
-                foreach (byte[] texData in uniqueTextures) {
-                    if (data.SequenceEqual(texData)) {
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if (!exists) {
-                    uniqueTextures.Add(data);
-                }
-            }
-
-            // Finally, add the textures to top textures.
-            foreach (byte[] texData in uniqueTextures) {
-                bool exists = false;
-
-                for (int i = 0; i < localTextureBank.Count; i++) {
-                    if (localTextureBank[i].data.SequenceEqual(texData)) {
-                        localTextureBank[i] = (localTextureBank[i].data, localTextureBank[i].frequency + 1);
-
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if (!exists) {
-                    localTextureBank.Add((texData, 1));
-                }
-            }
-        }
-
-        localTextureBank = localTextureBank.Where(x=>x.frequency > 1 && !globalTextureBank.Any(y=>y.data.SequenceEqual(x.data)))
-            .OrderBy(x => 0-(x.data.Length * (x.frequency - 1))).ToList();
-        int saveable = 0;
-        int ramPressure = 0;
-        int ii = 0;
-        for (; ii < localTextureBank.Count; ii++) {
-            int n = localTextureBank[ii].data.Length * (localTextureBank[ii].frequency - 1);
-
-            if (ramPressure + localTextureBank[ii].data.Length > LOCAL_TEXTURE_BANK_LIMIT)
-                break;
-            
-            saveable += n;
-            if (n > 0) {
-                ramPressure += localTextureBank[ii].data.Length;
-            }
-        }
-        while (localTextureBank.Count > ii)
-            localTextureBank.RemoveAt(ii);
-        Console.WriteLine($"Local texture bank for level {level.LevelID:X2}: {ramPressure/1024} KiB (save {saveable/1024} KiB)");
-        totalSaves += saveable;
-
-        int brothersInChrist = 0;
-        foreach (LevelArea area in level.Areas) {
-            AreaPaintingCfg areaPainting64Cfg = null;
-            if (painting64Cfg.TryGetValue(((byte)level.LevelID, (byte)area.AreaID), out AreaPaintingCfg value)) {
-                areaPainting64Cfg = value;
-            }
-
-            bool verboseDebug = level.LevelID == 0x9 && area.AreaID == 9;
-
-            Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
-            if (buffer.DLPointers.Length == 0) {
-                // nothing to do here. in fact this breaks sunken ghost ship
-                continue;
-            }
-
-            if (verboseDebug) {
-                Console.WriteLine($"verbosely debugging level {level.LevelID:X2} area {area.AreaID} which has {area.AreaModel.Fast3DBuffer.DLPointers.Length}x fast3d the buffer is {area.AreaModel.Fast3DBuffer.Length} in size");
-            }
-            //Console.WriteLine($"OptimizeFast3D: area {level.LevelID:X2}:{area.AreaID} original size {buffer.Length:X2}");
-
-            List<byte> newBuffer = [];
-            List<(uint pointer, int length, int type)> loads = [];
-            Dictionary<uint, byte[]> newData = [];
-            Dictionary<uint, uint> oldToNewPtrMap = [];
-            Dictionary<uint, (bool u, bool v)> clamp = [];
-
-            int STAT_totalLoads = 0;
-            int STAT_uniqueLoads = 0;
-            int vertexGeometryCount = 1;
-
-            // Scan for all data loads first.
-            foreach (Geopointer ptr in buffer.DLPointers) {
-                uint dataptr = (uint)(ptr.SegPointer & 0xFFFFFF);
-                buffer.Seek(dataptr, SeekOrigin.Begin);
-                //Console.WriteLine($"Load DL {dataptr:X2}");
-                byte[] cmdBuffer = new byte[8];
-                uint textureImage = 0;
-                uint texturerImager = 0;
-                byte texType = 0;
-                bool inGeometry = false;
-
-                while (dataptr < buffer.Length) {
-                    buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                    dataptr += 8;
-
-                    uint loadPtr = 0;
-                    int loadLength = 0;
-                    int loadType = -1;
-                    // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-
-                    switch (cmdBuffer[0]) {
-                        case (byte)RSPCmd.DisplayList:
-                            if (inGeometry) {
-                                inGeometry = false;
-                            }
-                            throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case (byte)RSPCmd.EndDisplayList:
-                            if (inGeometry) {
-                                inGeometry = false;
-                            }
-				            goto dlEnd;
-                        case (byte)RDPCmd.LoadBlock: // (contains texture size)
-                            //Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
-                            if (inGeometry) {
-                                inGeometry = false;
-                            }
-                            STAT_totalLoads++;
-                            loadPtr = textureImage;
-                            
-                            int length = (ReadU16(cmdBuffer, 5) >> 4) + 1;
-                            switch (texType & 3) {
-                                case 2: // 16 bit
-                                    length *= 2;
-                                    break;
-                                case 3: // 32 bit
-                                    length *= 4;
-                                    break;
-                            }
-                            
-                            if (areaPainting64Cfg != null) {
-                                if (textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF)) {
-                                    length = 0; // do not load the fuck texture, let painting64 handle it
-                                }
-                            }
-
-                            loadLength = length;
-                            loadType = 1; // texture
-                            break;
-                        case (byte)RDPCmd.SetEnvColor:
-                            texturerImager++; // idfk but this will create a unique number which is what matters
-                            break;
-                        case (byte)RDPCmd.SetTextureImage:
-                            //Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
-                            if (inGeometry) {
-                                inGeometry = false;
-                            }
-                            texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-                            textureImage = ReadU32(cmdBuffer, 4);
-                            if ((textureImage & 0xFF000000) != 0x0E000000) {
-                                throw new Exception($"{textureImage:X8} is NOT segment 0E!");
-                            }
-                            textureImage &= 0xFFFFFF;
-                            texturerImager = textureImage;
-                            //Console.WriteLine($"textureImage: {textureImage:X8}");
-                            break;
-
-                        case (byte)RDPCmd.SetTileSize: {
-                            uint width = (ReadU32(cmdBuffer, 4) >> 12) & 0xFFF;
-                            uint height = (ReadU32(cmdBuffer, 4) >> 0) & 0xFFF;
-                            if (width > 124)
-                                texturerImager |= 0x01000000;
-                            if (height > 124)
-                                texturerImager |= 0x02000000;
-                        }
-                            break;
-                        
-                        case (byte)RSPCmd.Vertex:
-                            //Console.WriteLine($"gsSPVertex {ReadU16(cmdBuffer, 2)} {ReadU32(cmdBuffer, 4):X8}");
-                            loadLength = ReadU16(cmdBuffer, 2);
-                            loadPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                            loadPtr += (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
-                            
-                            if (!inGeometry) {
-                                inGeometry = true;
-                                vertexGeometryCount++;
-                            }
-                            loadType = (int)texturerImager;
-                            break;
-                        case (byte)RSPCmd.Tri1:
-                            break;
-                        case 0x03: // G_MOVEMEM
-                            //Console.WriteLine($"G_MOVEMEM {ReadU16(cmdBuffer, 2)} {ReadU32(cmdBuffer, 4):X8}");
-                            if (inGeometry) {
-                                inGeometry = false;
-                            }
-                            loadLength = ReadU16(cmdBuffer, 2);
-                            loadPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                            loadType = 0; // lightma
-                            break;
-                        default:
-                            if (inGeometry) {
-                                inGeometry = false;
-                            }
-                            break;
-                    }
-
-                    if (loadLength > 0) {
-                        if (!loads.Contains((loadPtr, loadLength, loadType))) {
-                            STAT_uniqueLoads++;
-                            loads.Add((loadPtr, loadLength, loadType));
-                        }
-                    }
-                }
-
-                dlEnd:
-                continue;
-            }
-
-            bool tryMapPtr(uint oldPtr, out uint newPtr) {
-                newPtr = 0;
-
-                foreach ((uint _old, uint _new) in oldToNewPtrMap) {
-                    int length = newData[_new].Length;
-
-                    if (oldPtr >= _old && oldPtr - _old < length) {
-                        newPtr = _new + (oldPtr - _old);
-                        if ((oldPtr == 0x03C6C0 && newPtr == 0x02A6C0) || (oldPtr == 0x03C7A0 && newPtr == 0x02A7B0)) {
-                            Console.WriteLine($"the mapping visione: {_new:X8} + ({oldPtr:X8} - {_old:X8})");
-                        }
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            void printCmd(byte[] data, int pad) {
-                if (!verboseDebug) return;
-
-                string debugLine = $"UNKNOWN {string.Join(", ", data.Select(b => b.ToString("X2")))}";
-                ConsoleColor color = ConsoleColor.Red;
-
-                switch (data[0]) {
-                    case (byte)RSPCmd.Vertex:
-                        ushort loadLength = ReadU16(data, 2);
-                        debugLine = $"gsSPVertex(0x{ReadU32(data, 4):X8}, {loadLength/0x10}, {data[1] & 0xF})";
-                        color = ConsoleColor.Green; // dma
-                        break;
-                    case (byte)RSPCmd.EndDisplayList:
-                        debugLine = $"gsSPEndDisplayList()";
-                        color = ConsoleColor.White; // flow
-                        break;
-                    case (byte)RSPCmd.ClearGeometryMode:
-                        debugLine = $"gsSPClearGeometryMode(0x{ReadU32(data, 4):X8})";
-                        color = ConsoleColor.Blue; // configuration
-                        break;
-                    case (byte)RSPCmd.SetGeometryMode:
-                        debugLine = $"gsSPSetGeometryMode(0x{ReadU32(data, 4):X8})";
-                        color = ConsoleColor.Blue; // configuration
-                        break;
-                    case (byte)RSPCmd.Tri1:
-                        debugLine = $"gsSP1Triangle({data[5] / 10}, {data[6] / 10}, {data[7] / 10})";
-                        color = ConsoleColor.DarkGreen; // tri
-                        break;
-
-/* ok so basically
-#define	gDPPipelineMode(pkt, mode)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_PIPELINE, 1, mode)
-#define	gsDPPipelineMode(mode)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_PIPELINE, 1, mode)
-
-#define	gDPSetCycleType(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_CYCLETYPE, 2, type)
-#define	gsDPSetCycleType(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_CYCLETYPE, 2, type)
-
-#define	gDPSetTexturePersp(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
-#define	gsDPSetTexturePersp(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
-
-#define	gDPSetTextureDetail(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
-#define	gsDPSetTextureDetail(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
-
-#define	gDPSetTextureLOD(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
-#define	gsDPSetTextureLOD(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
-
-#define	gDPSetTextureLUT(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)
-#define	gsDPSetTextureLUT(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)
-
-#define	gDPSetTextureFilter(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type)
-#define	gsDPSetTextureFilter(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type)
-
-#define	gDPSetTextureConvert(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type)
-#define	gsDPSetTextureConvert(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type)
-
-#define	gDPSetCombineKey(pkt, type)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type)
-#define	gsDPSetCombineKey(type)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type)
-
-#ifndef _HW_VERSION_1
-#define	gDPSetColorDither(pkt, mode)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_RGBDITHER, 2, mode)
-#define	gsDPSetColorDither(mode)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_RGBDITHER, 2, mode)
-#else
-#define gDPSetColorDither(pkt, mode)    \
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_COLORDITHER, 1, mode)
-#define gsDPSetColorDither(mode)                \
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_COLORDITHER, 1, mode)
-#endif
-
-#ifndef _HW_VERSION_1
-#define	gDPSetAlphaDither(pkt, mode)	\
-	gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_ALPHADITHER, 2, mode)
-#define	gsDPSetAlphaDither(mode)		\
-	gsSPSetOtherMode(G_SETOTHERMODE_H, G_MDSFT_ALPHADITHER, 2, mode)
-#endif
-
-
-#define	gsSPSetOtherMode(cmd, sft, len, data)				\
-{{									\
-	_SHIFTL(cmd, 24, 8) | _SHIFTL(sft, 8, 8) | _SHIFTL(len, 0, 8),	\
-	(unsigned int)(data)						\
-}}
-*/
-                    case (byte)RSPCmd.SetOtherModeH: {
-                            uint uploadData = ReadU32(data, 4);
-                            Dictionary<byte, string> functions = new() {
-                                { 4, "gsDPSetAlphaDither" },
-                                { 6, "gsDPSetColorDither" },
-                                { 8, "gsDPSetCombineKey" },
-                                { 9, "gsDPSetTextureConvert" },
-                                { 12, "gsDPSetTextureFilter" },
-                                { 14, "gsDPSetTextureLUT" },
-                                { 16, "gsDPSetTextureLOD" },
-                                { 17, "gsDPSetTextureDetail" },
-                                { 19, "gsDPSetTexturePersp" },
-                                { 20, "gsDPSetCycleType" },
-                                { 23, "gsDPPipelineMode" },
-                            };
-
-                            if (functions.TryGetValue((byte)(data[2] >> 1), out string func)) {
-                                debugLine = $"{func}(0x{uploadData:X8})";
-                                color = ConsoleColor.Blue; // configuration
-                            }
-                            else {
-                                debugLine = $"UNKNOWN SetOtherModeH {string.Join(", ", data.Select(b => b.ToString("X2")))}";
-                                color = ConsoleColor.Red; // unknown
-                            }
-                        }
-                        break;
-                    
-/*
-# define gsSPTexture(s, t, level, tile, on)				\
-{{									\
-	(_SHIFTL(G_TEXTURE,24,8)|_SHIFTL(BOWTIE_VAL,16,8)|		\
-	 _SHIFTL((level),11,3)|_SHIFTL((tile),8,3)|_SHIFTL((on),0,8)),	\
-        (_SHIFTL((s),16,16)|_SHIFTL((t),0,16))				\
-}}
-*/
-                    case (byte)RSPCmd.Texture:
-                        debugLine = $"gsSPTexture({ReadU16(data, 4)}, {ReadU16(data, 6)}, {(data[2] >> 3) & 0x7}, {(data[2] >> 0) & 0x7}, {data[3]})";
-                        color = ConsoleColor.Blue; // configuration
-                        break;
-
-/*
-#define	gsDPFullSync()		gsDPNoParam(G_RDPFULLSYNC)
-#define	gsDPTileSync()		gsDPNoParam(G_RDPTILESYNC)
-#define	gsDPPipeSync()		gsDPNoParam(G_RDPPIPESYNC)
-#define	gsDPLoadSync()		gsDPNoParam(G_RDPLOADSYNC)
-*/
-                    case (byte)RDPCmd.FullSync:
-                        debugLine = $"gsDPFullSync()";
-                        color = ConsoleColor.Magenta; // sync
-                        break;
-                    case (byte)RDPCmd.TileSync:
-                        debugLine = $"gsDPTileSync()";
-                        color = ConsoleColor.Magenta; // sync
-                        break;
-                    case (byte)RDPCmd.PipeSync:
-                        debugLine = $"gsDPPipeSync()";
-                        color = ConsoleColor.Magenta; // sync
-                        break;
-                    case (byte)RDPCmd.LoadSync:
-                        debugLine = $"gsDPLoadSync()";
-                        color = ConsoleColor.Magenta; // sync
-                        break;
-
-/*
-#define gsDPLoadTileGeneric(c, tile, uls, ult, lrs, lrt)		\
-{{									\
-	_SHIFTL(c, 24, 8) | _SHIFTL(uls, 12, 12) | _SHIFTL(ult, 0, 12),	\
-	_SHIFTL(tile, 24, 3) | _SHIFTL(lrs, 12, 12) | _SHIFTL(lrt, 0, 12)\
-}}
-
-#define	gDPSetTileSize(pkt, t, uls, ult, lrs, lrt)			\
-		gDPLoadTileGeneric(pkt, G_SETTILESIZE, t, uls, ult, lrs, lrt)
-#define	gsDPSetTileSize(t, uls, ult, lrs, lrt)				\
-		gsDPLoadTileGeneric(G_SETTILESIZE, t, uls, ult, lrs, lrt)
-#define	gDPLoadTile(pkt, t, uls, ult, lrs, lrt)				\
-		gDPLoadTileGeneric(pkt, G_LOADTILE, t, uls, ult, lrs, lrt)
-#define	gsDPLoadTile(t, uls, ult, lrs, lrt)				\
-		gsDPLoadTileGeneric(G_LOADTILE, t, uls, ult, lrs, lrt)
-*/
-                    case (byte)RDPCmd.SetTileSize:
-                        debugLine = $"gsDPSetTileSize({(ReadU16(data, 1) >> 4) & 0xFFF}, {ReadU16(data, 2) & 0xFFF}, {data[4]}, {(ReadU16(data, 5) >> 4) & 0xFFF}, {ReadU16(data, 6) & 0xFFF})";
-                        color = ConsoleColor.Blue; // configuration
-                        break;
-                    // this command appears to be completely unused:fire:
-                    case (byte)RDPCmd.LoadTile:
-                        debugLine = $"gsDPLoadTile({(ReadU16(data, 1) >> 4) & 0xFFF}, {ReadU16(data, 2) & 0xFFF}, {data[4]}, {(ReadU16(data, 5) >> 4) & 0xFFF}, {ReadU16(data, 6) & 0xFFF})";
-                        color = ConsoleColor.Green; // dma?
-                        break;
-
-/*
-#define gsDPLoadBlock(tile, uls, ult, lrs, dxt)				\
-{{									\
-	(_SHIFTL(G_LOADBLOCK, 24, 8) | _SHIFTL(uls, 12, 12) | 		\
-	 _SHIFTL(ult, 0, 12)),						\
-	(_SHIFTL(tile, 24, 3) | 					\
-	 _SHIFTL((MIN(lrs,G_TX_LDBLK_MAX_TXL)), 12, 12) |		\
-	 _SHIFTL(dxt, 0, 12))						\
-}}
-*/
-                    case (byte)RDPCmd.LoadBlock:
-                        debugLine = $"gsDPLoadBlock({data[4]}, {(ReadU16(data, 1) >> 4) & 0xFFF}, {ReadU16(data, 2) & 0xFFF}, {(ReadU16(data, 5) >> 4) & 0xFFF}, {ReadU16(data, 6) & 0xFFF})";
-                        color = ConsoleColor.Green; // dma
-                        break;
-
-/*
-#define	gsDPSetTile(fmt, siz, line, tmem, tile, palette, cmt,		\
-		maskt, shiftt, cms, masks, shifts)			\
-{{									\
-	(_SHIFTL(G_SETTILE, 24, 8) | _SHIFTL(fmt, 21, 3) | 		\
-	 _SHIFTL(siz, 19, 2) | _SHIFTL(line, 9, 9) | _SHIFTL(tmem, 0, 9)),\
-        (_SHIFTL(tile, 24, 3) | _SHIFTL(palette, 20, 4) | 		\
-	 _SHIFTL(cmt, 18, 2) | _SHIFTL(maskt, 14, 4) | 			\
-	 _SHIFTL(shiftt, 10, 4) | _SHIFTL(cms, 8, 2) | 			\
-	 _SHIFTL(masks, 4, 4) | _SHIFTL(shifts, 0, 4))			\
-}}
-*/
-                    case (byte)RDPCmd.SetTile:
-                        debugLine = $"gsDPSetTile({(data[1] >> 5) & 0x7}, {(data[1] >> 3) & 0x3}, {(ReadU32(data, 0) >> 9) & 0x1FF}, {(ReadU32(data, 0) >> 0) & 0x1FF}" +
-                        $", {(ReadU32(data, 4) >> 24) & 0x7}, {(ReadU32(data, 4) >> 20) & 0xF}, {(ReadU32(data, 4) >> 18) & 0x3}, {(ReadU32(data, 4) >> 14) & 0xF}, {(ReadU32(data, 4) >> 10) & 0xF}" +
-                        $", {(ReadU32(data, 4) >> 8) & 0x3}, {(ReadU32(data, 4) >> 4) & 0xF}, {(ReadU32(data, 4) >> 0) & 0xF})";
-                        color = ConsoleColor.Blue; // configuration
-                        break;
-
-/*
-#define	gsDPSetColor(c, d)						\
-{{									\
-	_SHIFTL(c, 24, 8), (unsigned int)(d)				\
-}}
-
-#define	sDPRGBColor(cmd, r, g, b, a)					\
-	    gsDPSetColor(cmd,						\
-			 (_SHIFTL(r, 24, 8) | _SHIFTL(g, 16, 8) | 	\
-			  _SHIFTL(b, 8, 8) | _SHIFTL(a, 0, 8)))
-
-#define	gsDPSetEnvColor(r, g, b, a)					\
-            sDPRGBColor(G_SETENVCOLOR, r,g,b,a)
-#define	gsDPSetBlendColor(r, g, b, a)					\
-            sDPRGBColor(G_SETBLENDCOLOR, r,g,b,a)
-#define	gsDPSetFogColor(r, g, b, a)					\
-            sDPRGBColor(G_SETFOGCOLOR, r,g,b,a)
-#define	gsDPSetFillColor(d)						\
-            gsDPSetColor(G_SETFILLCOLOR, (d))
-*/
-                    case (byte)RDPCmd.SetFillColor:
-                        debugLine = $"gsDPSetFillColor(0x{ReadU32(data, 4):X8})";
-                        color = ConsoleColor.Cyan; // color
-                        break;
-                    case (byte)RDPCmd.SetFogColor:
-                        debugLine = $"gsDPSetFogColor(0x{ReadU8(data, 4):X2}, 0x{ReadU8(data, 5):X2}, 0x{ReadU8(data, 6):X2}, 0x{ReadU8(data, 7):X2})";
-                        color = ConsoleColor.Cyan; // color
-                        break;
-                    case (byte)RDPCmd.SetBlendColor:
-                        debugLine = $"gsDPSetBlendColor(0x{ReadU8(data, 4):X2}, 0x{ReadU8(data, 5):X2}, 0x{ReadU8(data, 6):X2}, 0x{ReadU8(data, 7):X2})";
-                        color = ConsoleColor.Cyan; // color
-                        break;
-                    case (byte)RDPCmd.SetEnvColor:
-                        debugLine = $"gsDPSetEnvColor(0x{ReadU8(data, 4):X2}, 0x{ReadU8(data, 5):X2}, 0x{ReadU8(data, 6):X2}, 0x{ReadU8(data, 7):X2})";
-                        color = ConsoleColor.Cyan; // color
-                        break;
-
-/*
-#define	GCCc0w0(saRGB0, mRGB0, saA0, mA0)				\
-		(_SHIFTL((saRGB0), 20, 4) | _SHIFTL((mRGB0), 15, 5) | 	\
-		 _SHIFTL((saA0), 12, 3) | _SHIFTL((mA0), 9, 3))
-
-#define	GCCc1w0(saRGB1, mRGB1)						\
-		(_SHIFTL((saRGB1), 5, 4) | _SHIFTL((mRGB1), 0, 5))
-
-#define GCCc0w1(sbRGB0, aRGB0, sbA0, aA0)				\
-                (_SHIFTL((sbRGB0), 28, 4) | _SHIFTL((aRGB0), 15, 3) |	\
-		 _SHIFTL((sbA0), 12, 3) | _SHIFTL((aA0), 9, 3))
-
-#define	GCCc1w1(sbRGB1, saA1, mA1, aRGB1, sbA1, aA1)			\
-		(_SHIFTL((sbRGB1), 24, 4) | _SHIFTL((saA1), 21, 3) |	\
-		 _SHIFTL((mA1), 18, 3) | _SHIFTL((aRGB1), 6, 3) |	\
-		 _SHIFTL((sbA1), 3, 3) | _SHIFTL((aA1), 0, 3))
-
-#define	gsDPSetCombineLERP(a0, b0, c0, d0, Aa0, Ab0, Ac0, Ad0,		\
-		a1, b1, c1, d1,	Aa1, Ab1, Ac1, Ad1)			\
-{{									\
-	_SHIFTL(G_SETCOMBINE, 24, 8) |					\
-	_SHIFTL(GCCc0w0(G_CCMUX_##a0, G_CCMUX_##c0,			\
-		       G_ACMUX_##Aa0, G_ACMUX_##Ac0) |			\
-	       GCCc1w0(G_CCMUX_##a1, G_CCMUX_##c1), 0, 24),		\
-	(unsigned int)(GCCc0w1(G_CCMUX_##b0, G_CCMUX_##d0,		\
-			       G_ACMUX_##Ab0, G_ACMUX_##Ad0) |		\
-		       GCCc1w1(G_CCMUX_##b1, G_ACMUX_##Aa1,		\
-			       G_ACMUX_##Ac1, G_CCMUX_##d1,		\
-			       G_ACMUX_##Ab1, G_ACMUX_##Ad1))		\
-}}
-*/
-                    case (byte)RDPCmd.SetCombine: {
-                        uint word0 = ReadU32(data, 0);
-                        uint word1 = ReadU32(data, 4);
-
-                        // Decode GCCc0w0 from word0 (bits 0-23)
-                        int saRGB0 = (int)((word0 >> 20) & 0xF);
-                        int mRGB0 = (int)((word0 >> 15) & 0x1F);
-                        int saA0 = (int)((word0 >> 12) & 0x7);
-                        int mA0 = (int)((word0 >> 9) & 0x7);
-
-                        // Decode GCCc1w0 from word0 (bits 24-31)
-                        int saRGB1 = (int)((word0 >> 5) & 0xF);
-                        int mRGB1 = (int)(word0 & 0x1F);
-
-                        // Decode GCCc0w1 from word1 (bits 0-31)
-                        int sbRGB0 = (int)((word1 >> 28) & 0xF);
-                        int aRGB0 = (int)((word1 >> 15) & 0x7);
-                        int sbA0 = (int)((word1 >> 12) & 0x7);
-                        int aA0 = (int)((word1 >> 9) & 0x7);
-
-                        // Decode GCCc1w1 from word1 (bits 0-31)
-                        int sbRGB1 = (int)((word1 >> 24) & 0xF);
-                        int saA1 = (int)((word1 >> 21) & 0x7);
-                        int mA1 = (int)((word1 >> 18) & 0x7);
-                        int aRGB1 = (int)((word1 >> 6) & 0x7);
-                        int sbA1 = (int)((word1 >> 3) & 0x7);
-                        int aA1 = (int)(word1 & 0x7);
-
-                        debugLine = $"gsDPSetCombineLERP({saRGB0}, {mRGB0}, {saA0}, {mA0}, {sbRGB0}, {aRGB0}, {sbA0}, {aA0}, " +
-                                        $"{saRGB1}, {mRGB1}, {sbRGB1}, {saA1}, {mA1}, {aRGB1}, {sbA1}, {aA1})";
-                        color = ConsoleColor.Blue; // configuration
-                    }
-                        break;
-
-/*
-#define	gsSetImage(cmd, fmt, siz, width, i)				\
-{{									\
-	_SHIFTL(cmd, 24, 8) | _SHIFTL(fmt, 21, 3) |			\
-	_SHIFTL(siz, 19, 2) | _SHIFTL((width)-1, 0, 12),		\
-	(uintptr_t)(i)						\
-}}
-#define	gsDPSetTextureImage(f, s, w, i)	gsSetImage(G_SETTIMG, f, s, w, i)
-*/
-                    case (byte)RDPCmd.SetTextureImage:
-                        debugLine = $"gsDPSetTextureImage({(data[1] >> 5) & 0x7}, {(data[1] >> 3) & 0x3}, {ReadU16(data, 2)}, 0x{ReadU32(data, 4):X8})";
-                        color = ConsoleColor.Blue; // configuration
-                        break;
-                }
-
-                Console.ForegroundColor = color;
-                if (pad == -1)
-                    Console.WriteLine(debugLine);
-                else
-                    Console.Write(debugLine.PadRight(pad, ' '));
-            }
-
-            // Merge intersecting data loads for optimization and to prevent issues.
-            loads = loads.OrderBy((load) => load.pointer).ToList();
-            for (int i = 0; i < loads.Count - 1; i++) {
-                var load1 = loads[i];
-                var load2 = loads[i + 1];
-
-                if (load1.pointer + load1.length > load2.pointer) {
-                    loads[i] = (load1.pointer, (int)Math.Max(load1.length, load2.pointer - load1.pointer + load2.length), load1.type);
-                    loads.RemoveAt(i + 1);
-                    i--;
-                }
-            }
-
-            // Merge consecutive data loads of similar data.
-            for (int i = 0; i < loads.Count - 1; i++) {
-                var load1 = loads[i];
-                var load2 = loads[i + 1];
-
-                if (load1.pointer + load1.length >= load2.pointer && load1.type > 1 && load1.type == load2.type) {
-                    loads[i] = (load1.pointer, (int)Math.Max(load1.length, load2.pointer - load1.pointer + load2.length), load1.type);
-                    loads.RemoveAt(i + 1);
-                    i--;
-                }
-            }
-
-            // Now, fetch all the data we need.
-            foreach ((uint pointer, int length, int type) in loads) {
-                byte[] data = new byte[length];
-                buffer.Seek(pointer, SeekOrigin.Begin);
-                buffer.Read(data, 0, length);
-                byte[] pad = new byte[0x10 - (length & 0xF)];
-                bool exists = false;
-
-                if (type > 1 && (length & 0xF) == 0) {
-                    // vertex load,
-                    // see if we can like unshit the uvs on this or something
-                    Vtx_tn[] vertices = new Vtx_tn[length / 0x10];
-                    for (int i = 0; i < vertices.Length; i++) {
-                        vertices[i] = Vtx_tn.Read(data, (uint)(i * 0x10));
-                    }
-
-                    uint texPtr = (uint)(type & 0xFFFFFF);
-                    bool wide = (type & 0x01000000) != 0;
-                    bool tall = (type & 0x02000000) != 0;
-
-                    const short UV_SNAP = 1024;
-                    // geometries spanning a lot of surfaces will have a lot of uv wraparound which causes artifacts when scaled,
-                    // a max size is necessary to prevent these artifacts
-                    const short UV_SNAP_MAX_SIZE = 4096;
-                    const short UV_SNAP_MARGIN = 128;
-                    const short UV_HALF_PIXEL = 16;
-                    const short U_OFFSET = -16;
-                    const short V_OFFSET = -16;
-
-                    short uMin = vertices.Min(v => v.texX);
-                    short uMax = vertices.Max(v => v.texX);
-                    short vMin = vertices.Min(v => v.texY);
-                    short vMax = vertices.Max(v => v.texY);
-
-                    if (uMin < uMax - (UV_SNAP - UV_SNAP_MARGIN * 2) && vMin < vMax - (UV_SNAP - UV_SNAP_MARGIN * 2)) {
-                        short uMinNew = uMin;
-                        short uMaxNew = uMax;
-                        short vMinNew = vMin;
-                        short vMaxNew = vMax;
-
-                        if ((uMax - uMin) < UV_SNAP_MAX_SIZE) {
-                            short dist = (short)uvmod(uMinNew, UV_SNAP);
-                            if (dist > UV_SNAP / 2)
-                                dist -= UV_SNAP;
-                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                                uMinNew = (short)(uMinNew - dist + UV_HALF_PIXEL + U_OFFSET);
-                            }
-
-                            dist = (short)uvmod(uMaxNew, UV_SNAP);
-                            if (dist > UV_SNAP / 2)
-                                dist -= UV_SNAP;
-                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                                uMaxNew = (short)(uMaxNew - dist - UV_HALF_PIXEL + U_OFFSET);
-                            }
-                        }
-
-                        if ((vMax - vMin) < UV_SNAP_MAX_SIZE) {
-                            short dist = (short)uvmod(vMinNew, UV_SNAP);
-                            if (dist > UV_SNAP / 2)
-                                dist -= UV_SNAP;
-                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                                vMinNew = (short)(vMinNew - dist + UV_HALF_PIXEL + V_OFFSET);
-                            }
-
-                            dist = (short)uvmod(vMaxNew, UV_SNAP);
-                            if (dist > UV_SNAP / 2)
-                                dist -= UV_SNAP;
-                            if (Math.Abs(dist) < UV_SNAP_MARGIN) {
-                                vMaxNew = (short)(vMaxNew - dist - UV_HALF_PIXEL + V_OFFSET);
-                            }
-                        }
-
-                        short uRange = (short)(UV_SNAP * (wide ? 2 : 1) - UV_HALF_PIXEL * 2);
-                        short uEnd = (short)(uRange + UV_HALF_PIXEL + U_OFFSET);
-                        short vRange = (short)(UV_SNAP * (tall ? 2 : 1) - UV_HALF_PIXEL * 2);
-                        short vEnd = (short)(vRange + UV_HALF_PIXEL + V_OFFSET);
-                        if ((uMaxNew - uMinNew) == uRange) {
-                            // how convenient...
-                            uMinNew = UV_HALF_PIXEL + U_OFFSET;
-                            uMaxNew = uEnd;
-                        }
-                        if ((vMaxNew - vMinNew) == vRange) {
-                            // how convenient...
-                            vMinNew = UV_HALF_PIXEL + V_OFFSET;
-                            vMaxNew = vEnd;
-                        }
-
-                        for (int i = 0; i < vertices.Length; i++) {
-                            Vtx_tn v = vertices[i];
-                            if (uMin != uMinNew || uMax != uMaxNew)
-                                v.texX = (short)Math.Round(Remap(v.texX, uMin, uMax, uMinNew, uMaxNew));
-                            if (vMin != vMinNew || vMax != vMaxNew)
-                                v.texY = (short)Math.Round(Remap(v.texY, vMin, vMax, vMinNew, vMaxNew));
-                            vertices[i] = v;
-                        }
-
-                        (bool u, bool v) clampma = (false, false);
-                        if (uMinNew == UV_HALF_PIXEL + U_OFFSET && uMaxNew == uEnd) {
-                            clampma.u = true;
-                        }
-                        if (vMinNew == UV_HALF_PIXEL + V_OFFSET && vMaxNew == vEnd) {
-                            clampma.v = true;
-                        }
-
-                        if (!clamp.ContainsKey(texPtr))
-                            clamp.Add(texPtr, (true, true));
-                        clamp[texPtr] = (clamp[texPtr].u && clampma.u, clamp[texPtr].v && clampma.v);
-                    }
-
-                    for (int i = 0; i < vertices.Length; i++) {
-                        byte[] bytes = vertices[i].ToBytes();
-                        Array.Copy(bytes, 0, data, i * 0x10, 0x10);
-                    }
-                }
-
-                foreach (KeyValuePair<uint, byte[]> dataEntry in newData) {
-                    if (data.SequenceEqual(dataEntry.Value)) {
-                        exists = true;
-                        oldToNewPtrMap.Add(pointer, dataEntry.Key);
-                        break;
-                    }
-                }
-
-                if (!exists) {
-                    uint newPtr = (uint)newBuffer.Count;
-                    newBuffer.AddRange(data);
-                    if (pad.Length < 0x10)
-                        newBuffer.AddRange(pad);
-
-                    newData.Add(newPtr, data);
-                    oldToNewPtrMap.Add(pointer, newPtr);
-                }
-            }
-            if (areaPainting64Cfg != null) {
-                uint newPtr = (uint)newBuffer.Count;
-                byte[] fuck = new byte[areaPainting64Cfg.paintingCount * 0x80];
-                newBuffer.AddRange(fuck);
-                newData.Add(newPtr, fuck);
-                oldToNewPtrMap.Add(areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF, newPtr);
-            }
-
-            //Console.WriteLine($"Loads: {STAT_totalLoads} total, {STAT_uniqueLoads} unique.");
-            //Console.WriteLine($"New data size: {newBuffer.Count:X2}");
-
-            // We have everything, construct display lists now.
-            foreach (Geopointer ptr in buffer.DLPointers) {
-                uint startptr = (uint)(ptr.SegPointer & 0xFFFFFF);
-                uint dataptr = startptr;
-                byte[] cmdBuffer = new byte[8];
-                byte[] newCmdBuffer = new byte[8];
-
-                // Geometry scan, this optimizes rom manager's gsSPVertex and gsSP1Triangle visione
-                Dictionary<uint, byte[]> geometryBalls = [];
-                //if (level.LevelID == 0x10 && area.AreaID == 5)
-                {
-                    // Step 1: extract every gsSPVertex and gsSP1Triangle call.
-                    List<List<(uint ptr, byte[] cmd)>> drawCommandmas = [];
-                    {
-                        List<(uint ptr, byte[] cmd)> drawCommands = [];
-                        uint vertPtr = 0;
-                        buffer.Seek(dataptr, SeekOrigin.Begin);
-                        while (dataptr < buffer.Length) {
-                            buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                            dataptr += 8;
-
-                            switch (cmdBuffer[0]) {
-                                case (byte)RSPCmd.DisplayList:
-                                    throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                                case (byte)RSPCmd.EndDisplayList:
-                                    if (drawCommands.Count > 0)
-                                        drawCommandmas.Add(drawCommands);
-                                    goto __dlEnd;
-
-                                case (byte)RSPCmd.Vertex: {
-                                    byte[] newBuf = new byte[8];
-                                    Array.Copy(cmdBuffer, newBuf, cmdBuffer.Length);
-                                    drawCommands.Add((dataptr - 8, newBuf));
-
-                                    vertPtr = ReadU32(newBuf, 4) & 0xFFFFFF;
-                                }
-                                    break;
-                                case (byte)RSPCmd.Tri1: {
-                                    byte[] newBuf = new byte[8];
-                                    Array.Copy(cmdBuffer, newBuf, cmdBuffer.Length);
-
-                                    uint v1i = cmdBuffer[5] / 10u, v2i = cmdBuffer[6] / 10u, v3i = cmdBuffer[7] / 10u, flag = cmdBuffer[4];
-                                    if (v1i == v2i || v1i == v3i || v2i == v3i) {
-                                        // yes, somehow there's even these type of obvious 0 area triangles
-                                        gSPNoOp(newBuf);
-                                        geometryBalls.Add(dataptr - 8, newBuf);
-                                        break;
-                                    }
-                                    // Read vertices from buffer
-                                    Vtx_tn v1 = Vtx_tn.Read(buffer, vertPtr + (v1i * 0x10));
-                                    Vtx_tn v2 = Vtx_tn.Read(buffer, vertPtr + (v2i * 0x10));
-                                    Vtx_tn v3 = Vtx_tn.Read(buffer, vertPtr + (v3i * 0x10));
-                                    //if (verboseDebug)
-                                    //    Console.Write($"Area: {TriArea(v1, v2, v3)}");
-
-                                    if (IsTriDegenerate(v1, v2, v3)) {
-                                        gSPNoOp(newBuf);
-                                        geometryBalls.Add(dataptr - 8, newBuf);
-                                        break;
-                                    }
-
-                                    drawCommands.Add((dataptr - 8, newBuf));
-                                }
-                                    break;
-                                default:
-                                    if (drawCommands.Count > 0)
-                                        drawCommandmas.Add(drawCommands);
-                                    drawCommands = [];
-                                    break;
-                            }
-                        }
-                    }
-
-                    __dlEnd:
-                    // Step 2: search for possible reductions
-                    foreach (List<(uint ptr, byte[] cmd)> drawCommands in drawCommandmas) {
-                        int lastVertexLoadIndex = -1;
-                        uint vertexPtr = 0;
-                        uint vertexCount = 0;
-
-                        int debugballs = 0;
-                        for (int i = 0; i < drawCommands.Count; i++) {
-                            uint currentCmdPtr = drawCommands[i].ptr;
-                            Array.Copy(drawCommands[i].cmd, cmdBuffer, cmdBuffer.Length);
-
-                            switch (cmdBuffer[0]) {
-                                case (byte)RSPCmd.Vertex: {
-                                    ushort loadLength = ReadU16(cmdBuffer, 2);
-                                    uint loadedVertexPtr, newVertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                                    uint loadedVertexCount, newVertexCount = loadLength / 0x10u;
-                                    int newVertexLoadIndex = i;
-                                    loadedVertexPtr = newVertexPtr;
-                                    loadedVertexCount = newVertexCount;
-
-                                    if (newVertexPtr == vertexPtr + vertexCount * 0x10 && vertexCount <= 13) {
-                                        debugballs--;
-                                        /*if (newVertexPtr == 0x06C4C0 && newVertexCount == 9) {
-                                            debugballs = 5;
-                                            Console.WriteLine($"debugma 5 balls.");
-                                        }*/
-                                        if (debugballs > 0) {
-                                            Console.WriteLine($"\tvertexPtr: 0x0E{vertexPtr:X6}");
-                                            Console.WriteLine($"\tvertexCount: {vertexCount}");
-                                            Console.WriteLine($"\tnewVertexPtr (just loaded): 0x0E{newVertexPtr:X6}");
-                                        }
-                                        // Perform lookahead scan.
-                                        // If we can borrow (at least some of) the next vertex load's triangles
-                                        // by simply loading more vertices in the first place, then we should.
-                                        byte[] _cmdBuffer = new byte[8];
-                                        int j;
-
-                                        if (debugballs > 0) {
-                                            Console.WriteLine("scan1");
-                                        }
-                                        bool perfectMerge = false;
-                                        for (j = i + 1; j < drawCommands.Count; j++) {
-                                            if (debugballs > 0) {
-                                                Console.Write($"{drawCommands[j].ptr:X8}: ");
-                                                printCmd(drawCommands[j].cmd, -1);
-                                                Console.ResetColor();
-                                            }
-                                            Array.Copy(drawCommands[j].cmd, _cmdBuffer, _cmdBuffer.Length);
-
-                                            switch (_cmdBuffer[0]) {
-                                                case (byte)RSPCmd.Tri1:
-                                                    int v1 = _cmdBuffer[5] / 10, v2 = _cmdBuffer[6] / 10, v3 = _cmdBuffer[7] / 10;
-
-                                                    if (debugballs > 0) {
-                                                        Console.WriteLine($"{vertexCount} + Math.Max({v1}, Math.Max({v2}, {v3})) >= 16");
-                                                    }
-                                                    if (vertexCount + Math.Max(v1, Math.Max(v2, v3)) >= 16) {
-                                                        if (debugballs > 0) {
-                                                            Console.WriteLine("break condition: vertexCount");
-                                                        }
-                                                        goto _search1end;
-                                                    }
-                                                    break;
-                                                case (byte)RSPCmd.Vertex:
-                                                    if (debugballs > 0) {
-                                                        Console.WriteLine("break condition: vertex command");
-                                                    }
-                                                    perfectMerge = true;
-                                                    goto _search1end;
-                                            }
-                                        }
-                                        _search1end:
-                                        j--; // to get the last valid command
-
-                                        if (debugballs > 0) {
-                                            Console.WriteLine("writema balls");
-                                        }
-                                        for (int k = i + 1; k <= j; k++) {
-                                            Array.Copy(drawCommands[k].cmd, _cmdBuffer, _cmdBuffer.Length);
-                                            if (_cmdBuffer[0] != (byte)RSPCmd.Tri1) continue;
-
-                                            uint v1 = _cmdBuffer[5] / 10u, v2 = _cmdBuffer[6] / 10u, v3 = _cmdBuffer[7] / 10u, flag = _cmdBuffer[4];
-                                            if (newVertexPtr != vertexPtr) {
-                                                newVertexPtr = vertexPtr;
-                                                newVertexCount = 0;
-                                                newVertexLoadIndex = lastVertexLoadIndex;
-                                            }
-                                            newVertexCount = Math.Max(newVertexCount, vertexCount + 1 + Math.Max(v1, Math.Max(v2, v3)));
-                                            if (debugballs > 0) {
-                                                Console.WriteLine($"\tnewVertexPtr: 0x0E{newVertexPtr:X6}");
-                                                Console.WriteLine($"\tnewVertexCount: {newVertexCount}");
-                                            }
-
-                                            gSP1Triangle(drawCommands[k - 1].cmd, vertexCount + v1, vertexCount + v2, vertexCount + v3, flag);
-                                            if (debugballs > 0) {
-                                                Console.Write($"{drawCommands[k - 1].ptr:X8} = ");
-                                                printCmd(drawCommands[k - 1].cmd, -1);
-                                                Console.ResetColor();
-                                            }
-                                        }
-                                        if (j > i) {
-                                            uint vertexOffset = 16;
-                                            // These 2 loops start at the first invalid command, which is either a triangle or a vertex.
-                                            // We're only interested if they're triangles, we want to reduce the vertex indices in this case
-                                            for (int k = j + 1; k < drawCommands.Count; k++) {
-                                                Array.Copy(drawCommands[k].cmd, _cmdBuffer, _cmdBuffer.Length);
-
-                                                switch (_cmdBuffer[0]) {
-                                                    case (byte)RSPCmd.Tri1:
-                                                        uint v1 = _cmdBuffer[5] / 10u, v2 = _cmdBuffer[6] / 10u, v3 = _cmdBuffer[7] / 10u;
-
-                                                        vertexOffset = Math.Min(vertexOffset, Math.Min(v1, Math.Min(v2, v3)));
-                                                        break;
-                                                    case (byte)RSPCmd.Vertex:
-                                                        goto _search2end;
-                                                }
-                                            }
-                                            _search2end:
-                                            for (int k = j + 1; k < drawCommands.Count; k++) {
-                                                Array.Copy(drawCommands[k].cmd, _cmdBuffer, _cmdBuffer.Length);
-
-                                                switch (_cmdBuffer[0]) {
-                                                    case (byte)RSPCmd.Tri1:
-                                                        uint v1 = _cmdBuffer[5] / 10u, v2 = _cmdBuffer[6] / 10u, v3 = _cmdBuffer[7] / 10u, flag = _cmdBuffer[4];
-
-                                                        gSP1Triangle(drawCommands[k].cmd, v1 - vertexOffset, v2 - vertexOffset, v3 - vertexOffset, flag);
-                                                        if (debugballs > 0) {
-                                                            Console.Write($"{drawCommands[k].ptr:X8} = ");
-                                                            printCmd(drawCommands[k].cmd, -1);
-                                                            Console.ResetColor();
-                                                        }
-                                                        break;
-                                                    case (byte)RSPCmd.Vertex:
-                                                        goto _search3end;
-                                                }
-                                            }
-                                            _search3end:
-                                            vertexOffset &= 0xF;
-                                            // Then, we insert the new vertex load command :D
-                                            if (perfectMerge || (j >= drawCommands.Count - 1 || drawCommands[j + 1].cmd[0] != (byte)RSPCmd.Tri1))
-                                                gSPNoOp(drawCommands[j].cmd);
-                                            else
-                                                gSPVertex(drawCommands[j].cmd, /*newVertexPtr + newVertexCount * 0x10*/ loadedVertexPtr + vertexOffset * 0x10, loadedVertexCount - vertexOffset, 0);
-                                            if (debugballs > 0) {
-                                                Console.Write($"{drawCommands[j].ptr:X8} = ");
-                                                printCmd(drawCommands[j].cmd, -1);
-                                                Console.ResetColor();
-                                            }
-                                            gSPVertex(drawCommands[lastVertexLoadIndex].cmd, newVertexPtr, newVertexCount, 0);
-                                            if (debugballs > 0) {
-                                                Console.Write($"{drawCommands[lastVertexLoadIndex].ptr:X8} = ");
-                                                printCmd(drawCommands[lastVertexLoadIndex].cmd, -1);
-                                                Console.ResetColor();
-                                            }
-                                        }
-                                    }
-
-                                    vertexPtr = newVertexPtr;
-                                    vertexCount = newVertexCount;
-                                    lastVertexLoadIndex = newVertexLoadIndex;
-                                }
-                                    break;
-                            }
-                        }
-
-                        // post analysis to make sure shit isn't being fucked
-                        if (verboseDebug) {
-                            Console.WriteLine("where is my ass?");
-                        }
-
-                        int vertMin = 0, vertMax = 0;
-                        uint vertPtr = 0;
-                        foreach ((uint ptr, byte[] cmd) bal in drawCommands) {
-                            if (verboseDebug) {
-                                printCmd(bal.cmd, 40);
-                                Console.ResetColor();
-                            }
-                            
-                            switch (bal.cmd[0]) {
-                                case (byte)RSPCmd.Vertex: {
-                                    /* (was chatgpt note ig this can be helpful for whoever reads or something)
-                                    This command takes vertex data at vertPtr, skips vertMin vertices, and loads *((u16*)(cmd + 2)) bytes of data.
-                                    Each vertex is 0x10 bytes long and uses the following C struct:
- *
- * Vertex (set up for use with normals)
- * 
-typedef struct {
-	short		ob[3];	 * x, y, z *  
-	unsigned short	flag;
-	short		tc[2];	 * texture coord * 
-	signed char	n[3];	 * normal * 
-	unsigned char   a;       * alpha  * 
-} Vtx_tn; // this is a 16 (0x10) byte struct
-                                    Vertex data can be obtained using a prior loaded variable:
-                                    `Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;`
-                                    which implements C# MemoryStream (seek and fetch bytes).
-
-                                    I have only created ReadU8, ReadU16, ReadU32, ReadU64 functions. Converting to signed requires (short)ReadU16()
-                                    */
-
-
-                                    vertMin = ReadU8(bal.cmd, 1) & 0xF;
-                                    vertMax = ReadU16(bal.cmd, 2) / 0x10 + vertMin;
-                                    vertPtr = ReadU32(bal.cmd, 4) & 0xFFFFFF;
-                                }
-                                break;
-                                case (byte)RSPCmd.Tri1: {
-                                    uint v1i = bal.cmd[5] / 10u, v2i = bal.cmd[6] / 10u, v3i = bal.cmd[7] / 10u, flag = bal.cmd[4];
-                                    if (v1i < vertMin || v1i >= vertMax || v2i < vertMin || v2i >= vertMax || v3i < vertMin || v3i >= vertMax)
-                                        throw new Exception("Bad vertex load");
-                                    
-                                    /*if (v1i == v2i || v1i == v3i || v2i == v3i) {
-                                        // yes, somehow there's even these type of obvious 0 area triangles
-                                        gSPNoOp(bal.cmd);
-                                    }
-                                    // Read vertices from buffer
-                                    Vtx_tn v1 = Vtx_tn.Read(buffer, vertPtr, (int)v1i);
-                                    Vtx_tn v2 = Vtx_tn.Read(buffer, vertPtr, (int)v2i);
-                                    Vtx_tn v3 = Vtx_tn.Read(buffer, vertPtr, (int)v3i);
-                                    //if (verboseDebug)
-                                    //    Console.Write($"Area: {TriArea(v1, v2, v3)}");
-
-                                    if (IsTriDegenerate(v1, v2, v3)) {
-                                        gSPNoOp(bal.cmd);
-                                    }*/
-                                }
-                                break;
-                            }
-                            if (verboseDebug)
-                                Console.WriteLine();
-                        }
-
-                        // finally we geometry the balls
-                        foreach ((uint ptr, byte[] cmd) bal in drawCommands) {
-                            geometryBalls.Add(bal.ptr, bal.cmd);
-                        }
-                    }
-                }
-
-                List<(List<byte> dl, uint sourceStart, uint sourceEnd, uint destStart)> materials = [];
-                (List<byte> dl, uint sourceStart, uint sourceEnd, uint destStart)? currentMat = null;
-                byte texType = 0;
-                bool thefunnytol = false;
-
-                Dictionary<string, ulong> rcpState = [];
-                Dictionary<string, ulong> rcpStateKnownBits = [];
-                byte envColorA = 255;
-                // Returns whether any state was modified.
-                bool RcpSetState(string name, ulong value, ulong mask) {
-                    if (!rcpState.ContainsKey(name))
-                        rcpState.Add(name, 0);
-                    if (!rcpStateKnownBits.ContainsKey(name))
-                        rcpStateKnownBits.Add(name, 0);
-
-                    value &= mask; // just to make sure
-                    /*if (verboseDebug) {
-                        Console.WriteLine($"Write {name} 0x{value:X8} mask 0x{mask:X8}");
-                        Console.WriteLine($"Current state {name} 0x{value:X8} mask 0x{mask:X8}");
-                    }*/
-                    if ((rcpStateKnownBits[name] & mask) == mask) {
-                        if ((rcpState[name] & mask) == value) {
-                            return false;
-                        }
-                    }
-
-                    rcpState[name] = (rcpState[name] & ~mask) | (value & mask);
-                    rcpStateKnownBits[name] |= mask;
-                    return true;
-                }
-
-                // first, we identify the materials and extract them.
-                dataptr = startptr;
-                buffer.Seek(dataptr, SeekOrigin.Begin);
-                uint currentTex = 0;
-                bool drawingGeometry = false;
-                while (dataptr < buffer.Length) {
-                    buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                    byte[] tro = new byte[cmdBuffer.Length];
-                    Array.Copy(cmdBuffer, tro, cmdBuffer.Length);
-                    if (geometryBalls.TryGetValue(dataptr, out byte[] overrideCmd)) {
-                        Array.Copy(overrideCmd, cmdBuffer, cmdBuffer.Length);
-                    }
-                    Array.Copy(cmdBuffer, newCmdBuffer, cmdBuffer.Length);
-                    dataptr += 8;
-                    bool skipCmd = false;
-                    bool _drawingGeometry = false;
-                    // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-
-                    switch (cmdBuffer[0]) {
-                        case (byte)RSPCmd.NOOP:
-                        case (byte)RDPCmd.NOOP:
-                            skipCmd = true; // should be obvious why
-                            break;
-                        case 0x03: { // G_MOVEMEM
-                            // usually used at the end of the prologue of a DL, to set up the lights
-                            // this isn't drawing geometry, but let's signal that the end of this is the start of the first material
-                            _drawingGeometry = true;
-
-                            uint lightPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-
-                            if (!tryMapPtr(lightPtr, out uint val)) {
-                                throw new Exception($"G_MOVEMEM with unmapped ptr {lightPtr:X2}??");
-                            }
-
-                            WriteU32(newCmdBuffer, 4, val | 0x0E000000);
-                        }
-                            break;
-                        case (byte)RSPCmd.Vertex: {
-                            //thefunnytol = Random.Shared.NextDouble() < 0.8;
-                            skipCmd = thefunnytol;
-                            _drawingGeometry = true;
-
-                            if (!skipCmd) {
-                                uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                                vertexPtr += (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
-
-                                if (!tryMapPtr(vertexPtr, out uint val)) {
-                                    throw new Exception($"gsSPVertex with unmapped ptr {vertexPtr:X2}??");
-                                }
-
-                                val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
-                                //if (verboseDebug)
-                                //    Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
-                                WriteU32(newCmdBuffer, 4, val | 0x0E000000);
-                            }
-                        }
-                            break;
-                        case (byte)RSPCmd.DisplayList:
-                            throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                        case (byte)RSPCmd.EndDisplayList:
-				            goto dlEnd1;
-                        case (byte)RDPCmd.SetEnvColor:
-                            envColorA = ReadU8(cmdBuffer, 7);
-                            currentTex = 0;
-                            thefunnytol = envColorA <= 1;
-                            break;
-                        case (byte)RDPCmd.SetTextureImage: {
-                            texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-                            uint textureImage = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                            currentTex = textureImage;
-                            //uint textureID = GetTextureID(textureImage, texType);
-
-                            thefunnytol = envColorA <= 1;
-                            if (areaPainting64Cfg != null) {
-                                thefunnytol = textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF) ||
-                                    (areaPainting64Cfg.textureSegmentedAddresses.Any(addr => textureImage == (addr & 0xFFFFFF)) &&
-                                    !areaPainting64Cfg.textureSegmentedAddresses_NoPurge.Any(addr => textureImage == (addr & 0xFFFFFF)));
-                            }
-
-                            if (!thefunnytol) {
-                                if (!tryMapPtr(textureImage, out uint val)) {
-                                    throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
-                                }
-                                WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
-                                skipCmd = false;
-                            }
-                            else {
-                                skipCmd = true;
-                            }
-
-                            //if (!newTextureCmds.ContainsKey(val))
-                            //    newTextureCmds.Add(val, []);
-                            //Console.WriteLine($"Entering texture {val:X8}");
-                            //currentList = newTextureCmds[val];
-
-                            //WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-                            /* TODO: CI4 conversion
-                            if (texType == ((2 << 2) | 0)) {
-                                Console.WriteLine("Conversion to CI4 in effect!");
-                                Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-                                Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
-                            }*/
-                        }
-                            break;
-                        case (byte)RSPCmd.Tri1:
-                            _drawingGeometry = true;
-                            skipCmd = thefunnytol;
-                            break;
-
-                        case (byte)RSPCmd.SetGeometryMode:
-                            skipCmd = !RcpSetState("SPGeometryMode", 0xFFFFFFFF, ReadU32(cmdBuffer, 4));
-                            break;
-                        case (byte)RSPCmd.ClearGeometryMode:
-                            skipCmd = !RcpSetState("SPGeometryMode", 0x00000000, ReadU32(cmdBuffer, 4));
-                            break;
-                        case (byte)RSPCmd.SetOtherModeH:
-                            skipCmd = !RcpSetState("SPOtherModeH", ReadU32(cmdBuffer, 4), (uint)((1 << cmdBuffer[2]) - 1) << cmdBuffer[3]);
-                            break;
-
-                        case (byte)RDPCmd.FullSync:
-                        case (byte)RDPCmd.LoadSync:
-                        case (byte)RDPCmd.PipeSync:
-                        case (byte)RDPCmd.TileSync:
-                        case (byte)RDPCmd.LoadBlock: // (contains texture size)
-                            //skipCmd = currentListContainsCmd((byte)RDPCmd.LoadBlock);
-                            skipCmd = thefunnytol;
-                            break;
-
-                        case (byte)RDPCmd.SetTileSize:
-                            skipCmd = !RcpSetState("DPTileSize", ((ulong)(ReadU32(cmdBuffer, 0) & 0xFFFFFF) << 32) | ReadU32(cmdBuffer, 4), 0x00FFFFFFFFFFFFFF);
-                            break;
-                        case (byte)RDPCmd.SetTile:
-                            /* TODO: CI4 conversion
-                            WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-                            if (texType == ((2 << 2) | 0)) {
-                                WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
-                            }*/
-                            if (clamp.TryGetValue(currentTex, out (bool u, bool v) clampma)) {
-                                if (clampma.u) {
-                                    cmdBuffer[6] |= 0x2;
-                                    newCmdBuffer[6] |= 0x2;
-                                }
-                                if (clampma.v) {
-                                    cmdBuffer[5] |= 0x2 << 2;
-                                    newCmdBuffer[5] |= 0x2 << 2;
-                                }
-                            }
-
-                            skipCmd = !RcpSetState("DPTile", ((ulong)(ReadU32(cmdBuffer, 0) & 0xFFFFFF) << 32) | ReadU32(cmdBuffer, 4), 0x00FFFFFFFFFFFFFF);
-                            break;
-
-                        default:
-                        //    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
-                        //    flushTextureCmds();
-                            break;
-                    }
-
-                    if (!skipCmd) {
-                        if (drawingGeometry != _drawingGeometry) {
-                            if (drawingGeometry) {
-                                // end of material, commit
-                                if (currentMat.HasValue) {
-                                    currentMat = (currentMat.Value.dl, currentMat.Value.sourceStart, dataptr - 8, currentMat.Value.destStart);
-                                    if (verboseDebug)
-                                        Console.WriteLine($"END MATERIAL {materials.Count + 1}");
-                                    materials.Add(currentMat.Value);
-                                }
-                                // geometry starts here :D
-                                currentMat = (new List<byte>(), dataptr - 8, 0, 0);
-                                if (verboseDebug)
-                                    Console.WriteLine($"MATERIAL {materials.Count + 1}");
-                            }
-                            else {
-                                // clear rcp state so a new material can be identified after we're done with tris and verts
-                                rcpState.Clear();
-                                rcpStateKnownBits.Clear();
-                            }
-
-                            drawingGeometry = _drawingGeometry;
-                        }
-                    }
-
-                    if (currentMat != null)
-                        printCmd(tro, 50);
-
-                    if (!skipCmd) {
-                        if (currentMat.HasValue) {
-                            printCmd(newCmdBuffer, -1);
-                            currentMat.Value.dl.AddRange(newCmdBuffer);
-                        }
-                    }
-                    else if (verboseDebug && currentMat != null) {
-                        Console.WriteLine();
-                    }
-                }
-
-                dlEnd1:
-                // the amount of bound volume that it has to be reduced to compared to the last check before printing again
-                const double VTX_BOUNDS_PERCENTAGE = 0.5;
-                // minimum vertex load calls in the geometry between bounds checks
-                const int VTX_BOUNDS_MIN_VTX = 20;
-                // write every material's code to newBuffer
-                for (int i = 0; i < materials.Count; i++) {
-                    byte[] dl = materials[i].dl.ToArray();
-                    byte[] _newBufferArr = newBuffer.ToArray();
-                    Dictionary<int, (byte[] data, ulong volume, uint vtxDataPtr)> bounds = [];
-
-                    byte[] cmdScratch = new byte[8];
-                    byte[] vtxScratch = new byte[0x10];
-
-                    short[] aabbXRange = [short.MaxValue, short.MinValue];
-                    short[] aabbYRange = [short.MaxValue, short.MinValue];
-                    short[] aabbZRange = [short.MaxValue, short.MinValue];
-                    int skip = 0;
-
-                    for (int j = dl.Length - 8; j >= 0; j -= 8) {
-                        Array.Copy(dl, j, cmdScratch, 0, 8);
-
-                        switch (cmdScratch[0]) {
-                            case (byte)RSPCmd.Vertex:
-                                ushort loadLength = ReadU16(cmdScratch, 2);
-                                uint vertPtr = ReadU32(cmdScratch, 4) & 0xFFFFFF;
-
-                                for (int k = 0; k <= loadLength - 0x10; k += 0x10) {
-                                    Array.Copy(_newBufferArr, vertPtr + k, vtxScratch, 0, 0x10);
-                                    Vtx_tn vtx = Vtx_tn.Read(vtxScratch, 0);
-
-                                    if (vtx.x < aabbXRange[0])
-                                        aabbXRange[0] = vtx.x;
-                                    if (vtx.x > aabbXRange[1])
-                                        aabbXRange[1] = vtx.x;
-
-                                    if (vtx.y < aabbYRange[0])
-                                        aabbYRange[0] = vtx.y;
-                                    if (vtx.y > aabbYRange[1])
-                                        aabbYRange[1] = vtx.y;
-
-                                    if (vtx.z < aabbZRange[0])
-                                        aabbZRange[0] = vtx.z;
-                                    if (vtx.z > aabbZRange[1])
-                                        aabbZRange[1] = vtx.z;
-                                }
-
-                                if (skip > 0)
-                                    skip--;
-                                else {
-                                    byte[] boundVtxData = new byte[0x10 * 8];
-
-                                    Vtx_tn[] boundVtx = new Vtx_tn[8];
-                                    for (int x = 0; x <= 1; x++) {
-                                        for (int y = 0; y <= 1; y++) {
-                                            for (int z = 0; z <= 1; z++) {
-                                                boundVtx[x * 4 + y * 2 + z] = new(aabbXRange[x], aabbYRange[y], aabbZRange[z], 0, 0, 0, 0, 0, 0, 0);
-                                            }
-                                        }
-                                    }
-
-                                    for (int k = 0; k < boundVtx.Length; k++) {
-                                        Array.Copy(boundVtx[k].ToBytes(), 0, boundVtxData, k * 0x10, 0x10);
-                                    }
-                                    ulong volume = (ulong)(aabbXRange[1] - aabbXRange[0]) * (ulong)(aabbYRange[1] - aabbYRange[0]) * (ulong)(aabbZRange[1] - aabbZRange[0]);
-                                    bounds.Add(j, (boundVtxData, volume, 0));
-                                }
-                                break;
-                        }
-                    }
-
-                    var keys = bounds.Keys.Order();
-                    ulong previousVolume = ulong.MaxValue;
-                    skip = 0;
-                    foreach (int vtxCmdPtr in keys) {
-                        bool accept = false;
-                        if (skip > 0) {
-                            skip--;
-                        }
-                        else {
-                            ulong volume = bounds[vtxCmdPtr].volume;
-                            if (volume < previousVolume * VTX_BOUNDS_PERCENTAGE) {
-                                accept = true;
-                            }
-                        }
-
-                        if (accept) {
-                            skip = VTX_BOUNDS_MIN_VTX - 1;
-                        }
-                        else {
-                            bounds.Remove(vtxCmdPtr);
-                        }
-                    }
-
-                    keys = bounds.Keys.Order();
-                    foreach (int vtxCmdPtr in keys) {
-                        // add bounds vtx
-                        byte[] pad = new byte[0x10 - (newBuffer.Count & 0xF)];
-                        if (pad.Length < 0x10) {
-                            newBuffer.AddRange(pad);
-                        }
-                        uint boundsVtxPtr = (uint)(0x0E000000 | newBuffer.Count);
-                        newBuffer.AddRange(bounds[vtxCmdPtr].data);
-
-                        bounds[vtxCmdPtr] = (bounds[vtxCmdPtr].data, bounds[vtxCmdPtr].volume, boundsVtxPtr);
-                    }
-
-                    materials[i] = (materials[i].dl, materials[i].sourceStart, materials[i].sourceEnd, (uint)(0x0E000000 | newBuffer.Count));
-                    if (verboseDebug)
-                        Console.WriteLine($"material possession {i+1}: 0x{materials[i].sourceStart:X8}-0x{materials[i].sourceEnd:X8}");
-
-                    skip = 1;
-                    for (int j = 0; j <= dl.Length - 8; j += 8) {
-                        Array.Copy(dl, j, cmdScratch, 0, 8);
-
-                        switch (cmdScratch[0]) {
-                            /*case (byte)RDPCmd.SetTextureImage: 
-                                if (bounds.Count > 0 && skip > 0) {
-                                    skip--;
-
-                                    keys = bounds.Keys.Order();
-                                    int kek = keys.First();
-                                    (byte[] data, ulong volume, uint vtxDataPtr) boundmaballs = bounds[kek];
-
-                                    // the trol.
-                                    gSPVertex(cmdScratch, boundmaballs.vtxDataPtr, (uint)(boundmaballs.data.Length / 0x10), 0);
-                                    newBuffer.AddRange(cmdScratch);
-                                    gSPCullDisplayList(cmdScratch, 0, (uint)(boundmaballs.data.Length / 0x10 - 1));
-                                    newBuffer.AddRange(cmdScratch);
-                                    Array.Copy(dl, j, cmdScratch, 0, 8);
-
-                                    bounds.Remove(kek);
-                                }
-                                break;*/
-                            case (byte)RSPCmd.Vertex: {
-                                if (bounds.TryGetValue(j, out (byte[] data, ulong volume, uint vtxDataPtr) boundmaballs)) {
-                                    // the trol.
-                                    gSPVertex(cmdScratch, boundmaballs.vtxDataPtr, (uint)(boundmaballs.data.Length / 0x10), 0);
-                                    newBuffer.AddRange(cmdScratch);
-                                    gSPCullDisplayList(cmdScratch, 0, (uint)(boundmaballs.data.Length / 0x10 - 1));
-                                    newBuffer.AddRange(cmdScratch);
-                                    Array.Copy(dl, j, cmdScratch, 0, 8);
-                                    bounds.Remove(j);
-                                }
-                            }
-                                break;
-                        }
-                        newBuffer.AddRange(cmdScratch);
-                    }
-
-                    // fin
-                    gSPEndDisplayList(cmdScratch);
-                    newBuffer.AddRange(cmdScratch);
-                }
-
-                // then we write the DL
-                void printAndAddDL(byte[] data) {
-                    printCmd(data, -1);
-                    /*Console.WriteLine("Writing DL");
-                    for (int i = 0; i < data.Length; i += 8) {
-                        Console.WriteLine($"{ReadU32(data, i):X8} {ReadU32(data, i + 4):X8}");
-                    }*/
-
-                    newBuffer.AddRange(data);
-                }
-
-                rcpState.Clear();
-                rcpStateKnownBits.Clear();
-                dataptr = startptr;
-                buffer.Seek(dataptr, SeekOrigin.Begin);
-                ptr.SegPointer = 0x0E000000 | newBuffer.Count;
-                if (verboseDebug) {
-                    Console.Write("IN".PadRight(40, ' '));
-                    Console.WriteLine("OUT");
-                }
-                while (dataptr < buffer.Length) {
-                    buffer.Read(cmdBuffer, 0, cmdBuffer.Length);
-                    printCmd(cmdBuffer, 50);
-                    if (geometryBalls.TryGetValue(dataptr, out byte[] overrideCmd)) {
-                        Array.Copy(overrideCmd, cmdBuffer, cmdBuffer.Length);
-                    }
-                    Array.Copy(cmdBuffer, newCmdBuffer, cmdBuffer.Length);
-                    (List<byte> dl, uint sourceStart, uint sourceEnd, uint destStart) mat = materials.FirstOrDefault(m => m.sourceStart == dataptr);
-                    dataptr += 8;
-                    bool skipCmd = false;
-                    // /*Print DL*/ Console.WriteLine($"\t{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-
-                    if (mat.dl != null) {
-                        gSPDisplayList(newCmdBuffer, mat.destStart);
-                        //skipCmd = true;
-
-                        dataptr = mat.sourceEnd;
-                        buffer.Seek(dataptr, SeekOrigin.Begin);
-                    }
-                    else {
-                        switch (cmdBuffer[0]) {
-                            case (byte)RSPCmd.NOOP:
-                            case (byte)RDPCmd.NOOP:
-                                skipCmd = true; // should be obvious why
-                                break;
-                            case 0x03: { // G_MOVEMEM
-                                uint lightPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-
-                                if (!tryMapPtr(lightPtr, out uint val)) {
-                                    throw new Exception($"G_MOVEMEM with unmapped ptr {lightPtr:X2}??");
-                                }
-
-                                WriteU32(newCmdBuffer, 4, val | 0x0E000000);
-                            }
-                                break;
-                            case (byte)RSPCmd.Vertex: {
-                                //thefunnytol = Random.Shared.NextDouble() < 0.8;
-                                skipCmd = thefunnytol;
-
-                                if (!skipCmd) {
-                                    uint vertexPtr = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                                    vertexPtr += (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
-
-                                    if (!tryMapPtr(vertexPtr, out uint val)) {
-                                        throw new Exception($"gsSPVertex with unmapped ptr {vertexPtr:X2}??");
-                                    }
-
-                                    val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
-                                    //if (verboseDebug)
-                                    //    Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
-                                    WriteU32(newCmdBuffer, 4, val | 0x0E000000);
-                                }
-                            }
-                                break;
-                            case (byte)RSPCmd.DisplayList:
-                                throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
-                            case (byte)RSPCmd.EndDisplayList:
-                                printAndAddDL(cmdBuffer);
-                                goto dlEnd2;
-                            case (byte)RDPCmd.SetEnvColor:
-                                envColorA = ReadU8(cmdBuffer, 7);
-                                currentTex = 0;
-                                thefunnytol = envColorA <= 1;
-                                break;
-                            case (byte)RDPCmd.SetTextureImage: {
-                                texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-                                uint textureImage = ReadU32(cmdBuffer, 4) & 0xFFFFFF;
-                                currentTex = textureImage;
-                                //uint textureID = GetTextureID(textureImage, texType);
-
-                                thefunnytol = envColorA <= 1;
-                                if (areaPainting64Cfg != null) {
-                                    thefunnytol = textureImage == (areaPainting64Cfg.baseSegmentedAddress & 0xFFFFFF) ||
-                                        (areaPainting64Cfg.textureSegmentedAddresses.Any(addr => textureImage == (addr & 0xFFFFFF)) &&
-                                        !areaPainting64Cfg.textureSegmentedAddresses_NoPurge.Any(addr => textureImage == (addr & 0xFFFFFF)));
-                                }
-
-                                if (!thefunnytol) {
-                                    if (!tryMapPtr(textureImage, out uint val)) {
-                                        throw new Exception($"gsDPSetTextureImage with unmapped ptr {textureImage:X2}??");
-                                    }
-                                    WriteU32(newCmdBuffer, 4, (val & 0x00FFFFFF) | 0x0E000000);
-                                    skipCmd = false;
-                                }
-                                else {
-                                    skipCmd = true;
-                                }
-
-                                //if (!newTextureCmds.ContainsKey(val))
-                                //    newTextureCmds.Add(val, []);
-                                //Console.WriteLine($"Entering texture {val:X8}");
-                                //currentList = newTextureCmds[val];
-
-                                //WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-                                /* TODO: CI4 conversion
-                                if (texType == ((2 << 2) | 0)) {
-                                    Console.WriteLine("Conversion to CI4 in effect!");
-                                    Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-                                    Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
-                                }*/
-                            }
-                                break;
-                            case (byte)RSPCmd.Tri1:
-                                skipCmd = thefunnytol;
-                                break;
-
-                            case (byte)RSPCmd.SetGeometryMode:
-                                skipCmd = !RcpSetState("SPGeometryMode", 0xFFFFFFFF, ReadU32(cmdBuffer, 4));
-                                break;
-                            case (byte)RSPCmd.ClearGeometryMode:
-                                skipCmd = !RcpSetState("SPGeometryMode", 0x00000000, ReadU32(cmdBuffer, 4));
-                                break;
-                            case (byte)RSPCmd.SetOtherModeH:
-                                skipCmd = !RcpSetState("SPOtherModeH", ReadU32(cmdBuffer, 4), (uint)((1 << cmdBuffer[2]) - 1) << cmdBuffer[3]);
-                                break;
-
-                            case (byte)RDPCmd.FullSync:
-                            case (byte)RDPCmd.LoadSync:
-                            case (byte)RDPCmd.PipeSync:
-                            case (byte)RDPCmd.TileSync:
-                            case (byte)RDPCmd.LoadBlock: // (contains texture size)
-                                //skipCmd = currentListContainsCmd((byte)RDPCmd.LoadBlock);
-                                skipCmd = thefunnytol;
-                                break;
-
-                            case (byte)RDPCmd.SetTileSize:
-                                skipCmd = !RcpSetState("DPTileSize", ((ulong)(ReadU32(cmdBuffer, 0) & 0xFFFFFF) << 32) | ReadU32(cmdBuffer, 4), 0x00FFFFFFFFFFFFFF);
-                                break;
-                            case (byte)RDPCmd.SetTile:
-                                /* TODO: CI4 conversion
-                                WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-                                if (texType == ((2 << 2) | 0)) {
-                                    WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
-                                }*/
-                                if (clamp.TryGetValue(currentTex, out (bool u, bool v) clampma)) {
-                                    if (clampma.u) {
-                                        cmdBuffer[6] |= 0x2;
-                                        newCmdBuffer[6] |= 0x2;
-                                    }
-                                    if (clampma.v) {
-                                        cmdBuffer[5] |= 0x2 << 2;
-                                        newCmdBuffer[5] |= 0x2 << 2;
-                                    }
-                                }
-
-                                skipCmd = !RcpSetState("DPTile", ((ulong)(ReadU32(cmdBuffer, 0) & 0xFFFFFF) << 32) | ReadU32(cmdBuffer, 4), 0x00FFFFFFFFFFFFFF);
-                                break;
-
-                            default:
-                            //    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
-                            //    flushTextureCmds();
-                                break;
-                        }
-                    }
-
-                    if (!skipCmd) {
-                        printAndAddDL(newCmdBuffer);
-                    }
-                    else if (verboseDebug) {
-                        Console.WriteLine();
-                    }
-                }
-
-                dlEnd2:
-                Console.ResetColor();
-                continue;
-            }
-
-            // Check these moving texture objects
-            for (int i = 0; i < area.ScrollingTextures.Count; i++) {
-                ManagedScrollingTexture scrollingTexture = area.ScrollingTextures[i];
-
-                //Console.WriteLine($"Texture scroll object - points to {scrollingTexture.VertexPointer:X8}");
-
-                if (!tryMapPtr((uint)scrollingTexture.VertexPointer & 0xFFFFFF, out uint val)) {
-                    throw new Exception($"Texture scroll object with unmapped ptr {scrollingTexture.VertexPointer:X8}??");
-                }
-
-                scrollingTexture.VertexPointer = (int)(val | 0x0E000000);
-            }
-
-            buffer.SetLength(newBuffer.Count);
-            buffer.Position = 0;
-            buffer.Write(newBuffer.ToArray(), 0, newBuffer.Count);
-            
-            if (areaPainting64Cfg != null) {
-                List<uint> trol = [ .. areaPainting64Cfg.textureSegmentedAddresses, areaPainting64Cfg.baseSegmentedAddress ];
-                // Update Painting64 config.
-                foreach (uint oldPtr in trol) {
-                    List<string> oldStr = [
-                        $"0x0E{oldPtr & 0xFFFFFF:X6}".ToLowerInvariant(),
-                        $"0xE{oldPtr & 0xFFFFFF:X6}".ToLowerInvariant(),
-                    ];
-                    if (!tryMapPtr(oldPtr & 0xFFFFFF, out uint newPtr)) {
-                        throw new Exception($"Level 0x{level.LevelID:X2} area {area.AreaID}: areaPainting64Cfg contains unmapped ptr {oldPtr:X8}?? mappings:\n{string.Join("\n", oldToNewPtrMap.Select(mapping => $"{mapping.Key:X8} -> {mapping.Value:X8} len: {(newData.TryGetValue(mapping.Value, out byte[] data) ? data.Length : 0):X8}"))}");
-                    }
-                    string newStr = $"0x00E{newPtr & 0xFFFFFF:X6}";
-                    foreach (string _oldStr in oldStr)
-                        areaPainting64Cfg.config = areaPainting64Cfg.config.ToLowerInvariant().Replace(_oldStr, newStr);
-                }
-            }
-        }
-        Console.WriteLine($"sisters in christ: {brothersInChrist}");
-    }
-    Console.WriteLine($"We've hypothetically saved a grand total of {totalSaves/1024} KiB!");
-
-    StreamWriter sw = new("paintingcfg.txt");
-    foreach (KeyValuePair<(byte, byte), AreaPaintingCfg> kvp in painting64Cfg) {
-        sw.WriteLine($"LEVEL_ID={kvp.Key.Item1}");
-        sw.WriteLine(kvp.Value.config);
-    }
-    sw.Close();
-}
-
-void OptimizeObjects(RomManager manger) {
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            Console.WriteLine($"OptimizeObjects: area {level.LevelID:X2}:{area.AreaID} {area.Objects.Count}");
-            for (int i = area.Objects.Count - 1; i >= 0; i--) {
-                LevelscriptCommand objCmd = area.Objects[i];
-
-                if (objCmd.CommandType == LevelscriptCommandTypes.Normal3DObject) {
-                    byte[] data = objCmd.ToArray();
-                    if (data[2] == 0) {
-                        Console.WriteLine("Removing object (acts = 0)");
-                        area.Objects.RemoveAt(i);
-                    }
-
-/*
-                    uint bhv = ReadU32(data, 0x14);
-                    if (bhv == 0x1F002C00) {
-                        Console.WriteLine("Mirror object!");
-                    }
-*/
-                }
-            }
-            Console.WriteLine($"new object count: {area.Objects.Count}");
-        }
-    }
-}
-
-
-
-
-void EvaporateCollision(RomManager manger) {
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            area.AreaModel.Collision.Mesh.Vertices = [];
-            area.AreaModel.Collision.Mesh.Triangles = [];
-        }
-    }
-}
-
-void EvaporateFast3D(RomManager manger, string painting64Path, Dictionary<(byte, byte), AreaPaintingCfg> painting64Cfg) {
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
-            buffer.SetLength(0);
-        }
-    }
-}
-
-void EvaporateObjects(RomManager manger) {
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            for (int i = area.Objects.Count - 1; i >= 0; i--) {
-                LevelscriptCommand objCmd = area.Objects[i];
-
-                if (objCmd.CommandType == LevelscriptCommandTypes.Normal3DObject) {
-                    area.Objects.RemoveAt(i);
-                }
-            }
-        }
-    }
-}
 
 Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> ExtractWarps(RomManager manger) {
     Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> result = [];
@@ -2290,21 +77,7 @@ Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWa
     return result;
 }
 
-string GetLevelName(RomManager manger, Level level) {
-    string name = ((RMLevel)level).Config.LevelName;
 
-    if (string.IsNullOrWhiteSpace(name)) {
-        name = manger.LevelInfoData.First(_level => _level.ID == level.LevelID).Name;
-    }
-    
-    return name;
-}
-
-string GetAreaName(RomManager manger, Level level, byte areaID) {
-    string name = ((RMLevel)level).Config.GetLevelAreaConfig(areaID).AreaName;
-
-    return name;
-}
 
 void PatchWarps(RomManager manger, Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> warps) {
     foreach (Level level in manger.Levels) {
@@ -2372,41 +145,155 @@ Dictionary<int, (CameraPresets preset, bool hasCameraObject)> ExtractCameras(Rom
 
 
 void MIO0_Fast3D(RomManager manger) {
-    int maxMio0Size = 0;
+	const string temp_bin = $"tmp.bin";
+	const string temp_mio0 = $"tmp.mio0";
 
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
-            byte[] newBuffer = new byte[buffer.Length];
+	int maxMio0Size = 0;
 
-            buffer.Seek(0, SeekOrigin.Begin);
-            buffer.Read(newBuffer, 0, (int)buffer.Length);
+	foreach (Level level in manger.Levels) {
+		foreach (LevelArea area in level.Areas) {
+			Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;
+			byte[] newBuffer = new byte[buffer.Length];
 
-            // mio0
-            {
-                string fbin = $"tmp.bin";
-                string fmio0 = $"tmp.mio0";
-                File.WriteAllBytes(fbin, newBuffer);
+			buffer.Seek(0, SeekOrigin.Begin);
+			buffer.Read(newBuffer, 0, (int)buffer.Length);
 
-                RunProcess($"tools/mio0 \"{fbin}\" \"{fmio0}\"");
+			// mio0
+			{
+				File.WriteAllBytes(temp_bin, newBuffer);
 
-                newBuffer = File.ReadAllBytes(fmio0);
-                if (newBuffer.Length > maxMio0Size) {
-                    maxMio0Size = newBuffer.Length;
-                }
-            }
+				RunProcess($"tools/mio0 \"{temp_bin}\" \"{temp_mio0}\"");
 
-            buffer.SetLength(newBuffer.Length);
-            buffer.Position = 0;
-            foreach (byte b in newBuffer)
-                buffer.WriteByte(b);
-        }
-    }
-    Console.WriteLine($"Largest mio0 data size: {maxMio0Size/1024} KiB!");
+				newBuffer = File.ReadAllBytes(temp_mio0);
+				if (newBuffer.Length > maxMio0Size) {
+					maxMio0Size = newBuffer.Length;
+				}
+			}
+
+			buffer.SetLength(newBuffer.Length);
+			buffer.Position = 0;
+			foreach (byte b in newBuffer)
+				buffer.WriteByte(b);
+		}
+	}
+	Console.WriteLine($"Largest mio0 data size: {maxMio0Size/1024} KiB!");
+
+	rm_f(temp_bin);
+	rm_f(temp_mio0);
+}
+
+
+Dictionary<(byte, byte), AreaPaintingCfg> LoadPainting64Cfg(string path) {
+	Dictionary<(byte, byte), AreaPaintingCfg> newCfg = [];
+
+	AreaPaintingCfg current = null;
+	StreamReader sr = new(path);
+	byte levelID = 0;
+	int linen = 0;
+	try {
+		uint half1 = 0;
+		uint half2 = 0;
+		bool optimizeIgnore = false;
+
+		void CommitPaintingIfAny() {
+			if (current != null && half1 != 0) {
+				current.textureSegmentedAddresses.Add(half1);
+				current.textureSegmentedAddresses.Add(half2);
+				if (optimizeIgnore) {
+					current.textureSegmentedAddresses_NoPurge.Add(half1);
+					current.textureSegmentedAddresses_NoPurge.Add(half2);
+				}
+			}
+			half1 = 0;
+			half2 = 0;
+			optimizeIgnore = false;
+		}
+
+		while (true) {
+			if (sr.EndOfStream) {
+				CommitPaintingIfAny();
+				break;
+			}
+
+			string ln = sr.ReadLine();
+			linen++;
+
+			string key = ln.Split('=')[0].ToLowerInvariant();
+			if (key == "new_painting") {
+				if (current != null)
+					current.paintingCount++;
+				CommitPaintingIfAny();
+			}
+			else if (ln.Length > key.Length + 1) {
+				string strValue = ln.Substring(key.Length + 1);
+				string value = strValue;
+
+				if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
+					try {
+						ulong u = Convert.ToUInt64(value.Substring(2), 16);
+						value = u.ToString();
+					}
+					catch { }
+				}
+
+				switch (key) {
+					case "level_id":
+						CommitPaintingIfAny();
+
+						current = null;
+						levelID = byte.Parse(value);
+						break;
+					case "area_id":
+						CommitPaintingIfAny();
+
+						byte areaID = byte.Parse(value);
+						if (!newCfg.ContainsKey((levelID, areaID))) {
+							newCfg.Add((levelID, areaID), new AreaPaintingCfg());
+						}
+						current = newCfg[(levelID, areaID)];
+						break;
+					case "base_rom_address":
+						throw new Exception("base_rom_address in Painting64 config not supported!");
+					case "base_segmented_address":
+						current.baseSegmentedAddress = uint.Parse(value);
+						break;
+					case "rom_address":
+						throw new Exception("painting rom_address in Painting64 config not supported!");
+					case "segmented_address":
+						throw new Exception("painting segmented_address in Painting64 config not supported!");
+					case "texture_segmented_address":
+						half1 = uint.Parse(value);
+						half2 = half1 + 0x1000;
+						break;
+					case "texture_segmented_address_half2":
+						half2 = uint.Parse(value);
+						break;
+					case "optimize_ignore":
+						optimizeIgnore = true;
+						break;
+				}
+			}
+
+			if (current != null) {
+				current.config += ln + "\n";
+			}
+		}
+
+		sr.Close();
+		return newCfg;
+	}
+	catch (Exception e) {
+		Console.ForegroundColor = ConsoleColor.Red;
+		Console.WriteLine($"Exception at line {linen} in paintingcfg.txt:\n\n{e}");
+		sr.Close();
+		Console.ReadKey(true);
+		return null;
+	}
 }
 
 
 /*RomManager manger = new("b3313 silved.z64");
+manger.BoxSystemA3Mode = true;
 manger.LoadRom();
 Console.WriteLine(manger.GameName);
 
@@ -2422,222 +309,299 @@ foreach (var level in manger.Levels)
         Console.WriteLine(area.Warps);
     }
 }*/
-RomManager manger;
-Console.WriteLine("hmm");
-if (args[1] == "MIO0_STAGE") {
-    manger = new(args[0]);
-    manger.LoadRom();
-    MIO0_Fast3D(manger);
-    SaveAndPrintRomSize(manger, "post Fast3D mio0 compression");
-    return;
-}
-if (args[1] == "PATCH_WARPS") {
-    manger = new("b3313 a3.z64");
-    manger.LoadRom();
 
-    var warps = ExtractWarps(manger);
-    manger = null;
-    RomManager manger2 = new("b3313 a2.z64");
-    manger2.LoadRom();
-    PatchWarps(manger2, warps);
-    SaveAndPrintRomSize(manger2, "patchma?");
-    return;
-}
-if (args[1] == "VERIFY_CAMERABALLS") {
-    RomManager manger2 = new("b3313 ref.z64");
-    manger2.LoadRom();
-    var camerasRef = ExtractCameras(manger2);
-    manger2 = null;
 
-    manger = new("b3313 silved.z64");
-    manger.LoadRom();
-    var cameras = ExtractCameras(manger);
-    
-    HashSet<int> keys = new(cameras.Keys);
-    keys.IntersectWith(camerasRef.Keys);
-    
-    Console.WriteLine("mangled to 0x01 (Open Camera):");
-    foreach (int i in keys) {
-        CameraPresets prev = camerasRef[i].preset;
-        CameraPresets next = cameras[i].preset;
-        ushort levelID = (ushort)((i >> 16) & 0xFFFF);
-        byte areaID = (byte)((i >> 0) & 0xFF);
-
-        if (prev != next) {
-            if (next == CameraPresets.OpenCamera) {
-                Level level = manger.Levels.First(l => l.LevelID == levelID);
-
-                Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
-            }
-        }
-    }
-
-    Console.WriteLine("honorable mention:");
-    foreach (int i in keys) {
-        CameraPresets prev = camerasRef[i].preset;
-        CameraPresets next = cameras[i].preset;
-        ushort levelID = (ushort)((i >> 16) & 0xFFFF);
-        byte areaID = (byte)((i >> 0) & 0xFF);
-
-        if (prev != next) {
-            if (next != CameraPresets.OpenCamera) {
-                Level level = manger.Levels.First(l => l.LevelID == levelID);
-
-                Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
-                Console.WriteLine($"\tchanged from preset 0x{(byte)prev:X2} {prev} to 0x{(byte)next:X2} {next}");
-            }
-        }
-    }
-
-    Console.WriteLine("missing area center objects:");
-    foreach (int i in keys) {
-        ushort levelID = (ushort)((i >> 16) & 0xFFFF);
-        byte areaID = (byte)((i >> 0) & 0xFF);
-
-        if (cameras[i].preset == CameraPresets.OpenCamera && !cameras[i].hasCameraObject) {
-            Level level = manger.Levels.First(l => l.LevelID == levelID);
-
-            Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
-        }
-    }
-
-    return;
-}
-
-Dictionary<(byte, byte), AreaPaintingCfg> painting64Cfg = [];
+/// from gpt:
+/// Specifically: on Linux, Environment.GetCommandLineArgs()[0] is silently rewritten to the full absolute path
+/// when you run a published self-contained app or sometimes even a trimmed dotnet app.
+string DotnetAndItsConsequences()
 {
-    AreaPaintingCfg current = null;
-    StreamReader sr = new(args[2]);
-    byte levelID = 0;
-    int linen = 0;
-    try {
-        uint half1 = 0;
-        uint half2 = 0;
-        bool optimizeIgnore = false;
+	if (OperatingSystem.IsLinux()) {
+		byte[] raw = File.ReadAllBytes("/proc/self/cmdline");
+		int nul = Array.IndexOf(raw, (byte)0);
+		return System.Text.Encoding.UTF8.GetString(raw, 0, nul);
+	}
 
-        void CommitPaintingIfAny() {
-            if (current != null && half1 != 0) {
-                current.textureSegmentedAddresses.Add(half1);
-                current.textureSegmentedAddresses.Add(half2);
-                if (optimizeIgnore) {
-                    current.textureSegmentedAddresses_NoPurge.Add(half1);
-                    current.textureSegmentedAddresses_NoPurge.Add(half2);
-                }
-            }
-            half1 = 0;
-            half2 = 0;
-            optimizeIgnore = false;
-        }
-
-        while (true) {
-            if (sr.EndOfStream) {
-                CommitPaintingIfAny();
-                break;
-            }
-
-            string ln = sr.ReadLine();
-            linen++;
-
-            string key = ln.Split('=')[0].ToLowerInvariant();
-            if (key == "new_painting") {
-                if (current != null)
-                    current.paintingCount++;
-                CommitPaintingIfAny();
-            }
-            else if (ln.Length > key.Length + 1) {
-                string strValue = ln.Substring(key.Length + 1);
-                string value = strValue;
-
-                if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
-                    try {
-                        ulong u = Convert.ToUInt64(value.Substring(2), 16);
-                        value = u.ToString();
-                    }
-                    catch { }
-                }
-
-                switch (key) {
-                    case "level_id":
-                        CommitPaintingIfAny();
-
-                        current = null;
-                        levelID = byte.Parse(value);
-                    break;
-                    case "area_id":
-                        CommitPaintingIfAny();
-
-                        byte areaID = byte.Parse(value);
-                        if (!painting64Cfg.ContainsKey((levelID, areaID))) {
-                            painting64Cfg.Add((levelID, areaID), new AreaPaintingCfg());
-                        }
-                        current = painting64Cfg[(levelID, areaID)];
-                        break;
-                    case "base_rom_address":
-                        throw new Exception("base_rom_address in Painting64 config not supported!");
-                    case "base_segmented_address":
-                        current.baseSegmentedAddress = uint.Parse(value);
-                        break;
-                    case "rom_address":
-                        throw new Exception("painting rom_address in Painting64 config not supported!");
-                    case "segmented_address":
-                        throw new Exception("painting segmented_address in Painting64 config not supported!");
-                    case "texture_segmented_address":
-                        half1 = uint.Parse(value);
-                        half2 = half1 + 0x1000;
-                        break;
-                    case "texture_segmented_address_half2":
-                        half2 = uint.Parse(value);
-                        break;
-                    case "optimize_ignore":
-                        optimizeIgnore = true;
-                        break;
-                }
-            }
-
-            if (current != null) {
-                current.config += ln + "\n";
-            }
-        }
-
-        sr.Close();
-    }
-    catch (Exception e) {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"Exception at line {linen} in paintingcfg.txt:\n\n{e}");
-        sr.Close();
-        Console.ReadKey(true);
-        return;
-    }
-}
-Console.WriteLine("Loaded Painting64 config!");
-
-manger = new(args[0]);
-string painting64Path = args[1];
-Console.WriteLine("a manger?");
-manger.LoadRom();
-PrintRomSize(manger, "pre compression");
-
-OptimizeCollision(manger);
-SaveAndPrintRomSize(manger, "post collision optimization");
-//EvaporateCollision(manger);
-//SaveAndPrintRomSize(manger, "post collision evaporation");
-
-OptimizeFast3D(manger, painting64Path, painting64Cfg);
-SaveAndPrintRomSize(manger, "post Fast3D optimization");
-//EvaporateFast3D(manger, painting64Path, painting64Cfg);
-//SaveAndPrintRomSize(manger, "post Fast3D evaporation");
-
-OptimizeObjects(manger);
-EvaporateObjects(manger);
-//SaveAndPrintRomSize(manger, "post object purge");
-
-if (File.Exists("paintingcfg.txt")) {
-    Console.WriteLine($"Applying new Painting64 cfg to rom...");
-    string romPath = manger.RomFile;
-    manger = null;
-    Process p = Process.Start(painting64Path, $"\"{romPath}\" --automatic");
-    p.WaitForExit();
-    File.Delete("paintingcfg.txt");
+	return Environment.GetCommandLineArgs()[0];
 }
 
-RunProcess($"./BeeieOptimizer \"{args[0]}\" MIO0_STAGE");
+
+string[] split = Environment.CommandLine.Split(' ');
+string cmdLineName = DotnetAndItsConsequences();
+
+string usage() {
+	return string.Join(Environment.NewLine, [
+		$"Usage: {cmdLineName} <path to ROM> <command> <command args...>",
+		$"Commands:",
+		$"\trun <path to Painting64> <path to paintingcfg.txt>",
+		$"\tsearch_obj <object bhv address>",
+		$"\tsearch_warps_to <area selector JSON>",
+		"",
+		$"Texture utils:",
+		$"\tdump <target directory>",
+		$"\treplace <target directory>",
+		"NOTE: Texture dumping requires populating TextureDumpList in the BeeieOptimizer.json config file!",
+		"To dump everything, simply set \"TextureDumpList\": [{\"AreaName\": \"*\"}]",
+		"",
+		$"Leftover A2AE utils (requires specific rom names):",
+					   $"\tpatch_warps",
+					$"\tverify_cameraballs",
+	]);
+}
+
+Console.WriteLine("The Great Bee Optimizator Unabandoned Versione A0");
+if (args.Length < 2) {
+	Console.WriteLine(usage());
+	return;
+}
+
+switch (args[1].ToLowerInvariant()) {
+	// TEMPORARY and UNDOCUMENTED for a reason
+	case "mio0_stage": {
+		RomManager manger = new(args[0]);
+		manger.BoxSystemA3Mode = true;
+		manger.LoadRom();
+		MIO0_Fast3D(manger);
+		SaveAndPrintRomSize(manger, "post Fast3D mio0 compression");
+		break;
+	}
+
+	default: {
+		Console.WriteLine(usage());
+		break;
+	}
+
+	case "run": {
+		Dictionary<(byte, byte), AreaPaintingCfg> painting64Cfg = LoadPainting64Cfg(args[3]);
+		Console.WriteLine($"Loaded {painting64Cfg.Sum(kvp => kvp.Value.paintingCount)} paintings from Painting64 config!");
+
+		RomManager manger = new(args[0]);
+		manger.BoxSystemA3Mode = true;
+		string painting64Path = args[2];
+		Console.WriteLine("a manger?");
+		manger.LoadRom();
+		PrintRomSize(manger, "pre compression");
+
+		Stages.OptimizeCollision(manger, configma);
+		SaveAndPrintRomSize(manger, "post collision optimization");
+		//EvaporateCollision(manger);
+		//SaveAndPrintRomSize(manger, "post collision evaporation");
+
+		Stages.OptimizeFast3D(manger, configma, painting64Path, painting64Cfg);
+		SaveAndPrintRomSize(manger, "post Fast3D optimization");
+		//EvaporateFast3D(manger, painting64Path, painting64Cfg);
+		//SaveAndPrintRomSize(manger, "post Fast3D evaporation");
+
+		Stages.OptimizeObjects(manger, configma);
+		//EvaporateObjects(manger);
+		SaveAndPrintRomSize(manger, "post object purge");
+
+		if (File.Exists("paintingcfg.txt")) {
+			Console.WriteLine($"Applying new Painting64 cfg to rom...");
+			string romPath = manger.RomFile;
+			manger = null;
+			RunProcess($"\"{painting64Path}\" \"{romPath}\" --automatic");
+			rm_f("paintingcfg.txt");
+		}
+
+		// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK!!!!!!!!!!!!!
+		// calling self for mio0, because it refuses to reload painting64 changes otherwise is incredibly cursed
+		RunProcess($"{cmdLineName} \"{args[0]}\" MIO0_STAGE");
+		break;
+	}
+	case "dump": {
+		string dumpPath = args[2];
+
+		if (!Directory.Exists(dumpPath)) {
+			Directory.CreateDirectory(dumpPath);
+		}
+
+		RomManager manger = new(args[0]);
+		manger.BoxSystemA3Mode = true;
+		Console.WriteLine("a manger?");
+		manger.LoadRom();
+
+		Console.WriteLine("what's dumpma?");
+		Stages.DumpTextures(manger, configma, dumpPath);
+
+		break;
+	}
+	case "replace": {
+		string dumpPath = args[2];
+
+		if (!Directory.Exists(dumpPath)) {
+			Directory.CreateDirectory(dumpPath);
+		}
+
+		RomManager manger = new(args[0]);
+		Console.WriteLine("a manger?");
+		manger.BoxSystemA3Mode = true;
+		manger.LoadRom();
+
+		Console.WriteLine("what's replacema?");
+		Stages.ReplaceTextures(manger, configma, dumpPath);
+
+		SaveAndPrintRomSize(manger, "post texture replace");
+		break;
+	}
+	case "search_obj": {
+		if (TryParseUIntma(args[2], out uint bhv)) {
+			RomManager manger = new(args[0]);
+			Console.WriteLine("a manger?");
+			manger.BoxSystemA3Mode = true;
+			manger.LoadRom();
+
+			Console.WriteLine("what's findma?");
+			Stages.FindObjects(manger, configma, bhv);
+		}
+		else {
+			Console.WriteLine($"L, {args[2]} is NOT an address");
+		}
+		break;
+	}
+	case "search_warps_to": {
+		var options = new JsonSerializerOptions {
+			PropertyNameCaseInsensitive = true,
+			ReadCommentHandling = JsonCommentHandling.Skip,
+			AllowTrailingCommas = true,
+			IncludeFields = true,
+		};
+
+		// best solutione
+		AreaMatchPattern ptn = JsonSerializer.Deserialize<AreaMatchPattern>(args[2], options);
+		if (ptn.IsEmptyPattern()) {
+			throw new Exception("failed to read jsone or like idk what happened");
+		}
+
+		RomManager manger = new(args[0]);
+		manger.BoxSystemA3Mode = true;
+		Console.WriteLine("a manger?");
+		manger.LoadRom();
+
+		Console.WriteLine("what's findma?");
+		foreach (Level level in manger.Levels) {
+			foreach (LevelArea area in level.Areas) {
+				var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
+
+				foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
+					foreach (LevelscriptCommand warp in list) {
+						byte warpId = clWarp.GetWarpID(warp);
+						byte destAreaID = clWarp.GetDestinationAreaID(warp);
+						byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
+						byte destWarpID = clWarp.GetDestinationWarpID(warp);
+
+						Level destLevel = manger.Levels.Where(lvl => lvl.LevelID == destLevelID).FirstOrDefault();
+						if (destLevel == null) continue;
+						LevelArea destArea = destLevel.Areas.Where(area => area.AreaID == destAreaID).FirstOrDefault();
+						if (destArea == null) continue;
+
+						if (ptn.Match(manger, destLevel, destArea)) {
+							Console.WriteLine($"Found warp:\n\tfrom level 0x{level.LevelID:X2} '{GetLevelName(manger, level)}' area {area.AreaID} '{GetAreaName(manger, level, area.AreaID)}' warp {warpId}" +
+							$"\n\tto level 0x{destLevel.LevelID:X2} '{GetLevelName(manger, destLevel)}' area {destArea.AreaID} '{GetAreaName(manger, destLevel, destArea.AreaID)}' warp {destWarpID}");
+						}
+					}
+				}
+			}
+		}
+		break;
+	}
+
+	case "the_great_area_randomizator": {
+		RomManager manger = new(args[0]);
+		manger.BoxSystemA3Mode = true;
+		Console.WriteLine("a manger?");
+		manger.LoadRom();
+
+		List<string> stagema = [];
+		foreach (Level level in manger.Levels) {
+			foreach (LevelArea area in level.Areas) {
+				stagema.Add(GetAreaName(manger, level, area.AreaID));
+			}
+		}
+
+		string[] stageballs = stagema.ToArray();
+		Random.Shared.Shuffle(stageballs);
+
+		Console.WriteLine("area list:");
+		foreach (string stage in stageballs) {
+			Console.WriteLine(stage);
+		}
+		break;
+	}
+
+	// a2ae development leftovers that may be useful
+	case "patch_warps": {
+		RomManager manger = new("b3313 a3.z64");
+		manger.BoxSystemA3Mode = true;
+		manger.LoadRom();
+
+		var warps = ExtractWarps(manger);
+		manger = null;
+		RomManager manger2 = new("b3313 a2.z64");
+		manger2.LoadRom();
+		PatchWarps(manger2, warps);
+		SaveAndPrintRomSize(manger2, "patchma?");
+		break;
+	}
+	case "verify_cameraballs": {
+		RomManager manger2 = new("b3313 ref.z64");
+		manger2.BoxSystemA3Mode = true;
+		manger2.LoadRom();
+		var camerasRef = ExtractCameras(manger2);
+		manger2 = null;
+
+		RomManager manger = new("b3313 silved.z64");
+		manger.BoxSystemA3Mode = true;
+		manger.LoadRom();
+		var cameras = ExtractCameras(manger);
+
+		HashSet<int> keys = new(cameras.Keys);
+		keys.IntersectWith(camerasRef.Keys);
+
+		Console.WriteLine("mangled to 0x01 (Open Camera):");
+		foreach (int i in keys) {
+			CameraPresets prev = camerasRef[i].preset;
+			CameraPresets next = cameras[i].preset;
+			ushort levelID = (ushort)((i >> 16) & 0xFFFF);
+			byte areaID = (byte)((i >> 0) & 0xFF);
+
+			if (prev != next) {
+				if (next == CameraPresets.OpenCamera) {
+					Level level = manger.Levels.First(l => l.LevelID == levelID);
+
+					Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
+				}
+			}
+		}
+
+		Console.WriteLine("honorable mention:");
+		foreach (int i in keys) {
+			CameraPresets prev = camerasRef[i].preset;
+			CameraPresets next = cameras[i].preset;
+			ushort levelID = (ushort)((i >> 16) & 0xFFFF);
+			byte areaID = (byte)((i >> 0) & 0xFF);
+
+			if (prev != next) {
+				if (next != CameraPresets.OpenCamera) {
+					Level level = manger.Levels.First(l => l.LevelID == levelID);
+
+					Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
+					Console.WriteLine($"\tchanged from preset 0x{(byte)prev:X2} {prev} to 0x{(byte)next:X2} {next}");
+				}
+			}
+		}
+
+		Console.WriteLine("missing area center objects:");
+		foreach (int i in keys) {
+			ushort levelID = (ushort)((i >> 16) & 0xFFFF);
+			byte areaID = (byte)((i >> 0) & 0xFF);
+
+			if (cameras[i].preset == CameraPresets.OpenCamera && !cameras[i].hasCameraObject) {
+				Level level = manger.Levels.First(l => l.LevelID == levelID);
+
+				Console.WriteLine($"\tlevel 0x{levelID:X2} '{GetLevelName(manger, level)}' area {areaID} '{GetAreaName(manger, level, areaID)}'");
+			}
+		}
+		break;
+	}
+}

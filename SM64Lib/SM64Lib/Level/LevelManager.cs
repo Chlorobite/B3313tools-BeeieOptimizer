@@ -19,8 +19,8 @@ namespace SM64Lib.Levels
 {
     public class LevelManager : ILevelManager
     {
-        public bool EnableLoadingAreaReverb { get; set; } = true;
-        public bool SortSpecialBoxesByHeight { get; set; } = true;
+		public bool EnableLoadingAreaReverb { get; set; } = true;
+		public bool SortSpecialBoxesByHeight { get; set; } = true;
 
         /// <summary>
         /// Loads a ROM Manager Level from ROM.
@@ -245,19 +245,45 @@ namespace SM64Lib.Levels
                 // Clear special boxes
                 a.SpecialBoxes.Clear();
 
-                // Load special boxes
-                a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, SpecialBoxType.Water, bank0x19RomStart, bank0x19RomStart + 0x6000 + 0x50 * a.AreaID));
-                a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, SpecialBoxType.ToxicHaze, bank0x19RomStart, bank0x19RomStart + 0x6280 + 0x50 * a.AreaID));
-                a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, SpecialBoxType.Mist, bank0x19RomStart, bank0x19RomStart + 0x6500 + 0x50 * a.AreaID));
+				// Load special boxes
+				brToUse.BaseStream.Position = 0x5FF8;
+				if (SwapInts.SwapUInt32(brToUse.ReadUInt32()) == 0x42454545)
+				{
+					// cat system
+					brToUse.BaseStream.Position = 0x60A0;
 
-                for (int i = 0; i < a.SpecialBoxes.Count; i++)
-                {
-                    var boxdata = a.AreaModel.Collision.SpecialBoxes.ElementAtOrDefault(i);
-                    if (boxdata is object)
-                    {
-                        a.SpecialBoxes[i].Y = boxdata.Y;
-                    }
-                }
+					while (SwapInts.SwapUInt32(brToUse.ReadUInt32()) != 0x33130000)
+					{
+						brToUse.BaseStream.Position -= 4;
+						var data = SwapInts.SwapUInt32(brToUse.ReadUInt32());
+						brToUse.BaseStream.Position -= 4;
+						if (((data >> 8) & 0xff) == a.AreaID)
+						{
+							a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, (SpecialBoxType)(data & 0xff), bank0x19RomStart, bank0x19RomStart + (int)brToUse.BaseStream.Position));
+							brToUse.BaseStream.Position += 2;
+						}
+						else
+						{
+							while (SwapInts.SwapUInt32(brToUse.ReadUInt32()) != 0xffff0000) ;
+						}
+					}
+				}
+				else
+				{
+					// mushroom system
+					a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, SpecialBoxType.Water, bank0x19RomStart, bank0x19RomStart + 0x6000 + 0x50 * a.AreaID));
+					a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, SpecialBoxType.ToxicHaze, bank0x19RomStart, bank0x19RomStart + 0x6280 + 0x50 * a.AreaID));
+					a.SpecialBoxes.AddRange(SpecialBoxList.ReadTable(brToUse.BaseStream, SpecialBoxType.Mist, bank0x19RomStart, bank0x19RomStart + 0x6500 + 0x50 * a.AreaID));
+				}
+
+				for (int i = 0; i < a.SpecialBoxes.Count; i++)
+				{
+					var boxdata = a.AreaModel.Collision.SpecialBoxes.ElementAtOrDefault(i);
+					if (boxdata is object)
+					{
+						a.SpecialBoxes[i].Y = boxdata.Y;
+					}
+				}
             }
 
             // One-Bank-0xE-System
@@ -367,7 +393,8 @@ namespace SM64Lib.Levels
                     buffer.Read(data, 0, (int)data.Length);
                     
                     if (data.SequenceEqual(new byte[] { 0x4D, 0x49, 0x4F, 0x30 })) {
-                        System.Console.WriteLine($"meow0 adjustment {a.CollisionPointer:X8} -> {(a.CollisionPointer + 0x806A0000 - 0x80420000):X8}");
+                        // TODO: is it even worth printing this anymore?
+						// System.Console.WriteLine($"meow0 adjustment {a.CollisionPointer:X8} -> {(a.CollisionPointer + 0x806A0000 - 0x80420000):X8}");
                         // mio0.
                         // the data will likely be overwritten where we currently are so go to where the game will load the data to
                         a.CollisionPointer += (int)(0x806A0000 - 0x80420000);
@@ -414,18 +441,19 @@ namespace SM64Lib.Levels
             ((RMLevel)lvl).Config.EnableLocalObjectBank = writeLocalObjectBank;
 
             // Get Bank 0x19
-            if (lvl.Bank0x19 is null)
-            {
+            //if (lvl.Bank0x19 is null)
+            //{
                 lvl.Bank0x19 = rommgr.SetSegBank(0x19, Conversions.ToInteger(curOff), (int)RomManagerSettings.DefaultLevelscriptSize);
                 lvl.Bank0x19.Data = new MemoryStream();
                 lvl.Bank0x19.Length = (int)RomManagerSettings.DefaultLevelscriptSize;
-            }
+            /*}
             else
             {
+				// honestly quite incredible isn't this just a rom space leak for no reason
                 var oldData = lvl.Bank0x19.Data;
                 lvl.Bank0x19 = rommgr.SetSegBank(0x19, Conversions.ToInteger(curOff), (int)(curOff + lvl.Bank0x19.Length));
                 lvl.Bank0x19.Data = oldData;
-            }
+            }*/
 
             data0x19 = new BinaryStreamData(lvl.Bank0x19.Data);
             saveres.Bank0x19 = lvl.Bank0x19;
@@ -820,10 +848,6 @@ namespace SM64Lib.Levels
 
             var bwToUse = data0x19 ?? output;
 
-            // Write 4 checkbytes for the One-0xE-Bank-Per-Area-Code
-            lvl.Bank0x19.Data.Position = 0x5FFC;
-            bwToUse.Write(Conversions.ToInteger(0x4BC9189A));
-
             // Write Area Table
             foreach (LevelArea a in lvl.Areas)
             {
@@ -838,47 +862,102 @@ namespace SM64Lib.Levels
                 bwToUse.Write(Bits.ArrayToByte(new[] { false, false, false, false, false, false, false, a.Enable2DCamera }));
             }
 
+            // Write 4 checkbytes for the One-0xE-Bank-Per-Area-Code
+            // this must be done after the area table to fix explosion on area 15
+            lvl.Bank0x19.Data.Position = 0x5FFC;
+			bwToUse.Write(Conversions.ToInteger(0x4BC9189A));
+
             // Write SpecialBoxes
-            int CurrentBoxOffset = 0x6A00;
-            foreach (LevelArea a in lvl.Areas)
-            {
-                var TableIndex = new[] { 0, 0x32, 0x33 };
-                var TableOffset = new[] { 0x6000 + 0x50 * a.AreaID, 0x6280 + 0x50 * a.AreaID, 0x6500 + 0x50 * a.AreaID };
-                
-                foreach (SpecialBoxType t in Enum.GetValues(typeof(SpecialBoxType)))
-                {
-                    foreach (SpecialBox w in a.SpecialBoxes.Where(n => n.Type == t))
-                    {
-                        // Write Table Entry
-                        bwToUse.Position = TableOffset[(int)w.Type];
-                        bwToUse.Write(Conversions.ToShort(TableIndex[(int)w.Type]));
-                        bwToUse.Write(Conversions.ToShort(0x0));
-                        bwToUse.Write(Conversions.ToInteger(CurrentBoxOffset + lvl.Bank0x19.BankAddress));
-                        TableOffset[(int)w.Type] = Conversions.ToInteger(bwToUse.Position);
+            if (rommgr.BoxSystemA3Mode) {
+				int CurrentBoxOffset = 0x6A00;
+				bwToUse.Position = 0x60A0;
+				foreach (LevelArea a in lvl.Areas)
+				{
+					var TableIndex = new[] { 0, 0x32, 0x33 };
 
-                        // Write Box Data
-                        bwToUse.Position = CurrentBoxOffset;
-                        foreach (byte b in w.ToArrayBoxData())
-                            bwToUse.Write(b);
-                        
-                        if (w.Type == SpecialBoxType.ToxicHaze)
-                        {
-                            TableIndex[(int)w.Type] += 10;
-                        }
-                        else
-                        {
-                            TableIndex[(int)w.Type] += 1;
-                        }
-                        CurrentBoxOffset += 0x20;
-                    }
-                }
+					foreach (SpecialBoxType t in Enum.GetValues(typeof(SpecialBoxType)))
+					{
+						var typebox = a.SpecialBoxes.Where(n => n.Type == t);
+						if (typebox.Count() == 0) continue;
 
-                foreach (int i in TableOffset)
-                {
-                    bwToUse.Position = i;
-                    bwToUse.Write(Conversions.ToUShort(0xFFFF));
-                }
-            }
+						foreach (SpecialBox w in typebox)
+						{
+							// Write Table Entry
+							bwToUse.Write(Conversions.ToUShort(TableIndex[(int)w.Type]));
+							bwToUse.Write(Conversions.ToByte(a.AreaID));
+							bwToUse.Write(Conversions.ToByte((int)w.Type));
+							bwToUse.Write(Conversions.ToUInteger(CurrentBoxOffset + lvl.Bank0x19.BankAddress));
+
+							long oldpos = bwToUse.Position;
+
+							// Write Box Data
+							bwToUse.Position = CurrentBoxOffset;
+							foreach (byte b in w.ToArrayBoxData())
+								bwToUse.Write(b);
+							CurrentBoxOffset += 0x20;
+
+							bwToUse.Position = oldpos;
+
+							if (w.Type == SpecialBoxType.ToxicHaze)
+							{
+								TableIndex[(int)w.Type] += 10;
+							}
+							else
+							{
+								TableIndex[(int)w.Type] += 1;
+							}
+						}
+						bwToUse.Write(Conversions.ToUInteger(0xFFFF0000));
+					}
+				}
+				bwToUse.Write(Conversions.ToUInteger(0x33130000));
+
+				// write new waterbox style "checkbytes"
+				lvl.Bank0x19.Data.Position = 0x5FF8;
+				bwToUse.Write(Conversions.ToInteger(0x42454545));
+			}
+			else {
+				int CurrentBoxOffset = 0x6A00;
+				foreach (LevelArea a in lvl.Areas)
+				{
+					var TableIndex = new[] { 0, 0x32, 0x33 };
+					var TableOffset = new[] { 0x6000 + 0x50 * a.AreaID, 0x6280 + 0x50 * a.AreaID, 0x6500 + 0x50 * a.AreaID };
+
+					foreach (SpecialBoxType t in Enum.GetValues(typeof(SpecialBoxType)))
+					{
+						foreach (SpecialBox w in a.SpecialBoxes.Where(n => n.Type == t))
+						{
+							// Write Table Entry
+							bwToUse.Position = TableOffset[(int)w.Type];
+							bwToUse.Write(Conversions.ToShort(TableIndex[(int)w.Type]));
+							bwToUse.Write(Conversions.ToShort(0x0));
+							bwToUse.Write(Conversions.ToInteger(CurrentBoxOffset + lvl.Bank0x19.BankAddress));
+							TableOffset[(int)w.Type] = Conversions.ToInteger(bwToUse.Position);
+
+							// Write Box Data
+							bwToUse.Position = CurrentBoxOffset;
+							foreach (byte b in w.ToArrayBoxData())
+								bwToUse.Write(b);
+
+							if (w.Type == SpecialBoxType.ToxicHaze)
+							{
+								TableIndex[(int)w.Type] += 10;
+							}
+							else
+							{
+								TableIndex[(int)w.Type] += 1;
+							}
+							CurrentBoxOffset += 0x20;
+						}
+					}
+
+					foreach (int i in TableOffset)
+					{
+						bwToUse.Position = i;
+						bwToUse.Write(Conversions.ToUShort(0xFFFF));
+					}
+				}
+			}
 
             // Write Bank0x19
             lvl.Bank0x19.WriteData(output);

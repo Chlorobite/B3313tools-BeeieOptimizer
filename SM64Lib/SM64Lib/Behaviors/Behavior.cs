@@ -128,12 +128,12 @@ namespace SM64Lib.Behaviors
 
         public void TakeoverSettingsToScript()
         {
-            // Update collision pointer
-            AddUpdateRemoveCmd(
+            // DO NOT the collision pointer
+            /*AddUpdateRemoveCmd(
                 BehaviorscriptCommandTypes.x2A_SetCollision,
                 EnableCollisionPointer,
                 () => BehaviorscriptCommandFactory.Build_x2A(CollisionPointer),
-                (cmd) => BehaviorscriptCommandFunctions.X2A.SetCollisionPointer(cmd, CollisionPointer));
+                (cmd) => BehaviorscriptCommandFunctions.X2A.SetCollisionPointer(cmd, CollisionPointer));*/
 
             // Insert Custom Asm Links
             {
