@@ -841,7 +841,7 @@ static partial class Stages {
 										Vtx_tn v2 = Vtx_tn.Read(buffer, vertPtr + (v2i * 0x10));
 										Vtx_tn v3 = Vtx_tn.Read(buffer, vertPtr + (v3i * 0x10));
 										//if (verboseDebug)
-										//    Console.Write($"Area: {TriArea(v1, v2, v3)}");
+										//	Console.Write($"Area: {TriArea(v1, v2, v3)}");
 
 										if (IsTriDegenerate(v1, v2, v3)) {
 											gSPNoOp(newBuf);
@@ -885,9 +885,9 @@ static partial class Stages {
 										if (newVertexPtr == vertexPtr + vertexCount * 0x10 && vertexCount <= 13) {
 											debugballs--;
 											/*if (newVertexPtr == 0x06C4C0 && newVertexCount == 9) {
-											*                                           debugballs = 5;
-											*                                           Console.WriteLine($"debugma 5 balls.");
-										}*/
+												debugballs = 5;
+												Console.WriteLine($"debugma 5 balls.");
+											}*/
 											if (debugballs > 0) {
 												Console.WriteLine($"\tvertexPtr: 0x0E{vertexPtr:X6}");
 												Console.WriteLine($"\tvertexCount: {vertexCount}");
@@ -1043,24 +1043,24 @@ static partial class Stages {
 								switch (bal.cmd[0]) {
 									case (byte)RSPCmd.Vertex: {
 										/* (was chatgpt note ig this can be helpful for whoever reads or something)
-										*                                   This command takes vertex data at vertPtr, skips vertMin vertices, and loads *((u16*)(cmd + 2)) bytes of data.
-										*                                   Each vertex is 0x10 bytes long and uses the following C struct:
-										*
-										* Vertex (set up for use with normals)
-										*
-										t *ypedef struct {
-										short		ob[3];	 * x, y, z *
-										unsigned short	flag;
-										short		tc[2];	 * texture coord *
-										signed char	n[3];	 * normal *
-										unsigned char   a;       * alpha  *
-									} Vtx_tn; // this is a 16 (0x10) byte struct
-									Vertex data can be obtained using a prior loaded variable:
-									`Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;`
-									which implements C# MemoryStream (seek and fetch bytes).
+										This command takes vertex data at vertPtr, skips vertMin vertices, and loads *((u16*)(cmd + 2)) bytes of data.
+										Each vertex is 0x10 bytes long and uses the following C struct:
 
-									I have only created ReadU8, ReadU16, ReadU32, ReadU64 functions. Converting to signed requires (short)ReadU16()
-									*/
+										Vertex (set up for use with normals)
+
+										typedef struct {
+											short		ob[3];	 * x, y, z *
+											unsigned short	flag;
+											short		tc[2];	 * texture coord *
+											signed char	n[3];	 * normal *
+											unsigned char   a;       * alpha  *
+										} Vtx_tn; // this is a 16 (0x10) byte struct
+										Vertex data can be obtained using a prior loaded variable:
+										`Fast3DBuffer buffer = area.AreaModel.Fast3DBuffer;`
+										which implements C# MemoryStream (seek and fetch bytes).
+
+										I have only created ReadU8, ReadU16, ReadU32, ReadU64 functions. Converting to signed requires (short)ReadU16()
+										*/
 
 
 										vertMin = ReadU8(bal.cmd, 1) & 0xF;
@@ -1074,19 +1074,19 @@ static partial class Stages {
 											throw new Exception("Bad vertex load");
 
 										/*if (v1i == v2i || v1i == v3i || v2i == v3i) {
-										*                                       // yes, somehow there's even these type of obvious 0 area triangles
-										*                                       gSPNoOp(bal.cmd);
-									}
-									// Read vertices from buffer
-									Vtx_tn v1 = Vtx_tn.Read(buffer, vertPtr, (int)v1i);
-									Vtx_tn v2 = Vtx_tn.Read(buffer, vertPtr, (int)v2i);
-									Vtx_tn v3 = Vtx_tn.Read(buffer, vertPtr, (int)v3i);
-									//if (verboseDebug)
-									//    Console.Write($"Area: {TriArea(v1, v2, v3)}");
+											// yes, somehow there's even these type of obvious 0 area triangles
+											gSPNoOp(bal.cmd);
+										}
+										// Read vertices from buffer
+										Vtx_tn v1 = Vtx_tn.Read(buffer, vertPtr, (int)v1i);
+										Vtx_tn v2 = Vtx_tn.Read(buffer, vertPtr, (int)v2i);
+										Vtx_tn v3 = Vtx_tn.Read(buffer, vertPtr, (int)v3i);
+										//if (verboseDebug)
+										//	Console.Write($"Area: {TriArea(v1, v2, v3)}");
 
-									if (IsTriDegenerate(v1, v2, v3)) {
-										gSPNoOp(bal.cmd);
-									}*/
+										if (IsTriDegenerate(v1, v2, v3)) {
+											gSPNoOp(bal.cmd);
+										}*/
 									}
 									break;
 								}
@@ -1118,9 +1118,9 @@ static partial class Stages {
 
 						value &= mask; // just to make sure
 						/*if (verboseDebug) {
-						*                       Console.WriteLine($"Write {name} 0x{value:X8} mask 0x{mask:X8}");
-						*                       Console.WriteLine($"Current state {name} 0x{value:X8} mask 0x{mask:X8}");
-					}*/
+							Console.WriteLine($"Write {name} 0x{value:X8} mask 0x{mask:X8}");
+							Console.WriteLine($"Current state {name} 0x{value:X8} mask 0x{mask:X8}");
+						}*/
 						if ((rcpStateKnownBits[name] & mask) == mask) {
 							if ((rcpState[name] & mask) == value) {
 								return false;
@@ -1184,7 +1184,7 @@ static partial class Stages {
 
 									val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
 									//if (verboseDebug)
-									//    Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
+									//	Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
 									WriteU32(newCmdBuffer, 4, val | 0x0E000000);
 								}
 							}
@@ -1223,17 +1223,17 @@ static partial class Stages {
 								}
 
 								//if (!newTextureCmds.ContainsKey(val))
-								//    newTextureCmds.Add(val, []);
+								//	newTextureCmds.Add(val, []);
 								//Console.WriteLine($"Entering texture {val:X8}");
 								//currentList = newTextureCmds[val];
 
 								//WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
 								/* TODO: CI4 conversion
-								*                           if (texType == ((2 << 2) | 0)) {
-								*                               Console.WriteLine("Conversion to CI4 in effect!");
-								*                               Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-								*                               Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
-							}*/
+								if (texType == ((2 << 2) | 0)) {
+									Console.WriteLine("Conversion to CI4 in effect!");
+									Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
+									Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
+								}*/
 							}
 							break;
 							case (byte)RSPCmd.Tri1:
@@ -1265,10 +1265,10 @@ static partial class Stages {
 								break;
 							case (byte)RDPCmd.SetTile:
 								/* TODO: CI4 conversion
-								*                           WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-								*                           if (texType == ((2 << 2) | 0)) {
-								*                               WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
-						}*/
+								WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
+								if (texType == ((2 << 2) | 0)) {
+									WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
+								}*/
 								if (clamp.TryGetValue(currentTex, out (bool u, bool v) clampma)) {
 									if (clampma.u) {
 										cmdBuffer[6] |= 0x2;
@@ -1284,8 +1284,8 @@ static partial class Stages {
 								break;
 
 							default:
-								//    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
-								//    flushTextureCmds();
+								//	Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
+								//	flushTextureCmds();
 								break;
 						}
 
@@ -1445,23 +1445,23 @@ static partial class Stages {
 
 							switch (cmdScratch[0]) {
 								/*case (byte)RDPCmd.SetTextureImage:
-								*                               if (bounds.Count > 0 && skip > 0) {
-								*                                   skip--;
-								*
-								*                                   keys = bounds.Keys.Order();
-								*                                   int kek = keys.First();
-								*                                   (byte[] data, ulong volume, uint vtxDataPtr) boundmaballs = bounds[kek];
-								*
-								*                                   // the trol.
-								*                                   gSPVertex(cmdScratch, boundmaballs.vtxDataPtr, (uint)(boundmaballs.data.Length / 0x10), 0);
-								*                                   newBuffer.AddRange(cmdScratch);
-								*                                   gSPCullDisplayList(cmdScratch, 0, (uint)(boundmaballs.data.Length / 0x10 - 1));
-								*                                   newBuffer.AddRange(cmdScratch);
-								*                                   Array.Copy(dl, j, cmdScratch, 0, 8);
-								*
-								*                                   bounds.Remove(kek);
-							}
-							break;*/
+									if (bounds.Count > 0 && skip > 0) {
+										skip--;
+
+									keys = bounds.Keys.Order();
+									int kek = keys.First();
+									(byte[] data, ulong volume, uint vtxDataPtr) boundmaballs = bounds[kek];
+
+									// the trol.
+									gSPVertex(cmdScratch, boundmaballs.vtxDataPtr, (uint)(boundmaballs.data.Length / 0x10), 0);
+									newBuffer.AddRange(cmdScratch);
+									gSPCullDisplayList(cmdScratch, 0, (uint)(boundmaballs.data.Length / 0x10 - 1));
+									newBuffer.AddRange(cmdScratch);
+									Array.Copy(dl, j, cmdScratch, 0, 8);
+
+									bounds.Remove(kek);
+								}
+								break;*/
 								case (byte)RSPCmd.Vertex: {
 									if (bounds.TryGetValue(j, out (byte[] data, ulong volume, uint vtxDataPtr) boundmaballs)) {
 										// the trol.
@@ -1487,9 +1487,9 @@ static partial class Stages {
 					void printAndAddDL(byte[] data) {
 						_printCmd(data, -1);
 						/*Console.WriteLine("Writing DL");
-						*                   for (int i = 0; i < data.Length; i += 8) {
-						*                       Console.WriteLine($"{ReadU32(data, i):X8} {ReadU32(data, i + 4):X8}");
-					}*/
+						for (int i = 0; i < data.Length; i += 8) {
+							Console.WriteLine($"{ReadU32(data, i):X8} {ReadU32(data, i + 4):X8}");
+						}*/
 
 						newBuffer.AddRange(data);
 					}
@@ -1552,7 +1552,7 @@ static partial class Stages {
 
 										val -= (uint)(0x10 * (ReadU8(cmdBuffer, 1) & 0xF));
 										//if (verboseDebug)
-										//    Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
+										//	Console.WriteLine($"mapping {vertexPtr | 0x0E000000:X8} -> {val | 0x0E000000:X8}");
 										WriteU32(newCmdBuffer, 4, val | 0x0E000000);
 									}
 								}
@@ -1592,17 +1592,17 @@ static partial class Stages {
 									}
 
 									//if (!newTextureCmds.ContainsKey(val))
-									//    newTextureCmds.Add(val, []);
+									//	newTextureCmds.Add(val, []);
 									//Console.WriteLine($"Entering texture {val:X8}");
 									//currentList = newTextureCmds[val];
 
 									//WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
 									/* TODO: CI4 conversion
-									*                               if (texType == ((2 << 2) | 0)) {
-									*                                   Console.WriteLine("Conversion to CI4 in effect!");
-									*                                   Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
-									*                                   Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
-								}*/
+									if (texType == ((2 << 2) | 0)) {
+										Console.WriteLine("Conversion to CI4 in effect!");
+										Console.WriteLine($"{string.Join("", cmdBuffer.Select(b => b.ToString("X2")))}");
+										Console.WriteLine($"{string.Join("", newCmdBuffer.Select(b => b.ToString("X2")))}");
+									}*/
 								}
 								break;
 								case (byte)RSPCmd.Tri1:
@@ -1633,10 +1633,10 @@ static partial class Stages {
 									break;
 								case (byte)RDPCmd.SetTile:
 									/* TODO: CI4 conversion
-									*                               WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
-									*                               if (texType == ((2 << 2) | 0)) {
-									*                                   WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
-							}*/
+									WriteU8(newCmdBuffer, 1, (byte)((texType << 3) | (ReadU8(cmdBuffer, 1) & 7)));
+									if (texType == ((2 << 2) | 0)) {
+										WriteU8(newCmdBuffer, 2, (byte)(ReadU8(cmdBuffer, 2) / 2));
+									}*/
 									if (clamp.TryGetValue(currentTex, out (bool u, bool v) clampma)) {
 										if (clampma.u) {
 											cmdBuffer[6] |= 0x2;
@@ -1652,8 +1652,8 @@ static partial class Stages {
 									break;
 
 								default:
-									//    Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
-									//    flushTextureCmds();
+									//	Console.WriteLine($"Unknown DL command {cmdBuffer[0]:X2}, may alter state. Flushing texture buffers now!");
+									//	flushTextureCmds();
 									break;
 							}
 						}

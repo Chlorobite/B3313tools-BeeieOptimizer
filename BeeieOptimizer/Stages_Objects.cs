@@ -28,11 +28,11 @@ static partial class Stages {
 						}
 
 						/*
-						 *                   uint bhv = ReadU32(data, 0x14);
-						 *                   if (bhv == 0x1F002C00) {
-						 *                       Console.WriteLine("Mirror object!");
-					}
-					*/
+						uint bhv = ReadU32(data, 0x14);
+						if (bhv == 0x1F002C00) {
+							Console.WriteLine("Mirror object!");
+						}
+						*/
 					}
 				}
 				if (verboseDebug)

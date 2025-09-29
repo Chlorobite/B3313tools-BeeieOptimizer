@@ -22,11 +22,11 @@ static partial class Stages {
 				collisionData.WriteLine($"AREA {level.LevelID} {area.AreaID}");
 
 				/*if (level.LevelID == 0x6 && area.AreaID == 11) {
-				*               Console.WriteLine(string.Join(";", (IEnumerable<Geopointer>)area.AreaModel.Fast3DBuffer.DLPointers));
-				*               var bin = new SM64Lib.Data.BinaryFile("dump.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite) { Position = 0 };
-				*               area.AreaModel.ToBinaryData(bin, 0, 0, 0xE000000, manger.RomConfig.CollisionBaseConfig);
-				*               bin.Close();
-			}*/
+					Console.WriteLine(string.Join(";", (IEnumerable<Geopointer>)area.AreaModel.Fast3DBuffer.DLPointers));
+					var bin = new SM64Lib.Data.BinaryFile("dump.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite) { Position = 0 };
+					area.AreaModel.ToBinaryData(bin, 0, 0, 0xE000000, manger.RomConfig.CollisionBaseConfig);
+					bin.Close();
+				}*/
 
 				Dictionary<byte, List<Triangle>> triangles = [];
 				foreach (Triangle tri in area.AreaModel.Collision.Mesh.Triangles) {

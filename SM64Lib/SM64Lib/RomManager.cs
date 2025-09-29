@@ -86,7 +86,7 @@ namespace SM64Lib
         public ILevelManager LevelManager { get; private set; }
         public RomConfig RomConfig { get; private set; }
         public bool IsNewROM { get; private set; } = false;
-		public bool BoxSystemA3Mode { get; set; } = false;
+        public bool BoxSystemA3Mode { get; set; } = false;
         public CustomObjectCollection CustomObjects { get => RomConfig.GlobalObjectBank; }
         public Text.TextGroup[] TextGroups { get => myTextGroups.ToArray(); }
 
@@ -374,14 +374,14 @@ namespace SM64Lib
         // also yes i am corrupting the holy c# land with tabs trol
         public long romSize = 0;
 
-		public long GetRomSize() {
-			if (romSize == 0) {
-				var fs = new BinaryRom(this, FileAccess.Read);
-				romSize = fs.Length;
-				fs.Close();
-			}
-			return romSize;
-		}
+        public long GetRomSize() {
+            if (romSize == 0) {
+                var fs = new BinaryRom(this, FileAccess.Read);
+                romSize = fs.Length;
+                fs.Close();
+            }
+            return romSize;
+        }
 
         /// <summary>
         /// Gets a new instance of BinaryRom, a BinaryData object.

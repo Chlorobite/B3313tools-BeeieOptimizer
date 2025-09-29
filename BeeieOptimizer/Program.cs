@@ -19,13 +19,13 @@ Config configma = new("BeeieOptimizer.json");
 
 
 void PrintRomSize(RomManager manger, string context) {
-    RomSpaceInfo info = manger.GetRomSpaceInfo();
-    Console.WriteLine($"ROM size {context}: {((0x1210000 + info.TotalUsedSpace) / 1024) / 1024.0} MiB");
+	RomSpaceInfo info = manger.GetRomSpaceInfo();
+	Console.WriteLine($"ROM size {context}: {((0x1210000 + info.TotalUsedSpace) / 1024) / 1024.0} MiB");
 }
 
 void SaveAndPrintRomSize(RomManager manger, string context) {
-    manger.SaveRom(true, true, RecalcChecksumBehavior.Never);
-    PrintRomSize(manger, context);
+	manger.SaveRom(true, true, RecalcChecksumBehavior.Never);
+	PrintRomSize(manger, context);
 }
 
 
@@ -33,113 +33,113 @@ void SaveAndPrintRomSize(RomManager manger, string context) {
 
 
 Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> ExtractWarps(RomManager manger) {
-    Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> result = [];
+	Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> result = [];
 
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)> extractedWarps = [];
-            var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
+	foreach (Level level in manger.Levels) {
+		foreach (LevelArea area in level.Areas) {
+			Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)> extractedWarps = [];
+			var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
 
-            foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
-                foreach (LevelscriptCommand warp in list) {
-                    byte warpId = clWarp.GetWarpID(warp);
-                    byte destAreaID = clWarp.GetDestinationAreaID(warp);
-                    byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
-                    byte destWarpID = clWarp.GetDestinationWarpID(warp);
+			foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
+				foreach (LevelscriptCommand warp in list) {
+					byte warpId = clWarp.GetWarpID(warp);
+					byte destAreaID = clWarp.GetDestinationAreaID(warp);
+					byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
+					byte destWarpID = clWarp.GetDestinationWarpID(warp);
 
-                    if (!(warpId == 0xF0 || warpId == 0xF1)) continue;
-                    if (extractedWarps.ContainsKey(warpId)) {
-                        byte newAreaID = extractedWarps[warpId].destAreaID;
-                        byte newLevelID = extractedWarps[warpId].destLevelID;
-                        byte newWarpID = extractedWarps[warpId].destWarpID;
-                        bool changes = destAreaID != newAreaID || destLevelID != newLevelID || destWarpID != newWarpID;
+					if (!(warpId == 0xF0 || warpId == 0xF1)) continue;
+					if (extractedWarps.ContainsKey(warpId)) {
+						byte newAreaID = extractedWarps[warpId].destAreaID;
+						byte newLevelID = extractedWarps[warpId].destLevelID;
+						byte newWarpID = extractedWarps[warpId].destWarpID;
+						bool changes = destAreaID != newAreaID || destLevelID != newLevelID || destWarpID != newWarpID;
 
-                        if (changes) throw new("ok zro");
-                    }
-                    else {
-                        extractedWarps.Add(warpId, (destAreaID, destLevelID, destWarpID));
-                    }
-                }
-            }
+						if (changes) throw new("ok zro");
+					}
+					else {
+						extractedWarps.Add(warpId, (destAreaID, destLevelID, destWarpID));
+					}
+				}
+			}
 
-            if (extractedWarps.Count > 0) {
-                int resultKey = (level.LevelID << 16) | area.AreaID;
-                if (!result.ContainsKey(resultKey)) {
-                    result.Add(resultKey, []);
-                }
+			if (extractedWarps.Count > 0) {
+				int resultKey = (level.LevelID << 16) | area.AreaID;
+				if (!result.ContainsKey(resultKey)) {
+					result.Add(resultKey, []);
+				}
 
-                foreach (var kvp in extractedWarps)
-                    result[resultKey].Add(kvp.Key, kvp.Value);
-            }
-        }
-    }
+				foreach (var kvp in extractedWarps)
+					result[resultKey].Add(kvp.Key, kvp.Value);
+			}
+		}
+	}
 
-    return result;
+	return result;
 }
 
 
 
 void PatchWarps(RomManager manger, Dictionary<int, Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)>> warps) {
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            bool anyChanges = false;
-            string log = $"Level 0x{level.LevelID:X2} '{GetLevelName(manger, level)}' area {area.AreaID} '{GetAreaName(manger, level, area.AreaID)}':";
+	foreach (Level level in manger.Levels) {
+		foreach (LevelArea area in level.Areas) {
+			bool anyChanges = false;
+			string log = $"Level 0x{level.LevelID:X2} '{GetLevelName(manger, level)}' area {area.AreaID} '{GetAreaName(manger, level, area.AreaID)}':";
 
-            var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
-            int key = (level.LevelID << 16) | area.AreaID;
-            if (!warps.ContainsKey(key)) continue;
-            Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)> localWarps = warps[key];
+			var immaculateVisione = new List<List<LevelscriptCommand>> { area.Warps, area.WarpsForGame };
+			int key = (level.LevelID << 16) | area.AreaID;
+			if (!warps.ContainsKey(key)) continue;
+			Dictionary<byte, (byte destAreaID, byte destLevelID, byte destWarpID)> localWarps = warps[key];
 
-            foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
-                foreach (LevelscriptCommand warp in list) {
-                    byte warpId = clWarp.GetWarpID(warp);
-                    byte destAreaID = clWarp.GetDestinationAreaID(warp);
-                    byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
-                    byte destWarpID = clWarp.GetDestinationWarpID(warp);
+			foreach (IEnumerable<LevelscriptCommand> list in immaculateVisione) {
+				foreach (LevelscriptCommand warp in list) {
+					byte warpId = clWarp.GetWarpID(warp);
+					byte destAreaID = clWarp.GetDestinationAreaID(warp);
+					byte destLevelID = (byte)clWarp.GetDestinationLevelID(warp); // Levels enum is sion
+					byte destWarpID = clWarp.GetDestinationWarpID(warp);
 
-                    if (!localWarps.ContainsKey(warpId)) continue;
-                    byte newAreaID = localWarps[warpId].destAreaID;
-                    byte newLevelID = localWarps[warpId].destLevelID;
-                    byte newWarpID = localWarps[warpId].destWarpID;
-                    bool changes = destAreaID != newAreaID || destLevelID != newLevelID || destWarpID != newWarpID;
+					if (!localWarps.ContainsKey(warpId)) continue;
+					byte newAreaID = localWarps[warpId].destAreaID;
+					byte newLevelID = localWarps[warpId].destLevelID;
+					byte newWarpID = localWarps[warpId].destWarpID;
+					bool changes = destAreaID != newAreaID || destLevelID != newLevelID || destWarpID != newWarpID;
 
-                    if (changes) {
-                        anyChanges = true;
-                        Level mangleDest = manger.Levels.First(lvl => lvl.LevelID == destLevelID);
-                        Level mangleNew = manger.Levels.First(lvl => lvl.LevelID == newLevelID);
-                        log += $"\n\tRerouting warp 0x{warpId:X2} from level 0x{destLevelID:X2} '{GetLevelName(manger, mangleDest)}' area {destAreaID} '{GetAreaName(manger, mangleDest, destAreaID)}' warp {destWarpID}\n" +
-                        $"\t\tto level 0x{newLevelID:X2} '{GetLevelName(manger, mangleNew)}' area {newAreaID} '{GetAreaName(manger, mangleNew, newAreaID)}' warp {newWarpID}";
-                        clWarp.SetDestinationAreaID(warp, newAreaID);
-                        clWarp.SetDestinationLevelID(warp, (Levels)newLevelID);
-                        clWarp.SetDestinationWarpID(warp, newWarpID);
-                    }
-                }
-            }
-            
-            if (anyChanges)
-                Console.WriteLine(log);
-        }
-    }
+					if (changes) {
+						anyChanges = true;
+						Level mangleDest = manger.Levels.First(lvl => lvl.LevelID == destLevelID);
+						Level mangleNew = manger.Levels.First(lvl => lvl.LevelID == newLevelID);
+						log += $"\n\tRerouting warp 0x{warpId:X2} from level 0x{destLevelID:X2} '{GetLevelName(manger, mangleDest)}' area {destAreaID} '{GetAreaName(manger, mangleDest, destAreaID)}' warp {destWarpID}\n" +
+						$"\t\tto level 0x{newLevelID:X2} '{GetLevelName(manger, mangleNew)}' area {newAreaID} '{GetAreaName(manger, mangleNew, newAreaID)}' warp {newWarpID}";
+						clWarp.SetDestinationAreaID(warp, newAreaID);
+						clWarp.SetDestinationLevelID(warp, (Levels)newLevelID);
+						clWarp.SetDestinationWarpID(warp, newWarpID);
+					}
+				}
+			}
+
+			if (anyChanges)
+				Console.WriteLine(log);
+		}
+	}
 }
 
 
 Dictionary<int, (CameraPresets preset, bool hasCameraObject)> ExtractCameras(RomManager manger) {
-    Dictionary<int, (CameraPresets preset, bool hasCameraObject)> result = [];
+	Dictionary<int, (CameraPresets preset, bool hasCameraObject)> result = [];
 
-    foreach (Level level in manger.Levels) {
-        foreach (LevelArea area in level.Areas) {
-            CameraPresets preset = area.Geolayout.CameraPreset;
-            bool hasCameraObject = area.Objects.Any(cmd => clNormal3DObject.GetSegBehaviorAddr(cmd) == 0x1F000500);
+	foreach (Level level in manger.Levels) {
+		foreach (LevelArea area in level.Areas) {
+			CameraPresets preset = area.Geolayout.CameraPreset;
+			bool hasCameraObject = area.Objects.Any(cmd => clNormal3DObject.GetSegBehaviorAddr(cmd) == 0x1F000500);
 
-            int dictKey = (level.LevelID << 16) | area.AreaID;
-            if (!result.ContainsKey(dictKey)) {
-                result.Add(dictKey, (CameraPresets.OpenCamera, false));
-            }
-            result[dictKey] = (preset, hasCameraObject);
-        }
-    }
+			int dictKey = (level.LevelID << 16) | area.AreaID;
+			if (!result.ContainsKey(dictKey)) {
+				result.Add(dictKey, (CameraPresets.OpenCamera, false));
+			}
+			result[dictKey] = (preset, hasCameraObject);
+		}
+	}
 
-    return result;
+	return result;
 }
 
 
@@ -302,12 +302,12 @@ Console.WriteLine($"there are {manger.Levels.Length} levels");
 
 foreach (var level in manger.Levels)
 {
-    Console.WriteLine($"level {level.LevelID} has areas:");
-    foreach (var area in level.Areas)
-    {
-        Console.WriteLine($"area {area.AreaID} has warps: ");
-        Console.WriteLine(area.Warps);
-    }
+	Console.WriteLine($"level {level.LevelID} has areas:");
+	foreach (var area in level.Areas)
+	{
+		Console.WriteLine($"area {area.AreaID} has warps: ");
+		Console.WriteLine(area.Warps);
+	}
 }*/
 
 
