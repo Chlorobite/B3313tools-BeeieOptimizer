@@ -11,8 +11,6 @@ The only B3313-specific function is Painting64 awareness. The optimizations migh
 * the romhack is patched to allow decompressing MIO0 areas, if MIO0 is used
 * any new functions the hack might perform in the Fast3D space are accounted for.
 
-[Join the B33h1v3 Discord](https://discord.gg/n8PsDgVkBr) for discussion!
-
 ## Usage
 1. Obtain the dependencies:
   * This software was developed and tested on Linux only; Windows users must run through WSL, or patch the process calls accordingly.
