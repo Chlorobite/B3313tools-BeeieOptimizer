@@ -58,7 +58,7 @@ static partial class Stages {
 								throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
 							case (byte)RSPCmd.EndDisplayList:
 								goto dlEnd;
-							case (byte)RDPCmd.LoadBlock: // (contains texture size)
+							case (byte)RDPCmd.LoadBlock: { // (contains texture size)
 								//Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
 								loadPtr = textureImage;
 
@@ -79,17 +79,29 @@ static partial class Stages {
 								}
 
 								loadLength = length;
-								break;
-									case (byte)RDPCmd.SetTextureImage:
-										//Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
-										texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-										textureImage = ReadU32(cmdBuffer, 4);
-										if ((textureImage & 0xFF000000) != 0x0E000000) {
-											throw new Exception($"{textureImage:X8} is NOT segment 0E!");
-										}
-										textureImage &= 0xFFFFFF;
-										//Console.WriteLine($"textureImage: {textureImage:X8}");
-										break;
+							}
+							break;
+							case (byte)RDPCmd.LoadTLUT: { // (contains LUT size)
+								//Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
+								loadPtr = textureImage;
+
+								int length = (ReadU16(cmdBuffer, 5) >> 6) + 1;
+								length *= 2; // TODO: it's probably related to the tile param?
+
+								loadLength = length;
+							}
+							break;
+							case (byte)RDPCmd.SetTextureImage: {
+								//Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
+								texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
+								textureImage = ReadU32(cmdBuffer, 4);
+								if ((textureImage & 0xFF000000) != 0x0E000000) {
+									throw new Exception($"{textureImage:X8} is NOT segment 0E!");
+								}
+								textureImage &= 0xFFFFFF;
+								//Console.WriteLine($"textureImage: {textureImage:X8}");
+							}
+							break;
 						}
 
 						if (loadLength > 0) {
@@ -213,7 +225,7 @@ static partial class Stages {
 								throw new Exception("Found gsSPDisplayList. Whoopsies, branching display lists are yet to be handled!");
 							case (byte)RSPCmd.EndDisplayList:
 								goto dlEnd;
-							case (byte)RDPCmd.LoadBlock: // (contains texture size)
+							case (byte)RDPCmd.LoadBlock: { // (contains texture size)
 								//Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
 								loadPtr = textureImage;
 
@@ -234,17 +246,29 @@ static partial class Stages {
 								}
 
 								loadLength = length;
-								break;
-									case (byte)RDPCmd.SetTextureImage:
-										//Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
-										texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
-										textureImage = ReadU32(cmdBuffer, 4);
-										if ((textureImage & 0xFF000000) != 0x0E000000) {
-											throw new Exception($"{textureImage:X8} is NOT segment 0E!");
-										}
-										textureImage &= 0xFFFFFF;
-										//Console.WriteLine($"textureImage: {textureImage:X8}");
-										break;
+							}
+							break;
+							case (byte)RDPCmd.LoadTLUT: { // (contains LUT size)
+								//Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
+								loadPtr = textureImage;
+
+								int length = (ReadU16(cmdBuffer, 5) >> 6) + 1;
+								length *= 2; // TODO: it's probably related to the tile param?
+
+								loadLength = length;
+							}
+							break;
+							case (byte)RDPCmd.SetTextureImage: {
+								//Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
+								texType = (byte)(ReadU8(cmdBuffer, 1) >> 3);
+								textureImage = ReadU32(cmdBuffer, 4);
+								if ((textureImage & 0xFF000000) != 0x0E000000) {
+									throw new Exception($"{textureImage:X8} is NOT segment 0E!");
+								}
+								textureImage &= 0xFFFFFF;
+								//Console.WriteLine($"textureImage: {textureImage:X8}");
+							}
+							break;
 						}
 
 						if (loadLength > 0) {
@@ -449,7 +473,7 @@ static partial class Stages {
 									inGeometry = false;
 								}
 								goto dlEnd;
-							case (byte)RDPCmd.LoadBlock: // (contains texture size)
+							case (byte)RDPCmd.LoadBlock: { // (contains texture size)
 								pushma();
 								//Console.WriteLine($"gsDPLoadBlock {(ReadU16(cmdBuffer, 5) >> 4) + 1:X8}");
 								if (inGeometry) {
@@ -476,11 +500,28 @@ static partial class Stages {
 
 								loadLength = length;
 								loadType = 1; // texture
-								break;
+							}
+							break;
+							case (byte)RDPCmd.LoadTLUT: { // (contains LUT size)
+								pushma();
+								if (inGeometry) {
+									inGeometry = false;
+								}
+
+								STAT_totalLoads++;
+								loadPtr = textureImage;
+
+								int length = (ReadU16(cmdBuffer, 5) >> 6) + 1;
+								length *= 2; // TODO: it's probably related to the tile param?
+
+								loadLength = length;
+								loadType = 1; // texture
+							}
+							break;
 							case (byte)RDPCmd.SetEnvColor:
 								texturerImager++; // idfk but this will create a unique number which is what matters
 								break;
-							case (byte)RDPCmd.SetTextureImage:
+							case (byte)RDPCmd.SetTextureImage: {
 								//Console.WriteLine($"gsDPSetTextureImage {ReadU32(cmdBuffer, 4):X8}");
 								if (inGeometry) {
 									inGeometry = false;
@@ -495,7 +536,8 @@ static partial class Stages {
 								textureImage &= 0xFFFFFF;
 								texturerImager = textureImage;
 								//Console.WriteLine($"textureImage: {textureImage:X8}");
-								break;
+							}
+							break;
 
 							case (byte)RDPCmd.SetTileSize: {
 								uint width = (ReadU32(cmdBuffer, 4) >> 12) & 0xFFF;
@@ -1256,6 +1298,7 @@ static partial class Stages {
 							case (byte)RDPCmd.PipeSync:
 							case (byte)RDPCmd.TileSync:
 							case (byte)RDPCmd.LoadBlock: // (contains texture size)
+							case (byte)RDPCmd.LoadTLUT: // (contains LUT size)
 								//skipCmd = currentListContainsCmd((byte)RDPCmd.LoadBlock);
 								skipCmd = thefunnytol;
 								break;
@@ -1624,6 +1667,7 @@ static partial class Stages {
 								case (byte)RDPCmd.PipeSync:
 								case (byte)RDPCmd.TileSync:
 								case (byte)RDPCmd.LoadBlock: // (contains texture size)
+								case (byte)RDPCmd.LoadTLUT: // (contains LUT size)
 									//skipCmd = currentListContainsCmd((byte)RDPCmd.LoadBlock);
 									skipCmd = thefunnytol;
 									break;

@@ -70,6 +70,9 @@ static class Simplicity {
 	public static bool IsWildcardMatch(string wildcardPattern, string subject) {
 		if (string.IsNullOrWhiteSpace(wildcardPattern))
 			return false;
+		if (string.IsNullOrWhiteSpace(subject)) {
+			subject = "";
+		}
 
 		string regexPattern = string.Concat("^", Regex.Escape(wildcardPattern).Replace("\\*", ".*"), "$");
 
