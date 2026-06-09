@@ -16,7 +16,7 @@ static partial class Stages {
 			foreach (LevelArea area in level.Areas) {
 				if (area.AreaModel.Collision.Mesh.Triangles.Count == 0) continue;
 				if (config.CollisionIgnoreAreas.Any(ptn => ptn.Match(manger, level, area))) {
-					Console.WriteLine("Collisione: Ignoring {level.LevelID} {area.AreaID}");
+					Console.WriteLine($"Collisione: Ignoring {level.LevelID} {area.AreaID}");
 					continue;
 				}
 				collisionData.WriteLine($"AREA {level.LevelID} {area.AreaID}");

@@ -19,6 +19,7 @@ public enum RDPCmd: byte {
 	PipeSync = 0xE7,
 	TileSync = 0xE8,
 	FullSync = 0xE9,
+	LoadTLUT = 0xF0,
 	SetTileSize = 0xF2,
 	LoadBlock = 0xF3,
 	LoadTile = 0xF4,

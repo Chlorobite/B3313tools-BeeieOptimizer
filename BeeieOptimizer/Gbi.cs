@@ -285,6 +285,18 @@ public static class Gbi {
 				break;
 
 			/*
+			#define	gsDPLoadTLUTCmd(tile, count)					\
+			{{									\
+				_SHIFTL(G_LOADTLUT, 24, 8),					\
+				_SHIFTL((tile), 24, 3) | _SHIFTL((count), 14, 10)		\
+			}}
+			*/
+			case (byte)RDPCmd.LoadTLUT:
+				debugLine = $"gsDPLoadTLUTCmd({data[4] & 0x7}, {(ReadU16(data, 5) >> 6) & 0x3FF})";
+				color = ConsoleColor.Blue; // configuration
+				break;
+
+			/*
 			#define gsDPLoadTileGeneric(c, tile, uls, ult, lrs, lrt)		\
 			{{									\
 			_SHIFTL(c, 24, 8) | _SHIFTL(uls, 12, 12) | _SHIFTL(ult, 0, 12),	\
